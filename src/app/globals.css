@@ -1,0 +1,402 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   DESIGN SYSTEM PAIRING SAFEGUARD & WCAG CONTRAST MATRIX
+   MANDATORY BACKGROUND / FOREGROUND PAIRS:
+   1. Primary Navy (`bg-primary`, `#003C64` light / `#184D7A` dark):
+      - Text / Icons: MUST use `text-on-primary` (#FFFFFF) or `text-on-primary-muted` (80% white).
+      - NEVER use `text-accent`, `text-red-*`, or dark text on primary background.
+      - Contrast: Light #003C64 vs #FFFFFF = 11.5:1 (AAA), Dark #184D7A vs #FFFFFF = 8.8:1 (AAA).
+   2. Accent Red (`bg-accent`, `#D1130D` light / `#E0281F` dark):
+      - Text / Icons: MUST use `text-on-accent` / `text-accent-text` (#FFFFFF).
+      - NEVER use blue/navy text on accent background.
+   3. Surface / Background (`bg-surface`, `bg-background`):
+      - Text: `text-text` (dark in light mode, light in dark mode), `text-muted`, `text-subtle`.
+      - Links / Highlights: `text-accent`.
+   ========================================================================== */
+
+:root {
+  /* ==========================================================================
+     SBS CaseLab Design System Tokens - Light Mode (Official SBS Brand Palette)
+     Reference: https://shantibschool.edu.in/ & Official SBS Emblem
+     ========================================================================== */
+  --primary: #003C64;
+  --primary-rgb: 0, 60, 100;
+  --primary-hover: #002B48;
+  --primary-hover-rgb: 0, 43, 72;
+  --primary-soft: #E6F0F7;
+  --primary-soft-rgb: 230, 240, 247;
+
+  --accent: #D1130D;
+  --accent-rgb: 209, 19, 13;
+  --accent-hover: #A80E0A;
+  --accent-hover-rgb: 168, 14, 10;
+  --on-primary: #FFFFFF;
+  --on-primary-rgb: 255, 255, 255;
+  --on-primary-muted: rgba(255, 255, 255, 0.8);
+  --on-primary-muted-rgb: 255, 255, 255;
+  --on-accent: #FFFFFF;
+  --on-accent-rgb: 255, 255, 255;
+  --accent-text: #FFFFFF;
+  --accent-text-rgb: 255, 255, 255;
+
+  --background: #E8EDF4;
+  --background-rgb: 232, 237, 244;
+  --background-elevated: #F0F4F8;
+  --background-elevated-rgb: 240, 244, 248;
+
+  --surface: #F6F8FB;
+  --surface-rgb: 246, 248, 251;
+  --surface-raised: #EEF2F8;
+  --surface-raised-rgb: 238, 242, 248;
+  --surface-subtle: #EEF2F7;
+  --surface-subtle-rgb: 238, 242, 247;
+  --surface-hover: #E8EEF5;
+  --surface-hover-rgb: 232, 238, 245;
+
+  --card: #F6F8FB;
+  --card-rgb: 246, 248, 251;
+  --popover: #F6F8FB;
+  --popover-rgb: 246, 248, 251;
+
+  --border: #D5DDE8;
+  --border-rgb: 213, 221, 232;
+  --border-strong: #BDC9DB;
+  --border-strong-rgb: 189, 201, 219;
+  --border-subtle: #D9E1EC;
+  --border-subtle-rgb: 217, 225, 236;
+
+  --breadcrumb-bg: #EEF2F7;
+  --breadcrumb-bg-rgb: 238, 242, 247;
+
+  --text: #14213D;
+  --text-rgb: 20, 33, 61;
+  --text-muted: #475569;
+  --text-muted-rgb: 71, 85, 105;
+  --text-subtle: #64748B;
+  --text-subtle-rgb: 100, 116, 139;
+
+  --success: #0D8D2D;
+  --success-rgb: 13, 141, 45;
+  --warning: #B7791F;
+  --warning-rgb: 183, 121, 31;
+  --danger: #C62828;
+  --danger-rgb: 198, 40, 40;
+  --info: #003C64;
+  --info-rgb: 0, 60, 100;
+
+  /* Hero Banner Tokens (Deep SBS Navy Gradient & Soft Muted Contrast) */
+  --hero-bg-from: #0B3A66;
+  --hero-bg-to: #062A4D;
+  --hero-text-muted: #C9D8EA;
+  --hero-border: rgba(255, 255, 255, 0.15);
+
+  /* Standard Z-Index Scale */
+  --z-base: 0;
+  --z-sticky: 30;
+  --z-overlay: 40;
+  --z-dropdown: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+
+  /* Industry Soft Tints */
+  --tint-blue: #E6F0F7;
+  --tint-red: #FDE8E7;
+  --tint-green: #E6F5EB;
+  --tint-amber: #FEF3E2;
+  --tint-cyan: #E1F0FA;
+  --tint-purple: #F2EDF8;
+}
+
+.dark, [data-theme="dark"] {
+  /* ==========================================================================
+     SBS CaseLab Design System Tokens - Dark Mode (Derived from SBS Navy Hue #003C64)
+     Layered surfaces and accessible vibrant brand tints
+     ========================================================================== */
+  --primary: #184D7A;
+  --primary-rgb: 24, 77, 122;
+  --primary-hover: #205F94;
+  --primary-hover-rgb: 32, 95, 148;
+  --primary-soft: #132B45;
+  --primary-soft-rgb: 19, 43, 69;
+
+  --accent: #E0281F;
+  --accent-rgb: 224, 40, 31;
+  --accent-hover: #F23D33;
+  --accent-hover-rgb: 242, 61, 51;
+  --on-primary: #FFFFFF;
+  --on-primary-rgb: 255, 255, 255;
+  --on-primary-muted: rgba(255, 255, 255, 0.8);
+  --on-primary-muted-rgb: 255, 255, 255;
+  --on-accent: #FFFFFF;
+  --on-accent-rgb: 255, 255, 255;
+  --accent-text: #FFFFFF;
+  --accent-text-rgb: 255, 255, 255;
+
+  --background: #07131F;
+  --background-rgb: 7, 19, 31;
+  --background-elevated: #0C1D2E;
+  --background-elevated-rgb: 12, 29, 46;
+
+  --surface: #112338;
+  --surface-rgb: 17, 35, 56;
+  --surface-raised: #182F49;
+  --surface-raised-rgb: 24, 47, 73;
+  --surface-subtle: #14283F;
+  --surface-subtle-rgb: 20, 40, 63;
+  --surface-hover: #1F3B5C;
+  --surface-hover-rgb: 31, 59, 92;
+
+  --card: #112338;
+  --card-rgb: 17, 35, 56;
+  --popover: #182F49;
+  --popover-rgb: 24, 47, 73;
+
+  /* Hero Banner Tokens - Dark Mode (Slightly deeper navy so it distinct from page background) */
+  --hero-bg-from: #0A2E50;
+  --hero-bg-to: #051C33;
+  --hero-text-muted: #C9D8EA;
+  --hero-border: rgba(255, 255, 255, 0.12);
+
+  --breadcrumb-bg: rgba(17, 35, 56, 0.75);
+
+  --border: #223E60;
+  --border-rgb: 34, 62, 96;
+  --border-strong: #335580;
+  --border-strong-rgb: 51, 85, 128;
+
+  --text: #F0F4F8;
+  --text-rgb: 240, 244, 248;
+  --text-muted: #9DB2C7;
+  --text-muted-rgb: 157, 178, 199;
+  --text-subtle: #7289A3;
+  --text-subtle-rgb: 114, 137, 163;
+
+  --success: #4ADE80;
+  --success-rgb: 74, 222, 128;
+  --warning: #FBBF24;
+  --warning-rgb: 251, 191, 36;
+  --danger: #F87171;
+  --danger-rgb: 248, 113, 113;
+  --info: #38BDF8;
+  --info-rgb: 56, 189, 248;
+
+  /* Standard Z-Index Scale */
+  --z-base: 0;
+  --z-sticky: 30;
+  --z-overlay: 40;
+  --z-dropdown: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+
+  /* Industry Soft Tints */
+  --tint-blue: #132B45;
+  --tint-red: #331518;
+  --tint-green: #122B1C;
+  --tint-amber: #2E2211;
+  --tint-cyan: #10293B;
+  --tint-purple: #251833;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif), Georgia, Cambria, serif;
+}
+
+/* Custom scrollbars utilizing theme tokens */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: var(--primary);
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* ==========================================================================
+   CASE CENTRE SIGNATURE IDENTITY & MOTIFS
+   ========================================================================== */
+
+/* Hero Banner Component: Deep SBS Navy Gradient with Layered Grid Pattern */
+.hero-banner {
+  background-color: var(--hero-bg-to);
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(135deg, var(--hero-bg-from) 0%, var(--hero-bg-to) 100%);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
+  border: 1px solid var(--hero-border);
+}
+
+/* Subtle layered grid pattern utility */
+.hero-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Folder tab corner motif for Case dossiers with soft navy shadow */
+.folder-card {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(15, 40, 80, 0.06), 0 6px 18px rgba(15, 40, 80, 0.06);
+}
+
+.dark .folder-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.folder-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.5rem;
+  width: 3.5rem;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, #F59E0B 100%);
+  border-radius: 0 0 4px 4px;
+  opacity: 0.85;
+  transition: width 0.2s ease, opacity 0.2s ease;
+}
+
+.folder-card:hover::before {
+  width: 5rem;
+  opacity: 1;
+}
+
+/* Micro-interaction: Card Hover Lift (Respects prefers-reduced-motion) */
+.card-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(15, 40, 80, 0.08), 0 12px 28px rgba(15, 40, 80, 0.09);
+  }
+
+  .dark .card-hover-lift:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+  }
+}
+
+/* Form inputs and controls base surface */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  background-color: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover-lift,
+  .folder-card,
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+}
+
+/* Stamp-style badges for Case Statuses */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.375rem;
+  line-height: 1;
+}
+
+.stamp-badge-draft {
+  border: 1px dashed rgba(120, 134, 152, 0.6);
+  background-color: rgba(120, 134, 152, 0.1);
+  color: var(--text-muted);
+}
+
+.stamp-badge-review {
+  border: 1.5px solid rgba(245, 158, 11, 0.7);
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #B45309;
+}
+.dark .stamp-badge-review {
+  color: #FBBF24;
+  border-color: rgba(251, 191, 36, 0.5);
+}
+
+.stamp-badge-approved {
+  border: 1.5px solid rgba(16, 185, 129, 0.75);
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  transform: rotate(-0.5deg);
+}
+.dark .stamp-badge-approved {
+  color: #34D399;
+  border-color: rgba(52, 211, 153, 0.6);
+}
+
+.stamp-badge-published {
+  border: 1.5px solid var(--primary);
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  box-shadow: 0 1px 2px rgba(0, 60, 100, 0.08);
+}
+.dark .stamp-badge-published {
+  border-color: var(--accent);
+  background-color: rgba(224, 40, 31, 0.15);
+  color: #FFFFFF;
+}
+
+/* Signature gold/amber accent bar */
+.signature-gold-line {
+  background: linear-gradient(90deg, #D1130D 0%, #F59E0B 50%, #D1130D 100%);
+  height: 2px;
+  width: 100%;
+}
