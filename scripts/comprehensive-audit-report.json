@@ -1,0 +1,338 @@
+[
+  {
+    "category": "Auth",
+    "feature": "Admin Demo Login",
+    "status": "PASS",
+    "note": "admin@shantibschool.edu.in successfully authenticated with role=admin",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Faculty Demo Login",
+    "status": "PASS",
+    "note": "prof.miller@shantibschool.edu.in successfully authenticated with role=faculty",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Student Demo Login",
+    "status": "PASS",
+    "note": "student1@shantibschool.edu.in successfully authenticated with role=student",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Signup with @shantibschool.edu.in",
+    "status": "PASS",
+    "note": "Registration accepted for verified SBS institutional domain",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Signup with Gmail Rejected",
+    "status": "PASS",
+    "note": "Gmail domain strictly rejected with official college domain error",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Signup with .edu Rejected",
+    "status": "PASS",
+    "note": "Non-.in domain strictly rejected without partial match bypass",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Logout Action",
+    "status": "PASS",
+    "note": "Logout clears session cookies and returns 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "RBAC",
+    "feature": "Student Blocked from /admin",
+    "status": "PASS",
+    "note": "Student attempting to access /admin is redirected to /dashboard",
+    "screenshot": null
+  },
+  {
+    "category": "RBAC",
+    "feature": "Student Blocked from /create",
+    "status": "PASS",
+    "note": "Student attempting to access /create is redirected to /dashboard",
+    "screenshot": null
+  },
+  {
+    "category": "RBAC",
+    "feature": "Student Blocked from /analytics",
+    "status": "PASS",
+    "note": "Student attempting to access /analytics is redirected to /dashboard",
+    "screenshot": null
+  },
+  {
+    "category": "Dashboard",
+    "feature": "Dashboard Route Availability",
+    "status": "PASS",
+    "note": "/dashboard returns HTTP 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Dashboard",
+    "feature": "Role Adaptive Metrics & Quick Links",
+    "status": "PASS",
+    "note": "Faculty sees pending reviews and token budget; student sees assignments and portfolio",
+    "screenshot": null
+  },
+  {
+    "category": "Curate Case",
+    "feature": "Page Availability",
+    "status": "PASS",
+    "note": "/create loads with HTTP 200",
+    "screenshot": null
+  },
+  {
+    "category": "Curate Case",
+    "feature": "Curate Case Suite",
+    "status": "FAIL",
+    "note": "fetch failed",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Case Detail Page Load",
+    "status": "PASS",
+    "note": "/cases/case-001 loads with HTTP 200",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Edit & Save Draft",
+    "status": "PASS",
+    "note": "Case study title/content updated and saved successfully",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Version History",
+    "status": "PASS",
+    "note": "Version log returned 2 revision snapshots",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Export PDF",
+    "status": "PASS",
+    "note": "PDF binary generated with jsPDF using institutional headers and tables",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Export DOCX",
+    "status": "PASS",
+    "note": "Word Document (.docx) generated with docx package and executive styling",
+    "screenshot": null
+  },
+  {
+    "category": "Approval",
+    "feature": "Submit for Approval",
+    "status": "PASS",
+    "note": "Case submitted to curriculum committee review queue",
+    "screenshot": null
+  },
+  {
+    "category": "Approval",
+    "feature": "Request Changes",
+    "status": "PASS",
+    "note": "Reviewer returned case with comment and status changes_requested",
+    "screenshot": null
+  },
+  {
+    "category": "Approval",
+    "feature": "Approve Case",
+    "status": "PASS",
+    "note": "Curriculum reviewer approved case and published to repository",
+    "screenshot": null
+  },
+  {
+    "category": "Approval",
+    "feature": "Student Visibility Only After Approval",
+    "status": "PASS",
+    "note": "Students receive HTTP 403 when requesting non-approved draft cases",
+    "screenshot": null
+  },
+  {
+    "category": "Library",
+    "feature": "Case Library Page Load",
+    "status": "PASS",
+    "note": "/library loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Library",
+    "feature": "Search & Keyword Filtering",
+    "status": "PASS",
+    "note": "Search query 'Gujarat' returned 1 relevant cases",
+    "screenshot": null
+  },
+  {
+    "category": "Library",
+    "feature": "Collections Management",
+    "status": "PASS",
+    "note": "Collections API returned 2 active syllabus folders",
+    "screenshot": null
+  },
+  {
+    "category": "Library",
+    "feature": "Grid/List View & Status Labels",
+    "status": "PASS",
+    "note": "Library component includes grid/list switcher and status badges",
+    "screenshot": null
+  },
+  {
+    "category": "Trending",
+    "feature": "Trending Radar Page Load",
+    "status": "PASS",
+    "note": "/trending loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Trending",
+    "feature": "Filters, Counts, Sort & Search",
+    "status": "PASS",
+    "note": "Live industry frequency distribution, difficulty bracket facets, and sorting",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Write Answer with Autosave",
+    "status": "FAIL",
+    "note": "Status 400",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Submit and Lock Answer",
+    "status": "FAIL",
+    "note": "Status 400",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "AI-Suggested Marks",
+    "status": "FAIL",
+    "note": "Status 400",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Student Sees Marks Only After Publishing (Withheld Test)",
+    "status": "FAIL",
+    "note": "Grade was exposed before faculty publishing!",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Faculty Override and Publish",
+    "status": "FAIL",
+    "note": "Status 400",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Student Sees Marks After Publishing",
+    "status": "FAIL",
+    "note": "Student could not retrieve published grade",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Dean-Signed Certificate PDF",
+    "status": "PASS",
+    "note": "Landscape Dean-signed certificate PDF generated with security verification hash",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Portfolio & Public Link Toggle",
+    "status": "PASS",
+    "note": "Public portfolio rendered with Dean certificate, completed cases and share toggle",
+    "screenshot": null
+  },
+  {
+    "category": "Analytics",
+    "feature": "Analytics Page Load",
+    "status": "PASS",
+    "note": "/analytics loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Analytics",
+    "feature": "NBA/NAAC CO/PO CSV Export with UTF-8 BOM",
+    "status": "FAIL",
+    "note": "Missing BOM (false) or headers (true)",
+    "screenshot": null
+  },
+  {
+    "category": "Pricing",
+    "feature": "Pricing Page Load",
+    "status": "PASS",
+    "note": "/pricing loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Pricing",
+    "feature": "Razorpay Webhook Signature Verification",
+    "status": "PASS",
+    "note": "Forged webhook rejected with 400 HMAC verification error",
+    "screenshot": null
+  },
+  {
+    "category": "Pricing",
+    "feature": "Pricing Suite",
+    "status": "FAIL",
+    "note": "Cannot read properties of undefined (reading 'toLocaleString')",
+    "screenshot": null
+  },
+  {
+    "category": "Facilitator Guide",
+    "feature": "Guide Page Load",
+    "status": "PASS",
+    "note": "/guide loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Facilitator Guide",
+    "feature": "Live Socratic Cockpit & Cold-Call Wheel",
+    "status": "PASS",
+    "note": "/cases/case-001/live loads cold-call roulette, live poll and 3-board plan",
+    "screenshot": null
+  },
+  {
+    "category": "Facilitator Guide",
+    "feature": "Guide Suite",
+    "status": "FAIL",
+    "note": "fetch failed",
+    "screenshot": null
+  },
+  {
+    "category": "Theme & Responsiveness",
+    "feature": "Theme Persistence & Solid Surface Tokens",
+    "status": "PASS",
+    "note": "Solid background and surface CSS variables eliminate transparency across all viewports",
+    "screenshot": null
+  },
+  {
+    "category": "Theme & Responsiveness",
+    "feature": "Responsive Layout at 1440px and 390px",
+    "status": "PASS",
+    "note": "Desktop and mobile layouts render without horizontal clipping or overlapping header elements",
+    "screenshot": null
+  },
+  {
+    "category": "Security",
+    "feature": "Security Suite",
+    "status": "FAIL",
+    "note": "fetch failed",
+    "screenshot": null
+  }
+]

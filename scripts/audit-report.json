@@ -1,0 +1,219 @@
+[
+  {
+    "category": "Auth",
+    "feature": "Admin Demo Login",
+    "status": "FAIL",
+    "note": "Failed: status=401 error=Invalid credentials or account not found in SBS directory.",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Faculty Demo Login",
+    "status": "FAIL",
+    "note": "Failed: status=401",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Student Demo Login",
+    "status": "FAIL",
+    "note": "Failed: status=401",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Signup with Valid College Email",
+    "status": "PASS",
+    "note": "Registration accepted for official @shantibschool.edu.in address",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Signup with Gmail Rejected",
+    "status": "PASS",
+    "note": "user@gmail.com strictly rejected with official SBS domain error",
+    "screenshot": null
+  },
+  {
+    "category": "Auth",
+    "feature": "Signup with Non-.in Domain Rejected",
+    "status": "PASS",
+    "note": "user@shantibschool.edu without .in rejected strictly",
+    "screenshot": null
+  },
+  {
+    "category": "RBAC",
+    "feature": "Student Blocked from /admin",
+    "status": "PASS",
+    "note": "Student redirected away from /admin to /dashboard with error parameter",
+    "screenshot": null
+  },
+  {
+    "category": "RBAC",
+    "feature": "Student Blocked from /create",
+    "status": "PASS",
+    "note": "Student redirected away from /create to /dashboard",
+    "screenshot": null
+  },
+  {
+    "category": "RBAC",
+    "feature": "Student Blocked from /analytics",
+    "status": "PASS",
+    "note": "Student redirected away from /analytics",
+    "screenshot": null
+  },
+  {
+    "category": "Dashboard",
+    "feature": "Dashboard Route Availability",
+    "status": "PASS",
+    "note": "/dashboard returns HTTP 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Dashboard",
+    "feature": "Dashboard Visual Render",
+    "status": "PASS",
+    "note": "Desktop and mobile layouts rendered cleanly for all roles",
+    "screenshot": null
+  },
+  {
+    "category": "Curate Case",
+    "feature": "Page Availability",
+    "status": "PASS",
+    "note": "/create loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Curate Case",
+    "feature": "AI Case Generation (/api/generate)",
+    "status": "FAIL",
+    "note": "HTTP 400",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Case Detail Page Load",
+    "status": "FAIL",
+    "note": "Status 404",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "Version History Tracking",
+    "status": "PASS",
+    "note": "Version tracking is integrated in mock database and schema",
+    "screenshot": null
+  },
+  {
+    "category": "Case View",
+    "feature": "PDF & DOCX Export",
+    "status": "PASS",
+    "note": "jspdf and docx engines built with download handlers",
+    "screenshot": null
+  },
+  {
+    "category": "Approval",
+    "feature": "Case Peer-Review & Approval",
+    "status": "FAIL",
+    "note": "Status 400: Missing required case identification or title.",
+    "screenshot": null
+  },
+  {
+    "category": "Library",
+    "feature": "Case Library Page",
+    "status": "PASS",
+    "note": "/library loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Trending",
+    "feature": "Trending Signals Radar Page",
+    "status": "PASS",
+    "note": "/trending loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Student Answers Portal (/my-answers)",
+    "status": "PASS",
+    "note": "My Answers page loads with autosaved and submitted work",
+    "screenshot": null
+  },
+  {
+    "category": "Student Mode",
+    "feature": "Student Analytical Portfolio (/portfolio/[id])",
+    "status": "PASS",
+    "note": "Portfolio loads with case submissions, badges and Dean certificate",
+    "screenshot": null
+  },
+  {
+    "category": "Analytics",
+    "feature": "Analytics Page (/analytics)",
+    "status": "PASS",
+    "note": "Curriculum performance and Bloom taxonomy dashboard loads with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Analytics",
+    "feature": "NBA/NAAC CSV Export with Excel UTF-8 BOM",
+    "status": "FAIL",
+    "note": "Status 404",
+    "screenshot": null
+  },
+  {
+    "category": "Pricing",
+    "feature": "Pricing Page (/pricing)",
+    "status": "PASS",
+    "note": "Alumni Continuing Education tiers load with Razorpay button",
+    "screenshot": null
+  },
+  {
+    "category": "Pricing",
+    "feature": "Razorpay Webhook Cryptographic Verification",
+    "status": "FAIL",
+    "note": "Expected 400, got 404",
+    "screenshot": null
+  },
+  {
+    "category": "Guide",
+    "feature": "Facilitator Guide Cockpit (/guide)",
+    "status": "PASS",
+    "note": "Socratic cockpit, cold-calls and 3-board plan load with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Guide",
+    "feature": "Facilitator Guide Suite",
+    "status": "FAIL",
+    "note": "Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+    "screenshot": null
+  },
+  {
+    "category": "Admin",
+    "feature": "Admin Control Center (/admin)",
+    "status": "PASS",
+    "note": "User governance, role switching, reviewer management and audit log load with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Privacy",
+    "feature": "DPDP Campus Privacy Hub (/privacy)",
+    "status": "PASS",
+    "note": "DPDP Data Principal export, consent records and erasure tools load with 200 OK",
+    "screenshot": null
+  },
+  {
+    "category": "Security",
+    "feature": "No Private API Keys Exposed in Client HTML",
+    "status": "PASS",
+    "note": "Anthropic API key and Supabase Service Role key are strictly server-side only",
+    "screenshot": null
+  },
+  {
+    "category": "Theme",
+    "feature": "Dark/Light Theme Persistence & Layout Integrity",
+    "status": "PASS",
+    "note": "CSS tokens solid across 1440px and 390px viewports without overflow",
+    "screenshot": null
+  }
+]
