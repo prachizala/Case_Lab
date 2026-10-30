@@ -7,6 +7,7 @@ import { StateLoading } from "@/components/StateLoading";
 import { StrategicProfile } from "@/components/StrategicProfile";
 import { FileSourceImporter } from "@/components/FileSourceImporter";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
+import { CaseNarrativeView } from "@/components/CaseNarrativeView";
 import {
   CaseBloomsLevel,
   CaseDifficulty,
@@ -1803,13 +1804,17 @@ function CreateCaseContent() {
                     </div>
 
                     <div>
-                      <h4 className="font-serif font-bold text-sm text-text mb-1">Enterprise Background & Context</h4>
-                      <p className="text-muted">{generatedCase.content.background}</p>
+                      <h4 className="font-serif font-bold text-sm text-text mb-2">Enterprise Background & Context</h4>
+                      <div className="p-4 rounded-xl bg-surface border border-border">
+                        <CaseNarrativeView content={generatedCase.content.background} />
+                      </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-primary-soft/50 border border-border">
-                      <h4 className="font-serif font-bold text-sm text-accent mb-1">Central Strategic Dilemma</h4>
-                      <p className="font-medium text-text">{generatedCase.content.challenge}</p>
+                    <div>
+                      <h4 className="font-serif font-bold text-sm text-accent mb-2">Central Strategic Dilemma & Alternatives</h4>
+                      <div className="p-4 rounded-xl bg-surface border border-border">
+                        <CaseNarrativeView content={generatedCase.content.challenge} />
+                      </div>
                     </div>
 
                     <div>

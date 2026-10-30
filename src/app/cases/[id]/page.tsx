@@ -87,6 +87,7 @@ const InteractiveFinancialExhibit = dynamic(
   () => import("@/components/InteractiveFinancialExhibit").then((mod) => mod.InteractiveFinancialExhibit),
   { ssr: false }
 );
+import { CaseNarrativeView } from "@/components/CaseNarrativeView";
 
 export default function CaseDetailPage({
   params,
@@ -1593,9 +1594,7 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   className="w-full p-3 text-xs leading-relaxed rounded-xl border border-border bg-surface text-text focus:border-accent focus:outline-none"
                 />
               ) : (
-                <div className={`text-text whitespace-pre-line ${typographyClass}`}>
-                  {content.background}
-                </div>
+                <CaseNarrativeView content={content.background} className={typographyClass} />
               )}
             </section>
 
@@ -1617,9 +1616,7 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   className="w-full p-3 text-xs leading-relaxed rounded-xl border border-border bg-surface text-text focus:border-accent focus:outline-none"
                 />
               ) : (
-                <div className={`text-text whitespace-pre-line ${typographyClass}`}>
-                  {content.challenge}
-                </div>
+                <CaseNarrativeView content={content.challenge} className={typographyClass} />
               )}
             </section>
 
