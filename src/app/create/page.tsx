@@ -8,6 +8,7 @@ import { StrategicProfile } from "@/components/StrategicProfile";
 import { FileSourceImporter } from "@/components/FileSourceImporter";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { CaseNarrativeView } from "@/components/CaseNarrativeView";
+import { TOP_CASE_COMPANIES, CaseCompanyPreset } from "@/config/companies";
 import {
   CaseBloomsLevel,
   CaseDifficulty,
@@ -151,7 +152,46 @@ function CreateCaseContent() {
   const [targetAudience, setTargetAudience] = useState<CaseTargetAudience>("MBA");
 
   // Phase 2: Enterprise & Dilemma Fields
-  const [primaryCompany, setPrimaryCompany] = useState<string>("Tata Motors Passenger Vehicles Ltd");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("tata-motors-ev");
+  const [isCustomCompany, setIsCustomCompany] = useState<boolean>(false);
+  const [companyPresetNotice, setCompanyPresetNotice] = useState<string | null>(null);
+
+  const groupedCompanies = useMemo(() => {
+    const groups: Record<string, CaseCompanyPreset[]> = {};
+    TOP_CASE_COMPANIES.forEach((item) => {
+      if (!groups[item.category]) groups[item.category] = [];
+      groups[item.category].push(item);
+    });
+    return groups;
+  }, []);
+
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompanyId(companyId);
+    if (companyId === "custom") {
+      setIsCustomCompany(true);
+      setCompanyPresetNotice(null);
+      return;
+    }
+    setIsCustomCompany(false);
+    const preset = TOP_CASE_COMPANIES.find((c) => c.id === companyId);
+    if (preset) {
+      setPrimaryCompany(preset.name);
+      setLocationMarket(preset.location);
+      setCentralDilemma(preset.dilemma);
+      setKeyDecisionMaker(preset.decisionMaker);
+      setProtagonists(preset.protagonists);
+      if (preset.industry) setIndustry(preset.industry);
+      if (preset.functionalFocus) setFunctionalFocus(preset.functionalFocus);
+      if (preset.domain) setDomain(preset.domain);
+      if (preset.learningObjectives && preset.learningObjectives.length > 0) {
+        setLearningObjectives([...preset.learningObjectives]);
+      }
+      setCompanyPresetNotice(`✨ Auto-filled real-world MBA case blueprint for ${preset.name}`);
+      setTimeout(() => setCompanyPresetNotice(null), 4000);
+    }
+  };
+
+  const [primaryCompany, setPrimaryCompany] = useState<string>("Tata Motors Passenger Vehicles & EV");
   const [locationMarket, setLocationMarket] = useState<string>("Ahmedabad & Surat, Gujarat / Pan-India");
   const [centralDilemma, setCentralDilemma] = useState<string>(
     "Whether to invest ₹2,500 Cr into proprietary battery cell manufacturing or partner with global battery OEMs amid shifting EV subsidy regulations."
@@ -1101,35 +1141,113 @@ function CreateCaseContent() {
                 </div>
               </div>
 
-              {/* Primary Company & Location */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label className="text-[11px] font-semibold text-muted mb-1 flex items-center justify-between">
-                    <span>Primary Company / Enterprise</span>
-                    {format === "real_signal" && (
-                      <span className="text-[10px] text-accent">Real entity required</span>
-                    )}
-                  </label>
-                  <input
-                    type="text"
-                    value={primaryCompany}
-                    onChange={(e) => setPrimaryCompany(e.target.value)}
-                    placeholder="e.g. Tata Motors Passenger Vehicles Ltd"
-                    className="w-full text-xs p-2.5 rounded-xl bg-surface border border-border text-text focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
+              {/* Top Case Study Companies Dropdown & Quick Selector */}
+              <div className="p-3.5 rounded-2xl bg-surface border border-border shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-accent" />
+                    <label className="text-xs font-bold text-text">
+                      Select Target Company (Top Market Case Subjects)
+                    </label>
+                  </div>
+                  <span className="text-[10px] text-muted">
+                    Choose from 18+ real-world market leaders or enter custom
+                  </span>
                 </div>
 
-                <div>
-                  <label className="text-[11px] font-semibold text-muted mb-1 block">
-                    Location & Market Geography
-                  </label>
-                  <input
-                    type="text"
-                    value={locationMarket}
-                    onChange={(e) => setLocationMarket(e.target.value)}
-                    placeholder="e.g. Ahmedabad & Surat, Gujarat / Pan-India"
-                    className="w-full text-xs p-2.5 rounded-xl bg-surface border border-border text-text focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
+                {/* Categorized Dropdown Selector */}
+                <div className="relative">
+                  <select
+                    value={isCustomCompany ? "custom" : selectedCompanyId}
+                    onChange={(e) => handleCompanySelect(e.target.value)}
+                    className="w-full text-xs font-semibold p-2.5 rounded-xl bg-surface-raised border border-border text-text focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer"
+                  >
+                    <option value="" disabled>-- Select a top market enterprise --</option>
+                    {Object.entries(groupedCompanies).map(([category, companies]) => (
+                      <optgroup key={category} label={category}>
+                        {companies.map((comp) => (
+                          <option key={comp.id} value={comp.id}>
+                            {comp.name} {comp.badge ? `(${comp.badge})` : ""} — {comp.industry}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                    <optgroup label="Custom / Free-form">
+                      <option value="custom">✏️ Custom Enterprise (Enter manually below)</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* Quick Trending Chips */}
+                <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted mr-1">
+                    Trending:
+                  </span>
+                  {[
+                    { id: "tata-motors-ev", label: "⚡ Tata Motors EV" },
+                    { id: "zomato-blinkit", label: "🍔 Zomato & Blinkit" },
+                    { id: "amul-gcmmf", label: "🥛 Amul (GCMMF)" },
+                    { id: "surat-lab-grown-diamonds", label: "💎 Surat Diamonds" },
+                    { id: "zerodha", label: "📈 Zerodha" },
+                    { id: "reliance-retail", label: "🛒 Reliance Retail" },
+                    { id: "zoho-corporation", label: "💻 Zoho Corp" },
+                  ].map((chip) => (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      onClick={() => handleCompanySelect(chip.id)}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                        selectedCompanyId === chip.id && !isCustomCompany
+                          ? "bg-primary text-white border-primary font-bold shadow-2xs"
+                          : "bg-surface-raised border-border text-text hover:border-accent hover:text-accent font-medium"
+                      }`}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Feedback Toast Banner when a preset is selected */}
+                {companyPresetNotice && (
+                  <div className="p-2.5 rounded-xl bg-accent/15 border border-accent/30 text-accent text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+                    <Sparkles className="w-4 h-4 text-accent shrink-0" />
+                    <span>{companyPresetNotice}</span>
+                  </div>
+                )}
+
+                {/* Editable Company Name & Location Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-border/40">
+                  <div>
+                    <label className="text-[11px] font-semibold text-muted mb-1 flex items-center justify-between">
+                      <span>Enterprise Name (Editable)</span>
+                      {format === "real_signal" && (
+                        <span className="text-[10px] text-accent font-medium">Real entity active</span>
+                      )}
+                    </label>
+                    <input
+                      type="text"
+                      value={primaryCompany}
+                      onChange={(e) => {
+                        setPrimaryCompany(e.target.value);
+                        setIsCustomCompany(true);
+                      }}
+                      placeholder="e.g. Tata Motors Passenger Vehicles Ltd"
+                      className="w-full text-xs p-2.5 rounded-xl bg-surface border border-border text-text focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-muted mb-1 block">
+                      Location & Market Geography
+                    </label>
+                    <input
+                      type="text"
+                      value={locationMarket}
+                      onChange={(e) => setLocationMarket(e.target.value)}
+                      placeholder="e.g. Ahmedabad & Surat, Gujarat / Pan-India"
+                      className="w-full text-xs p-2.5 rounded-xl bg-surface border border-border text-text focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                  </div>
                 </div>
               </div>
 
