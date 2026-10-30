@@ -38,10 +38,9 @@
 
 **SBS CaseLab** modernizes business school pedagogy by transforming static textbook case studies into dynamic, interactive, and accredited learning experiences. Specifically built for **Shanti Business School (SBS)**, the platform bridges classroom discussion with real-world industry dilemmas.
 
-- 👨‍🏫 **For Faculty**: Generate comprehensive 5-page case studies with realistic financial exhibits, teaching notes, and board plans in seconds using generative AI; track student mastery; and map rubrics to NAAC/NBA program outcomes.
-- 🔍 **For Reviewers**: Institutional peer-review workflow with change requests, audit logs, and version control.
+- 🏛️ **For Deans & Administrators**: Institutional oversight, review & approve curriculum cases, monitor token usage quotas, manage user access, export OBE curriculum attainment data, and enforce DPDP Act 2023 regulatory privacy rights.
+- 👨‍🏫 **For Faculty**: Generate comprehensive 5-page case studies with realistic financial exhibits, teaching notes, and board plans in seconds using generative AI; submit cases to the review queue; track student mastery; and map rubrics to NAAC/NBA program outcomes.
 - 🎓 **For Students**: Solve interactive real-world dilemmas, receive instant AI rubric grading, build a verified analytical portfolio, and earn downloadable certificates.
-- 🏛️ **For Deans & Administrators**: Monitor token usage quotas, manage user access, export OBE curriculum attainment data, and enforce DPDP Act 2023 regulatory privacy rights.
 
 ---
 
@@ -55,9 +54,9 @@
 | :---: | :---: |
 | ![Student Dashboard](public/screenshots/05-dashboard-student.png) | ![Persona Switcher](public/screenshots/02-persona-switcher-open.png) |
 
-| Case Library & Search | Curate Case & Financial Exhibits |
+| Case Library & Search | Generate Case & Financial Exhibits |
 | :---: | :---: |
-| ![Case Library](public/screenshots/case_library_dark.png) | ![Curate Case Studio](public/screenshots/curate_case_dark.png) |
+| ![Case Library](public/screenshots/case_library_dark.png) | ![Generate Case Studio](public/screenshots/curate_case_dark.png) |
 
 ---
 
@@ -239,16 +238,15 @@ Open your browser and visit:
 
 ## 👥 Built-In Test Personas & Role Switcher
 
-When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is fixed at the bottom-left sidebar and login page. Click any persona to instantly test that role's experience:
+When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is accessible directly in the top navigation profile dropdown and login page. All demo accounts use the standard password: `password123`.
 
 | Role | Persona Name | Institutional Email | Key Permissions |
 |---|---|---|---|
-| **Admin** | Dean Rajeshwar Sharma | `admin@shantibschool.edu.in` | User management, token quotas, DPDP compliance, system audit logs |
-| **Faculty** | Prof. Kirit Patel | `prof.patel@shantibschool.edu.in` | AI Case Studio, drafting cases, teaching notes, submission for review |
-| **Faculty Reviewer** | Dr. Ananya Iyer | `dr.iyer@shantibschool.edu.in` | Review queue, peer evaluation, approval/rejection, revision notes |
-| **Student** | Aarav Sharma | `student1@shantibschool.edu.in` | Library search, case solver, submission, portfolio & certificate |
+| **Administrator** | Dr. Neha Sharma | `neha.sharma@shantibschool.edu.in` | Curriculum approval, user management, token budgets, DPDP compliance, system audit logs |
+| **Faculty** | Ms. Reena Paswan | `reena.paswan@shantibschool.edu.in` | AI Case Studio, drafting cases, teaching notes, submission to review queue |
+| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | Case library access, case solver, rubric evaluations, personal analytical portfolio |
 
-*(All institutional accounts require the `@shantibschool.edu.in` domain).*
+*(Verified institutional members on `@shantibschool.edu.in` receive 30 case generations/month; external guests receive 3 free generations/month).*
 
 ---
 
