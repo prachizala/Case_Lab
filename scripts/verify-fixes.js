@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 
 const BASE_URL = "http://localhost:3000";
-const SESSION_SECRET = "sbs_caselab_secure_session_secret_key_2026_dev";
+const SESSION_SECRET = process.env.SESSION_SECRET || "dev-test-mock-secret";
 
 // Helper to create valid signed session cookie
 function makeSessionToken(userId, secret = SESSION_SECRET) {

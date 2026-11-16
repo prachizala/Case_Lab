@@ -3,7 +3,7 @@ const crypto = require("crypto");
 
 const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const BASE_URL = "http://localhost:3000";
-const SESSION_SECRET = "sbs_caselab_secure_session_secret_key_2026_dev";
+const SESSION_SECRET = process.env.SESSION_SECRET || "dev-test-mock-secret";
 
 function makeSessionToken(userId, secret = SESSION_SECRET) {
   const header = { alg: "HS256", typ: "JWT" };
