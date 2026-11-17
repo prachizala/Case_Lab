@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
-  Sparkles,
   BookOpen,
   ShieldCheck,
   GraduationCap,
@@ -66,11 +65,6 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main className="max-w-5xl mx-auto px-6 py-16 text-center space-y-8">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-soft border border-border text-xs font-bold text-text uppercase tracking-widest">
-          <Sparkles className="w-3.5 h-3.5 text-accent" />
-          <span>Curricular AI Intelligence for Business Education</span>
-        </div>
-
         <h1 className="font-serif text-4xl sm:text-6xl font-extrabold text-text leading-tight tracking-tight max-w-4xl mx-auto">
           Authoritative Business Case Studies, Generated in Real Time.
         </h1>
