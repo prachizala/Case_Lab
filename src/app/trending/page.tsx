@@ -61,7 +61,12 @@ export default function TrendingCasesPage() {
     try {
       const res = await fetch("/api/cases?status=approved");
       if (!res.ok) {
-        throw new Error(`Failed to load approved cases (HTTP ${res.status}).`);
+        if (res.status === 401) {
+          window.location.href = "/login?redirect=/trending";
+          return;
+        }
+        setError(`Failed to load approved cases (HTTP ${res.status}).`);
+        return;
       }
       const data = await res.json();
       if (data.cases) {

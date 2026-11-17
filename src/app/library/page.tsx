@@ -115,7 +115,12 @@ export default function LibraryPage() {
 
       const res = await fetch(`/api/cases?${params.toString()}`);
       if (!res.ok) {
-        throw new Error(`Failed to load cases (HTTP ${res.status})`);
+        if (res.status === 401) {
+          window.location.href = "/login?redirect=/library";
+          return;
+        }
+        setError(`Failed to load cases (HTTP ${res.status})`);
+        return;
       }
       const data = await res.json();
       if (data.cases) {

@@ -40,7 +40,12 @@ export default function StudentPortfolioPage() {
     try {
       const res = await fetch("/api/portfolio");
       if (!res.ok) {
-        throw new Error(`Failed to load portfolio (HTTP ${res.status})`);
+        if (res.status === 401) {
+          window.location.href = "/login?redirect=/portfolio";
+          return;
+        }
+        setError(`Failed to load portfolio (HTTP ${res.status})`);
+        return;
       }
       const data = await res.json();
       if (data.profile) {

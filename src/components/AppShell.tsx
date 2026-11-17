@@ -68,7 +68,24 @@ export function AppShell({ children }: AppShellProps) {
   useEffect(() => {
     getCachedUser()
       .then((user) => {
-        if (user) setCurrentUser(user);
+        if (user) {
+          setCurrentUser(user);
+        } else if (ENABLE_DEMO_PERSONA_SWITCHER) {
+          // In demo mode, if session cookie hasn't been initialized yet, auto-provision Dr. Neha Sharma
+          fetch("/api/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "switch-role", userId: "usr-admin-1" }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.user) {
+                setCurrentUser(data.user);
+                invalidateAuthCache();
+              }
+            })
+            .catch(() => null);
+        }
       })
       .catch((err) => console.error("Failed to load user:", err));
 

@@ -83,7 +83,14 @@ export default function ReviewQueuePage() {
     setError(null);
     try {
       const res = await fetch("/api/cases?scope=all");
-      if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch repository cases.`);
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = "/login?redirect=/review-queue";
+          return;
+        }
+        setError(`HTTP ${res.status}: Failed to fetch repository cases.`);
+        return;
+      }
       const data = await res.json();
       if (data.cases) {
         setCases(data.cases);

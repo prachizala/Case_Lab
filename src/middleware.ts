@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/session";
+import {
+  AUTH_COOKIE_NAME,
+  SESSION_COOKIE_OPTIONS,
+  createSessionToken,
+  verifySessionToken,
+} from "@/lib/session";
 import { mockStore } from "@/lib/mock-db";
 
 export async function middleware(request: NextRequest) {
@@ -32,7 +37,7 @@ export async function middleware(request: NextRequest) {
 
   // Read signed, tamper-proof auth cookie
   const sessionCookie = request.cookies.get(AUTH_COOKIE_NAME)?.value;
-  let userRole = "faculty"; // Fallback demo role for client navigation if unauthenticated
+  let userRole = "faculty";
 
   if (sessionCookie) {
     const payload = await verifySessionToken(sessionCookie);
@@ -41,6 +46,23 @@ export async function middleware(request: NextRequest) {
       if (user) {
         userRole = user.role;
       }
+    }
+  } else {
+    // When no cookie is present on protected routes:
+    // In demo/dev mode: automatically issue a signed session cookie for Dr. Neha Sharma (Admin)
+    const isDemo =
+      process.env.NODE_ENV !== "production" ||
+      process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true";
+
+    if (isDemo) {
+      const token = await createSessionToken("usr-admin-1");
+      response.cookies.set(AUTH_COOKIE_NAME, token, SESSION_COOKIE_OPTIONS);
+      userRole = "admin";
+    } else {
+      // In strict production, redirect unauthenticated visitors to login
+      const redirectUrl = new URL("/login", request.url);
+      redirectUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 

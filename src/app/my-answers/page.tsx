@@ -39,7 +39,12 @@ export default function MyAnswersPage() {
 
       const answersRes = await fetch("/api/answers");
       if (!answersRes.ok) {
-        throw new Error(`Failed to load answers (HTTP ${answersRes.status})`);
+        if (answersRes.status === 401) {
+          window.location.href = "/login?redirect=/my-answers";
+          return;
+        }
+        setError(`Failed to load answers (HTTP ${answersRes.status})`);
+        return;
       }
       const answersData = await answersRes.json();
       if (answersData.answers) {

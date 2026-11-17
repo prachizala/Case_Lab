@@ -100,7 +100,18 @@ export default function AdminPage() {
     setError(null);
     try {
       const res = await fetch("/api/admin");
-      if (!res.ok) throw new Error("Failed to fetch administrative data.");
+      if (!res.ok) {
+        if (res.status === 401) {
+          window.location.href = "/login?redirect=/admin";
+          return;
+        }
+        if (res.status === 403) {
+          window.location.href = "/dashboard?error=Access+denied+to+Admin+Center";
+          return;
+        }
+        setError("Failed to fetch administrative data.");
+        return;
+      }
       const data = await res.json();
       setProfiles(data.profiles || []);
       setDepartments(data.departments || []);
