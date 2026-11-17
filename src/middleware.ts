@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     // When no cookie is present on protected routes:
-    // In demo/dev mode: automatically issue a signed session cookie for Dr. Neha Sharma (Admin)
+    // In demo/dev mode: automatically issue a signed session cookie for Admin
     const isDemo =
       process.env.NODE_ENV !== "production" ||
       process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true";

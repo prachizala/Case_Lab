@@ -53,8 +53,8 @@ export default function PricingPage() {
         // Fallback demo user
         userObj = {
           id: "usr-student-1",
-          email: `prachi.z24bca@${ALLOWED_EMAIL_DOMAIN}`,
-          name: "Zala Prachi",
+          email: `student@${ALLOWED_EMAIL_DOMAIN}`,
+          name: "Student",
           role: "student",
           subscription_status: "active",
         };

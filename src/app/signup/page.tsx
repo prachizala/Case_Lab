@@ -261,7 +261,7 @@ function SignUpForm() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Zala Prachi or Reena Paswan"
+                    placeholder="e.g. Student Name or Faculty Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent"

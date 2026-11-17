@@ -43,8 +43,8 @@ export default function PrivacyPage() {
       } else {
         setCurrentUser({
           id: "usr-student-1",
-          email: `prachi.z24bca@${ALLOWED_EMAIL_DOMAIN}`,
-          name: "Zala Prachi",
+          email: `student@${ALLOWED_EMAIL_DOMAIN}`,
+          name: "Student",
           role: "student",
         });
       }

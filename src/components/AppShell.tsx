@@ -71,7 +71,7 @@ export function AppShell({ children }: AppShellProps) {
         if (user) {
           setCurrentUser(user);
         } else if (ENABLE_DEMO_PERSONA_SWITCHER) {
-          // In demo mode, if session cookie hasn't been initialized yet, auto-provision Dr. Neha Sharma
+          // In demo mode, if session cookie hasn't been initialized yet, auto-provision Admin
           fetch("/api/auth", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -453,10 +453,10 @@ export function AppShell({ children }: AppShellProps) {
                   {/* User Profile Card */}
                   <div className="p-3 rounded-xl bg-primary-soft/30 dark:bg-primary-soft/10 border border-border/40 space-y-1">
                     <p className="text-xs font-bold text-text truncate">
-                      {currentUser?.name || "Dr. Neha Sharma"}
+                      {currentUser?.name || "Admin"}
                     </p>
                     <p className="text-[11px] text-muted truncate">
-                      {currentUser?.email || "neha.sharma@shantibschool.edu.in"}
+                      {currentUser?.email || "admin@shantibschool.edu.in"}
                     </p>
                     <div className="flex items-center flex-wrap gap-1.5 pt-1">
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider bg-primary text-white">
@@ -514,7 +514,7 @@ export function AppShell({ children }: AppShellProps) {
                                 : "hover:bg-muted/10 text-text"
                             }`}
                           >
-                            <span className="truncate">Dr. Neha Sharma</span>
+                            <span className="truncate font-semibold">Admin</span>
                             <span className="text-[9px] font-mono px-1 rounded bg-white/20 font-bold shrink-0 ml-1">
                               ADMIN
                             </span>
@@ -527,7 +527,7 @@ export function AppShell({ children }: AppShellProps) {
                                 : "hover:bg-muted/10 text-text"
                             }`}
                           >
-                            <span className="truncate">Ms. Reena Paswan</span>
+                            <span className="truncate font-semibold">Faculty</span>
                             <span className="text-[9px] font-mono px-1 rounded bg-white/20 font-bold shrink-0 ml-1">
                               FACULTY
                             </span>
@@ -540,7 +540,7 @@ export function AppShell({ children }: AppShellProps) {
                                 : "hover:bg-muted/10 text-text"
                             }`}
                           >
-                            <span className="truncate">Zala Prachi</span>
+                            <span className="truncate font-semibold">Student</span>
                             <span className="text-[9px] font-mono px-1 rounded bg-white/20 font-bold shrink-0 ml-1">
                               STUDENT
                             </span>
@@ -638,7 +638,7 @@ export function AppShell({ children }: AppShellProps) {
                       }}
                       className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-medium text-white"
                     >
-                      Dr. Neha Sharma (Admin)
+                      Admin
                     </button>
                     <button
                       onClick={() => {
@@ -647,7 +647,7 @@ export function AppShell({ children }: AppShellProps) {
                       }}
                       className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-medium text-white"
                     >
-                      Ms. Reena Paswan (Faculty)
+                      Faculty
                     </button>
                     <button
                       onClick={() => {
@@ -656,7 +656,7 @@ export function AppShell({ children }: AppShellProps) {
                       }}
                       className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-medium text-white"
                     >
-                      Zala Prachi (Student)
+                      Student
                     </button>
                   </div>
                 </div>

@@ -138,11 +138,11 @@ export const initialCourses: Course[] = [
 ];
 
 export const initialProfiles: Profile[] = [
-  // 1. Admin: Dr. Neha Sharma
+  // 1. Admin
   {
     id: "usr-admin-1",
-    email: "neha.sharma@shantibschool.edu.in",
-    name: "Dr. Neha Sharma",
+    email: "admin@shantibschool.edu.in",
+    name: "Admin",
     role: "admin",
     department_id: "dept-1",
     plan: "institutional",
@@ -155,11 +155,11 @@ export const initialProfiles: Profile[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
-  // 2. Faculty: Ms. Reena Paswan
+  // 2. Faculty
   {
     id: "usr-faculty-1",
-    email: "reena.paswan@shantibschool.edu.in",
-    name: "Ms. Reena Paswan",
+    email: "faculty@shantibschool.edu.in",
+    name: "Faculty",
     role: "faculty",
     department_id: "dept-2",
     plan: "institutional",
@@ -172,11 +172,11 @@ export const initialProfiles: Profile[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
-  // 3. Student: Zala Prachi
+  // 3. Student
   {
     id: "usr-student-1",
-    email: "prachi.z24bca@shantibschool.edu.in",
-    name: "Zala Prachi",
+    email: "student@shantibschool.edu.in",
+    name: "Student",
     role: "student",
     department_id: "dept-3",
     plan: "standard",
@@ -263,7 +263,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-001",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "FinTech Disruption at Gujarat Cooperative Bank: The Micro-Lending Dilemma",
     status: "published",
     visibility: "sbs_only",
@@ -325,7 +325,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-002",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "FlashCase: Supply Chain Volatility at Reliance Solar Gigafactory",
     status: "draft",
     visibility: "private",
@@ -385,7 +385,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-003",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "Tata Motors EV Battery Sourcing: The Sanand Expansion Dilemma",
     status: "in_review",
     visibility: "sbs_only",
@@ -445,7 +445,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-004",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "Amul's Quick-Commerce Pivot: Balancing Cold Chain Economics with 10-Minute Delivery",
     status: "changes_requested",
     visibility: "sbs_only",
@@ -504,7 +504,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-005",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "Zomato vs Swiggy: The Platform Economy Battlefield in Ahmedabad",
     status: "approved",
     visibility: "public",
@@ -562,7 +562,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-006",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "भारतीय स्टार्टअप्स में प्रतिभा प्रतिधारण: हाइब्रिड कार्यबल चुनौती",
     status: "published",
     visibility: "sbs_only",
@@ -619,7 +619,7 @@ export const initialCases: CaseStudy[] = [
   {
     id: "case-007",
     author_id: "usr-faculty-1",
-    author_name: "Ms. Reena Paswan",
+    author_name: "Faculty",
     title: "સુરતના હીરા ઉદ્યોગમાં લેબ-ગ્રોન ડાયમંડ કટોકટી",
     status: "published",
     visibility: "public",
@@ -740,8 +740,8 @@ export const initialAnswers: StudentAnswer[] = [
     id: "ans-student-1-case-001",
     case_id: "case-001",
     student_id: "usr-student-1",
-    student_name: "Zala Prachi",
-    student_email: "prachi.z24bca@shantibschool.edu.in",
+    student_name: "Student",
+    student_email: "student@shantibschool.edu.in",
     text: `Executive Memorandum: Resolution Strategy for Gujarat Cooperative Bank
 
 1. Strategic Diagnosis: The surge in gross non-performing assets to 8.4% is primarily driven by unsecured agricultural micro-loans that lack digital repayment tracking. Concurrently, agile UPI-enabled fintechs are capturing high-velocity merchant deposits in Surat and Rajkot, eroding the bank's low-cost CASA deposit base.
@@ -809,7 +809,7 @@ export const initialGrades: Grade[] = [
       "Executive Presentation & Clarity": 14,
     },
     faculty_comment:
-      "Outstanding boardroom synthesis, Prachi. High honors for practical cooperative finance structuring.",
+      "Outstanding boardroom synthesis. High honors for practical cooperative finance structuring.",
     graded_by: "usr-faculty-1",
     is_published: true,
     published_at: new Date(Date.now() - 3600000 * 12).toISOString(),
@@ -994,7 +994,7 @@ export const initialClassroomSessions: ClassroomSession[] = [
     cold_call_history: [
       {
         student_id: "01938562-7e04-7a1b-9a82-120000000001",
-        student_name: "Zala Prachi",
+        student_name: "Student",
         timestamp: new Date(Date.now() - 1800000).toISOString(),
         score: 4,
         notes: "Strong opening cold call. Analyzed non-performing assets (NPA) risk and defended proprietary credit scoring.",
@@ -1015,7 +1015,7 @@ export const initialAudioBriefs: AudioBrief[] = [
     case_id: "case-001",
     title: "Executive Audio Debrief: Gujarat Cooperative Bank",
     duration_seconds: 140,
-    executive_summary: "Ms. Reena Paswan and Senior Banking Analyst Priya Desai unpack the high-stakes digital transition facing cooperative banking in India, evaluating credit risk, partnership models, and financial inclusion.",
+    executive_summary: "Faculty and Senior Banking Analyst Priya Desai unpack the high-stakes digital transition facing cooperative banking in India, evaluating credit risk, partnership models, and financial inclusion.",
     dialogue: [
       {
         speaker: "Professor",
@@ -1096,7 +1096,7 @@ export const initialAuditLogs: AuditLog[] = [
   {
     id: "audit-001",
     actor_id: "usr-admin-1",
-    actor_email: "neha.sharma@shantibschool.edu.in",
+    actor_email: "admin@shantibschool.edu.in",
     action: "role_change",
     target_id: "usr-faculty-1",
     target_type: "user",
@@ -1107,7 +1107,7 @@ export const initialAuditLogs: AuditLog[] = [
   {
     id: "audit-002",
     actor_id: "usr-admin-1",
-    actor_email: "neha.sharma@shantibschool.edu.in",
+    actor_email: "admin@shantibschool.edu.in",
     action: "case_approval",
     target_id: "case-001",
     target_type: "case",
@@ -1118,7 +1118,7 @@ export const initialAuditLogs: AuditLog[] = [
   {
     id: "audit-003",
     actor_id: "usr-faculty-1",
-    actor_email: "reena.paswan@shantibschool.edu.in",
+    actor_email: "faculty@shantibschool.edu.in",
     action: "grade_override",
     target_id: "ans-student-1-case-001",
     target_type: "grade",
@@ -1129,7 +1129,7 @@ export const initialAuditLogs: AuditLog[] = [
   {
     id: "audit-004",
     actor_id: "usr-faculty-1",
-    actor_email: "reena.paswan@shantibschool.edu.in",
+    actor_email: "faculty@shantibschool.edu.in",
     action: "case_created",
     target_id: "case-001",
     target_type: "case",
@@ -1140,7 +1140,7 @@ export const initialAuditLogs: AuditLog[] = [
   {
     id: "audit-005",
     actor_id: "usr-faculty-1",
-    actor_email: "reena.paswan@shantibschool.edu.in",
+    actor_email: "faculty@shantibschool.edu.in",
     action: "case_submitted",
     target_id: "case-002",
     target_type: "case",
@@ -1151,7 +1151,7 @@ export const initialAuditLogs: AuditLog[] = [
   {
     id: "audit-006",
     actor_id: "usr-admin-1",
-    actor_email: "neha.sharma@shantibschool.edu.in",
+    actor_email: "admin@shantibschool.edu.in",
     action: "case_approval",
     target_id: "case-003",
     target_type: "case",
@@ -1315,13 +1315,14 @@ class MockStore {
   }
 
   getProfile(id: string): Profile | undefined {
+    const clean = id.toLowerCase().trim();
     const p = this.profiles.find(
       (item) =>
         item.id === id ||
-        item.email.toLowerCase() === id.toLowerCase() ||
-        (id.toLowerCase() === "neha.sharma@shantibschool.edu.in" && item.id === "usr-admin-1") ||
-        (id.toLowerCase() === "reena.paswan@shantibschool.edu.in" && item.id === "usr-faculty-1") ||
-        (id.toLowerCase() === "prachi.z24bca@shantibschool.edu.in" && item.id === "usr-student-1")
+        item.email.toLowerCase() === clean ||
+        ((clean === "admin" || clean === "admin01" || clean === "admin@shantibschool.edu.in" || clean === "neha.sharma@shantibschool.edu.in") && item.id === "usr-admin-1") ||
+        ((clean === "faculty" || clean === "faculty01" || clean === "faculty@shantibschool.edu.in" || clean === "reena.paswan@shantibschool.edu.in") && item.id === "usr-faculty-1") ||
+        ((clean === "student" || clean === "student01" || clean === "student@shantibschool.edu.in" || clean === "prachi.z24bca@shantibschool.edu.in") && item.id === "usr-student-1")
     );
     if (!p) return undefined;
     this.checkAndResetMonthlyQuota(p);
@@ -3169,7 +3170,7 @@ class MockStore {
   graduateStudent(
     studentId: string,
     actorId: string = "usr-admin-1",
-    actorEmail: string = "neha.sharma@shantibschool.edu.in"
+    actorEmail: string = "admin@shantibschool.edu.in"
   ): { success: boolean; user?: Profile; error?: string } {
     const profile = this.profiles.find((p) => p.id === studentId);
     if (!profile) return { success: false, error: "User not found" };

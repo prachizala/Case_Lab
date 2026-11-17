@@ -82,21 +82,21 @@ export function getDefaultDemoUsers() {
   return [
     {
       role: "admin" as UserRole,
-      label: "Dr. Neha Sharma (Admin)",
-      email: "neha.sharma@shantibschool.edu.in",
-      description: "Dean, Academics & Accreditation — Management & Strategy",
+      label: "Admin",
+      email: "admin@shantibschool.edu.in",
+      description: "Administrator Portal — Management, Approvals & Platform Settings",
     },
     {
       role: "faculty" as UserRole,
-      label: "Ms. Reena Paswan (Faculty)",
-      email: "reena.paswan@shantibschool.edu.in",
-      description: "Assistant Professor — Business Analytics / Marketing",
+      label: "Faculty",
+      email: "faculty@shantibschool.edu.in",
+      description: "Faculty Portal — Case Generation & Academic Authoring",
     },
     {
       role: "student" as UserRole,
-      label: "Zala Prachi (Student)",
-      email: "prachi.z24bca@shantibschool.edu.in",
-      description: "BCA, Semester 5 — Case library, answers & portfolio",
+      label: "Student",
+      email: "student@shantibschool.edu.in",
+      description: "Student Portal — Case Library, Submissions & Portfolio",
     },
   ];
 }

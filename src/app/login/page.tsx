@@ -18,6 +18,8 @@ import {
   ArrowRight,
   AlertCircle,
   Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export default function LoginPage() {
@@ -25,6 +27,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -130,21 +133,29 @@ export default function LoginPage() {
               <span>One-Click Test Persona:</span>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
-              {demoUsers.map((u) => (
-                <button
-                  key={u.role}
-                  type="button"
-                  onClick={() => handleQuickDemoLogin(u.email)}
-                  className="p-2 rounded-xl border border-border bg-surface text-center hover:border-accent transition-all shadow-xs"
-                >
-                  <span className="text-[11px] font-bold block uppercase text-text">
-                    {u.role}
-                  </span>
-                  <span className="text-[9px] text-muted truncate block">
-                    {u.label.split(" ")[0]}
-                  </span>
-                </button>
-              ))}
+              {demoUsers.map((u) => {
+                const personaName = u.role === "admin" ? "Admin" : u.role === "faculty" ? "Faculty" : "Student";
+                return (
+                  <button
+                    key={u.role}
+                    type="button"
+                    onClick={() => {
+                      setEmail(u.email);
+                      setPassword("password123");
+                      handleQuickDemoLogin(u.email);
+                    }}
+                    className="p-2.5 rounded-xl border border-border bg-surface text-center hover:border-accent hover:bg-primary-soft/40 transition-all shadow-xs group"
+                    title={`Sign in as ${personaName} (${u.email})`}
+                  >
+                    <span className="text-[11px] font-bold block uppercase text-text group-hover:text-accent">
+                      {u.role}
+                    </span>
+                    <span className="text-[10px] text-muted block font-semibold">
+                      {personaName}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -163,9 +174,9 @@ export default function LoginPage() {
               <div className="relative">
                 <Mail className="w-4 h-4 text-muted absolute left-3 top-2.5" />
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="e.g. name@shantibschool.edu.in or your.email@example.com"
+                  placeholder="admin@shantibschool.edu.in, ADMIN01, or name@shantibschool.edu.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
@@ -174,20 +185,51 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="font-semibold text-text mb-1 block">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="font-semibold text-text">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[11px] text-accent hover:underline flex items-center gap-1 font-sans cursor-pointer"
+                >
+                  {showPassword ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5" />
+                      <span>Hide password</span>
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Show password</span>
+                    </>
+                  )}
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-muted absolute left-3 top-2.5" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
+                  className="w-full pl-9 pr-10 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 text-muted hover:text-text transition-colors cursor-pointer"
+                  title={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
+              <p className="mt-1 text-[10px] text-muted font-sans">
+                Demo Password: <button type="button" onClick={() => setPassword("password123")} className="px-1 py-0.5 rounded bg-muted/15 font-mono text-text font-bold hover:bg-accent/20 hover:text-accent transition-colors">password123</button>
+              </p>
             </div>
 
             <button

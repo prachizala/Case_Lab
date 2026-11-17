@@ -727,8 +727,8 @@ export default function LibraryPage() {
                     className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-surface text-text focus:outline-none focus:border-accent"
                   >
                     <option value="all">All Faculty</option>
-                    <option value="Ms. Reena Paswan">Ms. Reena Paswan</option>
-                    <option value="Dr. Neha Sharma">Dr. Neha Sharma</option>
+                    <option value="Faculty">Faculty</option>
+                    <option value="Admin">Admin</option>
                   </select>
                 </div>
 

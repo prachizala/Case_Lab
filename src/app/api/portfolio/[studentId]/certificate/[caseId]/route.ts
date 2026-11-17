@@ -199,7 +199,7 @@ export async function GET(
     doc.line(pageWidth - 105, sigY, pageWidth - 40, sigY);
     doc.setFontSize(9.5);
     doc.setTextColor(...primaryRgb);
-    doc.text(caseStudy.author_name || "Ms. Reena Paswan", pageWidth - 72.5, sigY + 5, {
+    doc.text(caseStudy.author_name || "Faculty", pageWidth - 72.5, sigY + 5, {
       align: "center",
     });
     doc.setFontSize(8);
