@@ -40,6 +40,7 @@ function SignUpForm() {
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"faculty" | "student">("faculty");
   const [dpdpConsent, setDpdpConsent] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [success, setSuccess] = useState<string | null>(null);
@@ -84,6 +85,7 @@ function SignUpForm() {
           name,
           email: trimmedEmail,
           password,
+          role,
           dpdp_consent: true,
         }),
       });
@@ -328,14 +330,34 @@ function SignUpForm() {
                 </div>
               </div>
 
-              {/* Informative Role Banner */}
-              <div className="p-3 rounded-xl bg-surface-raised border border-border/80 flex items-center gap-2.5 text-[11px] text-muted">
-                <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold font-mono text-xs">
-                  S
-                </div>
-                <div>
-                  <span className="font-semibold text-text block">Default Access: Student & Member</span>
-                  <span>Faculty and administrative permissions are provisioned by an institution administrator.</span>
+              {/* Role Selection */}
+              <div>
+                <label className="block text-xs font-semibold text-text mb-1.5">
+                  Registering As:
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole("faculty")}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      role === "faculty"
+                        ? "border-accent bg-accent/10 text-accent shadow-sm"
+                        : "border-border bg-surface text-muted hover:text-text"
+                    }`}
+                  >
+                    <span>🎓 Faculty</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole("student")}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      role === "student"
+                        ? "border-accent bg-accent/10 text-accent shadow-sm"
+                        : "border-border bg-surface text-muted hover:text-text"
+                    }`}
+                  >
+                    <span>📚 Student</span>
+                  </button>
                 </div>
               </div>
 

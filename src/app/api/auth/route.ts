@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
       }
 
       const isCollegeAdmin = email.toLowerCase().trim() === `admin@${ALLOWED_EMAIL_DOMAIN}`;
-      // Everyone who signs up gets role "student" by default; admin is reserved for seeded administrative accounts
-      const newRole: UserRole = isCollegeAdmin ? "admin" : "student";
+      const requestedRole: UserRole = (body.role === "faculty" || body.role === "student") ? body.role : "faculty";
+      const newRole: UserRole = isCollegeAdmin ? "admin" : requestedRole;
       const isApproved = isCollegeAdmin ? true : true; // Student accounts are active, role elevations are approved by Admin
 
       // Generate 6-digit verification OTP
