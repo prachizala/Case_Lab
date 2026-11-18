@@ -16,7 +16,9 @@
     "test:otp": "tsx scripts/test-otp-security.ts",
     "test:consent": "tsx scripts/test-dpdp-consent.ts",
     "test:student-access": "tsx scripts/test-student-generation-access.ts",
-    "test:password": "tsx scripts/test-password-security.ts"
+    "test:password": "tsx scripts/test-password-security.ts",
+    "test:smoke": "tsx scripts/smoke-test.ts",
+    "test:secret-scan": "tsx scripts/secret-scan.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
