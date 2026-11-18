@@ -56,7 +56,7 @@ export interface Profile {
   updated_at?: string;
 }
 
-export type CaseType = "short" | "full" | "research" | "flash";
+export type CaseType = "short" | "full" | "research" | "flash" | "ce_pack";
 export type CaseFormat = "hypothetical" | "real_signal";
 export type CaseStatus = "draft" | "in_review" | "approved" | "published" | "archived" | "changes_requested";
 export type CaseVisibility = "private" | "sbs_only" | "public";
