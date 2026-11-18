@@ -58,6 +58,8 @@ import {
   Layers,
   ArrowRight,
   Eye,
+  Upload,
+  Paperclip,
   CheckCircle2,
   Bookmark,
   Share2,
@@ -169,6 +171,49 @@ function CreateCaseContent() {
   const [streamingProgress, setStreamingProgress] = useState<number>(0);
   const [streamingStepName, setStreamingStepName] = useState<string>("");
   const [streamingText, setStreamingText] = useState<string>("");
+
+  // Syllabus Upload & Extraction State
+  const [uploadingSyllabus, setUploadingSyllabus] = useState<boolean>(false);
+  const [syllabusFileName, setSyllabusFileName] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [uploadedUnits, setUploadedUnits] = useState<any[] | null>(null);
+  const [syllabusMessage, setSyllabusMessage] = useState<string | null>(null);
+
+  const handleSyllabusUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingSyllabus(true);
+    setSyllabusMessage(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("department", department);
+
+      const res = await fetch("/api/casepack/syllabus", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to parse syllabus");
+      }
+
+      const data = await res.json();
+      setSyllabusFileName(file.name);
+      setUploadedUnits(data.units || []);
+      if (data.suggestedConcepts && data.suggestedConcepts.length > 0) {
+        setSelectedTopics(data.suggestedConcepts.slice(0, 4));
+      }
+      setSyllabusMessage(`Syllabus grounded: ${data.unitsCount} units parsed from ${file.name}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Syllabus parsing failed";
+      setSyllabusMessage(`Error: ${msg}`);
+    } finally {
+      setUploadingSyllabus(false);
+    }
+  };
 
   // Phase 2: Domain, Difficulty, Audience
   const [domain, setDomain] = useState<CaseDomain>("Strategy");
@@ -1318,6 +1363,36 @@ function CreateCaseContent() {
                     </div>
                   </div>
 
+                  {/* Syllabus Document Grounding (PDF/DOCX) */}
+                  <div className="p-3.5 rounded-xl border border-border/80 bg-surface/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-text">
+                        <Paperclip className="w-3.5 h-3.5 text-accent" />
+                        <span>Ground in Faculty Syllabus Document</span>
+                      </div>
+                      <p className="text-[11px] text-muted">
+                        Upload your syllabus (PDF, DOCX, TXT) to automatically parse unit topics and map Bloom levels.
+                      </p>
+                      {syllabusMessage && (
+                        <p className={`text-[11px] font-semibold ${syllabusMessage.startsWith("Error") ? "text-danger" : "text-success"}`}>
+                          {syllabusMessage}
+                        </p>
+                      )}
+                    </div>
+
+                    <label className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-primary-soft hover:bg-surface text-xs font-semibold text-text cursor-pointer transition-colors">
+                      <Upload className="w-3.5 h-3.5 text-accent" />
+                      <span>{uploadingSyllabus ? "Parsing..." : syllabusFileName ? "Change Syllabus" : "Upload Syllabus"}</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.docx,.txt"
+                        className="hidden"
+                        onChange={handleSyllabusUpload}
+                        disabled={uploadingSyllabus}
+                      />
+                    </label>
+                  </div>
+
                   {/* Units & Topics Multi-Select */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-semibold text-text">
@@ -1328,6 +1403,47 @@ function CreateCaseContent() {
                     </div>
 
                     <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      {/* Uploaded custom syllabus units if any */}
+                      {uploadedUnits && uploadedUnits.length > 0 && (
+                        <div className="p-3 rounded-lg border border-accent/40 bg-accent/5 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-accent">
+                              Extracted from {syllabusFileName}:
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-accent/15 text-accent">
+                              Custom Syllabus
+                            </span>
+                          </div>
+                          {uploadedUnits.map((u, uIdx) => (
+                            <div key={uIdx} className="space-y-1.5 pt-1">
+                              <span className="text-[11px] font-semibold text-text block">
+                                {u.name}
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {u.topics.map((t: string) => {
+                                  const isSelected = selectedTopics.includes(t);
+                                  return (
+                                    <button
+                                      key={t}
+                                      type="button"
+                                      onClick={() => handleToggleTopic(t)}
+                                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                                        isSelected
+                                          ? "bg-accent/15 border-accent text-accent font-semibold"
+                                          : "bg-surface border-border text-muted hover:text-text"
+                                      }`}
+                                    >
+                                      {isSelected && <span className="mr-1">✓</span>}
+                                      {t}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       {getDepartmentProfile(department).units.map((u) => (
                         <div key={u.unit} className="p-3 rounded-lg border border-border/70 bg-surface/90 space-y-2">
                           <div className="flex items-center justify-between text-xs">

@@ -22,6 +22,9 @@ import {
   FileDown,
   Layers,
   Award,
+  Star,
+  Send,
+  ThumbsUp,
 } from "lucide-react";
 
 export interface CECasePackViewProps {
@@ -67,6 +70,47 @@ export function CECasePackView({
     navigator.clipboard?.writeText(text);
     setCopiedText(true);
     setTimeout(() => setCopiedText(false), 2500);
+  };
+
+  // Faculty Review & Quality Feedback state
+  const [rating, setRating] = useState<number>(5);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [flaggedIssues, setFlaggedIssues] = useState<string[]>([]);
+  const [feedbackComment, setFeedbackComment] = useState<string>("");
+  const [promoteToGold, setPromoteToGold] = useState<boolean>(false);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+  const [submittingFeedback, setSubmittingFeedback] = useState<boolean>(false);
+
+  const toggleIssue = (issue: string) => {
+    setFlaggedIssues((prev) =>
+      prev.includes(issue) ? prev.filter((i) => i !== issue) : [...prev, issue]
+    );
+  };
+
+  const handleFeedbackSubmit = async () => {
+    setSubmittingFeedback(true);
+    try {
+      const res = await fetch("/api/casepack/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          case_id: caseId || casePack.case.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          case_title: casePack.case.title,
+          department: casePack.meta.department,
+          rating,
+          flagged_issues: flaggedIssues,
+          comments: feedbackComment,
+          promote_to_gold: promoteToGold,
+        }),
+      });
+      if (res.ok) {
+        setFeedbackSubmitted(true);
+      }
+    } catch (e) {
+      console.error("Failed to submit feedback:", e);
+    } finally {
+      setSubmittingFeedback(false);
+    }
   };
 
   return (
@@ -816,6 +860,155 @@ export function CECasePackView({
               ))}
             </div>
           )}
+
+          {/* FACULTY QUALITY EVALUATION & FEEDBACK LOOP */}
+          <div className="mt-8 pt-6 border-t border-border space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs uppercase font-mono text-muted tracking-widest block">
+                  SBS CONTINUOUS IMPROVEMENT LOOP
+                </span>
+                <h3 className="font-serif text-lg font-bold text-text flex items-center gap-2">
+                  <Star className="w-5 h-5 text-accent fill-accent" />
+                  Faculty Quality Assessment & Gold Reference Nomination
+                </h3>
+              </div>
+              {feedbackSubmitted && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success/20 text-success border border-success/30">
+                  <Check className="w-3.5 h-3.5" />
+                  Feedback Recorded in Ledger
+                </span>
+              )}
+            </div>
+
+            {feedbackSubmitted ? (
+              <div className="p-4 rounded-xl border border-success/30 bg-success/10 text-success text-xs font-medium flex items-center gap-2">
+                <ThumbsUp className="w-4 h-4 shrink-0" />
+                Thank you! Your pedagogical assessment has been registered in the CaseLab Quality Ledger.
+              </div>
+            ) : (
+              <div className="space-y-4 bg-primary-soft/30 p-5 rounded-xl border border-border">
+                {/* 1-5 Star Rating */}
+                <div>
+                  <label className="block text-xs font-bold text-text mb-1.5">
+                    Overall Pedagogical Quality Rating (1 to 5 Stars):
+                  </label>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="p-1 text-muted hover:text-accent transition-colors"
+                      >
+                        <Star
+                          className={`w-6 h-6 ${
+                            (hoverRating || rating) >= star
+                              ? "text-accent fill-accent"
+                              : "text-muted"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    <span className="ml-3 text-xs font-mono font-bold text-text">
+                      {rating} / 5 Stars
+                    </span>
+                  </div>
+                </div>
+
+                {/* Flagged issues */}
+                <div>
+                  <label className="block text-xs font-bold text-text mb-1.5">
+                    Flag Any Specific Pedagogical Defects (Optional):
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    {[
+                      { id: "math_discrepancy", label: "Math / Calculation formula discrepancy" },
+                      { id: "missing_table", label: "Financial / Workforce data table missing" },
+                      { id: "bloom_verb", label: "Weak question or Bloom verb mismatch" },
+                      { id: "answer_depth", label: "Answer key lacking depth or limitations" },
+                      { id: "unrealistic_figures", label: "Unrealistic numbers or metrics" },
+                      { id: "formatting", label: "Formatting or layout defects" },
+                    ].map((iss) => (
+                      <label
+                        key={iss.id}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer transition-all ${
+                          flaggedIssues.includes(iss.id)
+                            ? "border-accent bg-accent/10 text-accent font-semibold"
+                            : "border-border bg-surface text-muted hover:text-text"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={flaggedIssues.includes(iss.id)}
+                          onChange={() => toggleIssue(iss.id)}
+                          className="rounded border-border text-accent focus:ring-accent"
+                        />
+                        <span>{iss.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Faculty Comments */}
+                <div>
+                  <label className="block text-xs font-bold text-text mb-1.5">
+                    Evaluator Feedback & Qualitative Notes:
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={feedbackComment}
+                    onChange={(e) => setFeedbackComment(e.target.value)}
+                    placeholder="Enter any faculty observations or suggestions for future model iterations..."
+                    className="w-full text-xs p-3 rounded-lg border border-border bg-surface text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+
+                {/* Nominate for Gold Reference */}
+                <div className="p-3.5 rounded-lg border border-accent/30 bg-accent/5 flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="nominate_gold"
+                    checked={promoteToGold}
+                    onChange={(e) => setPromoteToGold(e.target.checked)}
+                    className="mt-0.5 rounded border-accent text-accent focus:ring-accent"
+                  />
+                  <label htmlFor="nominate_gold" className="text-xs cursor-pointer">
+                    <span className="font-bold text-text block">
+                      Nominate for SBS Gold Standard Reference Library
+                    </span>
+                    <span className="text-muted leading-relaxed">
+                      Check this box if this case pack exemplifies ideal classroom and exam standards. It will be sent to the Admin Quality review queue for promotion to institutional few-shot examples.
+                    </span>
+                  </label>
+                </div>
+
+                {/* Submit button */}
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={handleFeedbackSubmit}
+                    disabled={submittingFeedback}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-accent text-white hover:opacity-95 disabled:opacity-50 transition-all shadow-sm"
+                  >
+                    {submittingFeedback ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Submitting Evaluation...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Submit Faculty Quality Evaluation</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

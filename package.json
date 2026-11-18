@@ -10,7 +10,8 @@
     "seed": "tsx scripts/seed.ts",
     "test": "tsx scripts/test-acceptance.ts",
     "test:validators": "tsx scripts/test-casepack-validators.ts",
-    "test:exports": "tsx scripts/test-casepack-export.ts"
+    "test:exports": "tsx scripts/test-casepack-export.ts",
+    "test:feedback-syllabus": "tsx scripts/test-casepack-feedback-syllabus.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

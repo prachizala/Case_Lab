@@ -452,6 +452,8 @@ export type AuditAction =
   | "subscription_created"
   | "data_export"
   | "data_erasure"
+  | "casepack_feedback_submitted"
+  | "gold_reference_status_updated"
   | "admin_action";
 
 export interface AuditLog {
