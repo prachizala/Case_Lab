@@ -15,7 +15,7 @@ interface ExtractedUnit {
 }
 
 export async function POST(req: NextRequest) {
-  const auth = await authenticateUser(req, ["admin", "faculty"]);
+  const auth = await authenticateUser(req, ["admin", "faculty", "student"]);
   if (auth.errorResponse) return auth.errorResponse;
 
   try {

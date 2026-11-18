@@ -184,7 +184,7 @@ export function CECasePackView({
                     {!isStudent && (
                       <>
                         <div className="px-3 py-1.5 font-bold text-[10px] uppercase text-muted tracking-wider">
-                          Faculty / Exam Master Pack
+                          Complete Case Pack (With Solutions)
                         </div>
                         <a
                           href={caseId ? `/api/cases/${caseId}/export/docx?mode=full` : "#"}
@@ -207,7 +207,7 @@ export function CECasePackView({
                     )}
 
                     <div className="px-3 py-1.5 font-bold text-[10px] uppercase text-muted tracking-wider">
-                      Student Exam Handout
+                      Student Case Handout
                     </div>
                     <a
                       href={caseId ? `/api/cases/${caseId}/export/docx?mode=student` : "#"}
@@ -257,7 +257,7 @@ export function CECasePackView({
             }`}
           >
             <HelpCircle className="w-4 h-4" />
-            <span>Exam Questions ({casePack.questions.length})</span>
+            <span>Analysis Questions ({casePack.questions.length})</span>
           </button>
 
           {/* FACULTY / ADMIN TABS (STRICTLY EXCLUDED FOR STUDENTS) */}
@@ -409,10 +409,10 @@ export function CECasePackView({
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div>
               <span className="text-xs uppercase font-mono text-muted tracking-widest block mb-1">
-                EVALUATION QUESTIONS • TOTAL {casePack.meta.max_marks || 40} MARKS
+                PROBLEM ANALYSIS & DISCUSSION QUESTIONS
               </span>
               <h2 className="font-serif text-2xl font-bold text-text">
-                Continuous Evaluation Examination Questions
+                Case Analysis & Critical Thinking Questions
               </h2>
             </div>
             <button

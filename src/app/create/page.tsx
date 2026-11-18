@@ -351,10 +351,6 @@ function CreateCaseContent() {
       .then((r) => r.json())
       .then((data) => {
         if (data.user) {
-          if (data.user.role === "student") {
-            window.location.href = "/dashboard?error=Students+are+restricted+from+accessing+Case+Generation.";
-            return;
-          }
           setCurrentUser(data.user);
         }
       })
@@ -1281,8 +1277,8 @@ function CreateCaseContent() {
                     {
                       id: "ce_pack" as CaseType,
                       title: "CE Case Pack",
-                      badge: "Exam + Solutions",
-                      desc: "Accredited Continuous Evaluation Pack: Teaching Case + Exam Questions + Faculty Model Answer Key & Solutions.",
+                      badge: "Case + Solutions",
+                      desc: "Comprehensive Teaching Case + Analysis Questions + Model Solutions & Discussion Notes.",
                     },
                     {
                       id: "short" as CaseType,
@@ -2315,7 +2311,7 @@ function CreateCaseContent() {
                             generationStep === 1
                               ? "1. Case Narrative (Indian context & data tables)"
                               : generationStep === 2
-                              ? "2. Examination Questions (Bloom taxonomy)"
+                              ? "2. Case Analysis Questions (Bloom taxonomy)"
                               : generationStep === 3
                               ? "3. Model Answer Key & Teaching Notes"
                               : "4. Programmatic Checks & Quality Validation"

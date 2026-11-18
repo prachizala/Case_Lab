@@ -84,7 +84,7 @@ export async function GET(
         new Paragraph({
           children: [
             new TextRun({
-              text: `CONTINUOUS EVALUATION ${meta.ce_no || "CE-3"} • SET ${meta.set || "A"}`,
+              text: `CASE STUDY & DISCUSSION PACK • SET ${meta.set || "A"}`,
               bold: true,
               size: 20,
             }),
@@ -296,10 +296,10 @@ export async function GET(
         });
       }
 
-      // 4. Examination Questions Section
+      // 4. Case Questions Section
       children.push(
         new Paragraph({
-          text: `EXAMINATION QUESTIONS [Total Marks: ${meta.max_marks || 40}]`,
+          text: "CASE ANALYSIS & DISCUSSION QUESTIONS",
           heading: HeadingLevel.HEADING_1,
           spacing: { before: 260, after: 160 },
         })

@@ -67,20 +67,18 @@ export async function middleware(request: NextRequest) {
   }
 
   // 1. Student Route Protection
-  // Students cannot access case generation, admin center, review queue, or analytics
+  // Students cannot access admin center or review queue
   if (userRole === "student") {
     if (
       pathname.startsWith("/faculty") ||
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/create") ||
       pathname.startsWith("/review-queue") ||
-      pathname.startsWith("/analytics") ||
-      pathname.startsWith("/guide")
+      pathname.startsWith("/analytics")
     ) {
       const redirectUrl = new URL("/dashboard", request.url);
       redirectUrl.searchParams.set(
         "error",
-        "Students are restricted from accessing Case Generation, Review Queue, Analytics, or Admin Center."
+        "Students are restricted from accessing Faculty Review Queue, Analytics, or Admin Center."
       );
       return NextResponse.redirect(redirectUrl);
     }
