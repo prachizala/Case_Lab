@@ -56,7 +56,7 @@ export interface Profile {
   updated_at?: string;
 }
 
-export type CaseType = "short" | "full" | "research" | "flash";
+export type CaseType = "short" | "full" | "research" | "flash" | "ce_pack";
 export type CaseFormat = "hypothetical" | "real_signal";
 export type CaseStatus = "draft" | "in_review" | "approved" | "published" | "archived" | "changes_requested";
 export type CaseVisibility = "private" | "sbs_only" | "public";
@@ -452,6 +452,8 @@ export type AuditAction =
   | "subscription_created"
   | "data_export"
   | "data_erasure"
+  | "casepack_feedback_submitted"
+  | "gold_reference_status_updated"
   | "admin_action";
 
 export interface AuditLog {

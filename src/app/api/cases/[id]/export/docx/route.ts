@@ -3,6 +3,7 @@ import { mockStore } from "@/lib/mock-db";
 import { COLLEGE_NAME, COLLEGE_NAME_WITH_SHORT } from "@/config/college";
 import { THEME_TOKENS } from "@/config/theme";
 import { authenticateUser } from "@/lib/session";
+import { CECasePack } from "@/lib/casepack/schema";
 import {
   Document,
   Packer,
@@ -13,7 +14,6 @@ import {
   TableRow,
   TableCell,
   WidthType,
-  BorderStyle,
   AlignmentType,
   ShadingType,
 } from "docx";
@@ -43,9 +43,557 @@ export async function GET(
       );
     }
 
-    const content = caseStudy.content;
+    // Determine export mode: "full" (faculty/admin) vs "student" (handout)
+    const { searchParams } = new URL(req.url);
+    const requestedMode = searchParams.get("mode") || "full";
+    const mode = user.role === "student" ? "student" : requestedMode;
 
-    // Construct DOCX document
+    const content = caseStudy.content as any;
+    const isCEPack =
+      caseStudy.type === "ce_pack" || (content && "case" in content && "questions" in content);
+
+    // =========================================================================
+    // BRANCH A: CE CASE PACK DOCX EXPORT (Continuous Evaluation Exam Standard)
+    // =========================================================================
+    if (isCEPack) {
+      const pack = content as CECasePack;
+      const meta = pack.meta || ({} as any);
+      const isStudentHandout = mode === "student";
+
+      const children: (Paragraph | Table)[] = [];
+
+      // 1. Institutional Header Banner
+      children.push(
+        new Paragraph({
+          text: COLLEGE_NAME.toUpperCase(),
+          heading: HeadingLevel.HEADING_1,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 80 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `DEPARTMENT OF ${(meta.department || "Business Studies").toUpperCase()}`,
+              bold: true,
+              size: 22,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 60 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `CONTINUOUS EVALUATION ${meta.ce_no || "CE-3"} • SET ${meta.set || "A"}`,
+              bold: true,
+              size: 20,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 180 },
+        })
+      );
+
+      // Metadata Specification Table
+      children.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "Course Code: ", bold: true }),
+                        new TextRun(meta.course_code || "FIN-501"),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "Max Marks: ", bold: true }),
+                        new TextRun(`${meta.max_marks || 40} Marks`),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "Target Level: ", bold: true }),
+                        new TextRun(meta.level || "MBA / PGDM"),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "Industry: ", bold: true }),
+                        new TextRun(meta.industry || caseStudy.industry || "General Management"),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "Geography: ", bold: true }),
+                        new TextRun(meta.geography || "India"),
+                      ],
+                    }),
+                  ],
+                }),
+                new TableCell({
+                  children: [
+                    new Paragraph({
+                      children: [
+                        new TextRun({ text: "Academic Year: ", bold: true }),
+                        new TextRun("2026-27"),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+        new Paragraph({ text: "", spacing: { after: 120 } })
+      );
+
+      // Instructions Box
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "INSTRUCTIONS TO CANDIDATES:",
+              bold: true,
+              size: 19,
+            }),
+          ],
+          spacing: { before: 80, after: 60 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "1. Read the following case carefully and answer all questions based strictly on the case facts, figures, and established theoretical frameworks.",
+            }),
+          ],
+          spacing: { after: 40 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "2. Support your arguments with quantitative calculations and structured analytical tables where applicable.",
+            }),
+          ],
+          spacing: { after: 40 },
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "3. Clearly justify protagonist decisions, identify operational limitations, and state all analytical assumptions.",
+            }),
+          ],
+          spacing: { after: 200 },
+        })
+      );
+
+      // 2. Case Narrative
+      children.push(
+        new Paragraph({
+          text: pack.case.title,
+          heading: HeadingLevel.TITLE,
+          spacing: { before: 120, after: 180 },
+        })
+      );
+
+      pack.case.sections.forEach((sec) => {
+        children.push(
+          new Paragraph({
+            text: sec.heading,
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 180, after: 100 },
+          })
+        );
+
+        sec.paragraphs.forEach((p) => {
+          children.push(
+            new Paragraph({
+              text: p,
+              spacing: { after: 120 },
+            })
+          );
+        });
+
+        if (sec.bullets && sec.bullets.length > 0) {
+          sec.bullets.forEach((b) => {
+            children.push(
+              new Paragraph({
+                text: `• ${b}`,
+                spacing: { after: 60 },
+              })
+            );
+          });
+        }
+      });
+
+      // 3. Quantitative Data Tables / Exhibits
+      if (pack.case.data_tables && pack.case.data_tables.length > 0) {
+        pack.case.data_tables.forEach((table) => {
+          children.push(
+            new Paragraph({
+              text: table.title,
+              heading: HeadingLevel.HEADING_3,
+              spacing: { before: 200, after: 100 },
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: table.columns.map(
+                    (col) =>
+                      new TableCell({
+                        shading: { fill: "E5E7EB", type: ShadingType.CLEAR },
+                        children: [
+                          new Paragraph({
+                            children: [new TextRun({ text: col, bold: true, size: 18 })],
+                          }),
+                        ],
+                      })
+                  ),
+                }),
+                ...table.rows.map(
+                  (row) =>
+                    new TableRow({
+                      children: row.map(
+                        (cell) =>
+                          new TableCell({
+                            children: [
+                              new Paragraph({
+                                children: [new TextRun({ text: String(cell), size: 18 })],
+                              }),
+                            ],
+                          })
+                      ),
+                    })
+                ),
+              ],
+            }),
+            new Paragraph({ text: "", spacing: { after: 160 } })
+          );
+        });
+      }
+
+      // 4. Examination Questions Section
+      children.push(
+        new Paragraph({
+          text: `EXAMINATION QUESTIONS [Total Marks: ${meta.max_marks || 40}]`,
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 260, after: 160 },
+        })
+      );
+
+      pack.questions.forEach((q, idx) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Question ${idx + 1} [${q.marks || 20} Marks] [Bloom: ${q.bloom_verb} - ${q.k_level || "K4"}]: `,
+                bold: true,
+              }),
+              new TextRun({ text: q.text }),
+            ],
+            spacing: { before: 100, after: 60 },
+          })
+        );
+
+        if (q.concepts && q.concepts.length > 0) {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Tested Concepts: ${q.concepts.join(", ")}`,
+                  italics: true,
+                  size: 18,
+                }),
+              ],
+              spacing: { after: 140 },
+            })
+          );
+        }
+      });
+
+      // 5. Faculty / Admin Only: Model Answer Key (strictly excluded in student handout)
+      if (!isStudentHandout && pack.answers && pack.answers.length > 0) {
+        children.push(
+          new Paragraph({
+            pageBreakBefore: true,
+            children: [
+              new TextRun({
+                text: "FACULTY CONFIDENTIAL — FOR EVALUATION ONLY",
+                bold: true,
+                color: "B91C1C",
+                size: 22,
+              }),
+            ],
+            spacing: { before: 200, after: 80 },
+          }),
+          new Paragraph({
+            text: "Model Answer Key & Benchmark Solutions",
+            heading: HeadingLevel.HEADING_1,
+            spacing: { after: 180 },
+          })
+        );
+
+        pack.answers.forEach((ans) => {
+          const matchedQ = pack.questions.find((q) => q.id === ans.question_id);
+          children.push(
+            new Paragraph({
+              text: `Model Answer for Question ${ans.question_id} (${matchedQ?.bloom_verb || "Analysis"})`,
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 180, after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: "1. Framing & Introduction: ", bold: true }),
+                new TextRun(ans.introduction),
+              ],
+              spacing: { after: 120 },
+            })
+          );
+
+          // Sections
+          ans.sections.forEach((sec) => {
+            children.push(
+              new Paragraph({
+                text: sec.heading,
+                heading: HeadingLevel.HEADING_3,
+                spacing: { before: 120, after: 60 },
+              })
+            );
+
+            if (sec.points && sec.points.length > 0) {
+              sec.points.forEach((pt) => {
+                children.push(
+                  new Paragraph({
+                    text: `• ${pt}`,
+                    spacing: { after: 50 },
+                  })
+                );
+              });
+            }
+
+            if (sec.evaluation && sec.evaluation.length > 0) {
+              sec.evaluation.forEach((ev) => {
+                children.push(
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: "Evaluation: ", bold: true }),
+                      new TextRun(ev),
+                    ],
+                    spacing: { after: 50 },
+                  })
+                );
+              });
+            }
+
+            if (sec.limitation) {
+              children.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "Limitation / Risk: ", bold: true }),
+                    new TextRun(sec.limitation),
+                  ],
+                  spacing: { after: 80 },
+                })
+              );
+            }
+          });
+
+          // Comparison Table
+          if (ans.comparison_table) {
+            children.push(
+              new Paragraph({
+                text: "Comparative Analysis Matrix",
+                heading: HeadingLevel.HEADING_3,
+                spacing: { before: 140, after: 80 },
+              }),
+              new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: [
+                  new TableRow({
+                    children: ans.comparison_table.columns.map(
+                      (col) =>
+                        new TableCell({
+                          shading: { fill: "F3F4F6", type: ShadingType.CLEAR },
+                          children: [
+                            new Paragraph({
+                              children: [new TextRun({ text: col, bold: true, size: 18 })],
+                            }),
+                          ],
+                        })
+                    ),
+                  }),
+                  ...ans.comparison_table.rows.map(
+                    (row) =>
+                      new TableRow({
+                        children: row.map(
+                          (cell, cIdx) =>
+                            new TableCell({
+                              children: [
+                                new Paragraph({
+                                  children: [
+                                    new TextRun({
+                                      text: String(cell),
+                                      bold: cIdx === 0,
+                                      size: 18,
+                                    }),
+                                  ],
+                                }),
+                              ],
+                            })
+                        ),
+                      })
+                  ),
+                ],
+              }),
+              new Paragraph({ text: "", spacing: { after: 120 } })
+            );
+          }
+
+          if (ans.overall_assessment) {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "Overall Assessment: ", bold: true }),
+                  new TextRun(ans.overall_assessment),
+                ],
+                spacing: { before: 100, after: 80 },
+              })
+            );
+          }
+
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: "Conclusion: ", bold: true }),
+                new TextRun(ans.conclusion),
+              ],
+              spacing: { after: 160 },
+            })
+          );
+        });
+      }
+
+      // 6. Faculty Teaching Notes
+      if (!isStudentHandout && pack.teaching_notes) {
+        children.push(
+          new Paragraph({
+            pageBreakBefore: true,
+            children: [
+              new TextRun({
+                text: "FACULTY INSTRUCTIONAL NOTES & PEDAGOGY",
+                bold: true,
+                size: 22,
+              }),
+            ],
+            spacing: { before: 200, after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Case Synopsis: ", bold: true }),
+              new TextRun(pack.teaching_notes.synopsis),
+            ],
+            spacing: { after: 120 },
+          }),
+          new Paragraph({
+            text: "Learning Objectives:",
+            heading: HeadingLevel.HEADING_3,
+            spacing: { after: 60 },
+          }),
+          ...pack.teaching_notes.objectives.map(
+            (obj) => new Paragraph({ text: `• ${obj}`, spacing: { after: 40 } })
+          ),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Teaching Approach & Roadmap: ", bold: true }),
+              new TextRun(pack.teaching_notes.teaching_approach),
+            ],
+            spacing: { before: 100, after: 120 },
+          })
+        );
+
+        if (pack.teaching_notes.marking_scheme && pack.teaching_notes.marking_scheme.length > 0) {
+          children.push(
+            new Paragraph({
+              text: "Evaluation Marking Scheme",
+              heading: HeadingLevel.HEADING_3,
+              spacing: { before: 120, after: 60 },
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      shading: { fill: "F3F4F6", type: ShadingType.CLEAR },
+                      children: [new Paragraph({ children: [new TextRun({ text: "Criterion", bold: true })] })],
+                    }),
+                    new TableCell({
+                      shading: { fill: "F3F4F6", type: ShadingType.CLEAR },
+                      children: [new Paragraph({ children: [new TextRun({ text: "Marks", bold: true })] })],
+                    }),
+                  ],
+                }),
+                ...pack.teaching_notes.marking_scheme.map(
+                  (m) =>
+                    new TableRow({
+                      children: [
+                        new TableCell({ children: [new Paragraph(m.criterion)] }),
+                        new TableCell({ children: [new Paragraph(String(m.marks))] }),
+                      ],
+                    })
+                ),
+              ],
+            })
+          );
+        }
+      }
+
+      const doc = new Document({
+        sections: [{ properties: {}, children }],
+      });
+
+      const buffer = await Packer.toBuffer(doc);
+      const safeTitle = (pack.case.title || "CE_Case_Pack")
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .slice(0, 40);
+      const filename = `${safeTitle}_${isStudentHandout ? "Student_Handout" : "Full_Pack"}.docx`;
+
+      return new NextResponse(new Uint8Array(buffer), {
+        headers: {
+          "Content-Type":
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+        },
+      });
+    }
+
+    // =========================================================================
+    // BRANCH B: STANDARD CASE DOCX EXPORT (Existing Classic Flow)
+    // =========================================================================
     const doc = new Document({
       sections: [
         {
@@ -149,21 +697,6 @@ export async function GET(
 
             new Paragraph({ text: "", spacing: { after: 300 } }),
 
-            // Real Signal Alert if applicable
-            ...(caseStudy.format === "real_signal" || content.verify_facts_flag
-              ? [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: "⚠️ VERIFY FACTS BEFORE CLASS PROTOCOL: This teaching case is grounded in observable industry & macro signals. Faculty are instructed to cross-verify recent regulatory updates and corporate quarterly filings prior to classroom facilitation.",
-                        bold: true,
-                      }),
-                    ],
-                    spacing: { after: 300 },
-                  }),
-                ]
-              : []),
-
             // Executive Summary
             new Paragraph({
               text: "Executive Summary",
@@ -171,9 +704,7 @@ export async function GET(
               spacing: { before: 200, after: 120 },
             }),
             new Paragraph({
-              children: [
-                new TextRun({ text: content.summary, italics: true }),
-              ],
+              children: [new TextRun({ text: content.summary, italics: true })],
               spacing: { after: 300 },
             }),
 
@@ -199,93 +730,6 @@ export async function GET(
               spacing: { after: 300 },
             }),
 
-            // Key Data Table Exhibit
-            new Paragraph({
-              text: "Exhibit 1: Quantitative Indicators & Operating Metrics",
-              heading: HeadingLevel.HEADING_1,
-              spacing: { before: 200, after: 120 },
-            }),
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              rows: [
-                // Header Row
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      shading: { fill: THEME_TOKENS.light.primary.replace("#", ""), type: ShadingType.CLEAR },
-                      children: [
-                        new Paragraph({
-                          children: [
-                            new TextRun({ text: "Financial / Operating Metric", bold: true, color: THEME_TOKENS.light.accentText.replace("#", "") }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableCell({
-                      shading: { fill: THEME_TOKENS.light.primary.replace("#", ""), type: ShadingType.CLEAR },
-                      children: [
-                        new Paragraph({
-                          children: [
-                            new TextRun({ text: "Value", bold: true, color: THEME_TOKENS.light.accentText.replace("#", "") }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableCell({
-                      shading: { fill: THEME_TOKENS.light.primary.replace("#", ""), type: ShadingType.CLEAR },
-                      children: [
-                        new Paragraph({
-                          children: [
-                            new TextRun({ text: "Period", bold: true, color: THEME_TOKENS.light.accentText.replace("#", "") }),
-                          ],
-                        }),
-                      ],
-                    }),
-                    new TableCell({
-                      shading: { fill: THEME_TOKENS.light.primary.replace("#", ""), type: ShadingType.CLEAR },
-                      children: [
-                        new Paragraph({
-                          children: [
-                            new TextRun({ text: "Pedagogical Notes", bold: true, color: THEME_TOKENS.light.accentText.replace("#", "") }),
-                          ],
-                        }),
-                      ],
-                    }),
-                  ],
-                }),
-                // Data Rows
-                ...content.key_data.map(
-                  (row) =>
-                    new TableRow({
-                      children: [
-                        new TableCell({
-                          children: [new Paragraph(row.metric)],
-                        }),
-                        new TableCell({
-                          children: [new Paragraph(row.value)],
-                        }),
-                        new TableCell({
-                          children: [new Paragraph(row.period || "—")],
-                        }),
-                        new TableCell({
-                          children: [new Paragraph(row.notes || "illustrative")],
-                        }),
-                      ],
-                    })
-                ),
-              ],
-            }),
-
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: content.figures_disclaimer || "All figures are illustrative pedagogical models for classroom analysis.",
-                  italics: true,
-                }),
-              ],
-              spacing: { before: 100, after: 300 },
-            }),
-
             // Decision Point
             new Paragraph({
               text: "The Strategic Decision Point",
@@ -293,9 +737,7 @@ export async function GET(
               spacing: { before: 200, after: 120 },
             }),
             new Paragraph({
-              children: [
-                new TextRun({ text: content.decision_point, bold: true }),
-              ],
+              children: [new TextRun({ text: content.decision_point, bold: true })],
               spacing: { after: 300 },
             }),
 
@@ -305,8 +747,8 @@ export async function GET(
               heading: HeadingLevel.HEADING_1,
               spacing: { before: 200, after: 120 },
             }),
-            ...content.discussion_questions.map(
-              (q, idx) =>
+            ...(content.discussion_questions || []).map(
+              (q: string, idx: number) =>
                 new Paragraph({
                   children: [
                     new TextRun({ text: `Question ${idx + 1}: `, bold: true }),
@@ -315,42 +757,6 @@ export async function GET(
                   spacing: { after: 120 },
                 })
             ),
-
-            // Teaching Note
-            ...(content.teaching_note
-              ? [
-                  new Paragraph({
-                    text: "Facilitator Teaching Note (Confidential to Instructors)",
-                    heading: HeadingLevel.HEADING_1,
-                    spacing: { before: 300, after: 120 },
-                  }),
-                  new Paragraph({
-                    children: [
-                      new TextRun({ text: "Pedagogical Learning Objectives:", bold: true }),
-                    ],
-                  }),
-                  ...content.teaching_note.objectives.map(
-                    (obj) => new Paragraph({ text: `• ${obj}`, spacing: { after: 60 } })
-                  ),
-
-                  new Paragraph({
-                    children: [
-                      new TextRun({ text: "Applied Theoretical Frameworks:", bold: true }),
-                    ],
-                    spacing: { before: 150, after: 80 },
-                  }),
-                  ...content.teaching_note.frameworks.map(
-                    (fw) =>
-                      new Paragraph({
-                        children: [
-                          new TextRun({ text: `${fw.name}: `, bold: true }),
-                          new TextRun(`Application: ${fw.application} | Key Takeaway: ${fw.key_takeaway}`),
-                        ],
-                        spacing: { after: 100 },
-                      })
-                  ),
-                ]
-              : []),
           ],
         },
       ],

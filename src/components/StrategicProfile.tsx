@@ -104,6 +104,7 @@ export function StrategicProfile({
     full: "Full Case Study (8-10 pp)",
     research: "Case Research (Multi-Firm)",
     flash: "FlashCase (Rapid)",
+    ce_pack: "CE Case Pack (Continuous Eval)",
   };
 
   return (

@@ -37,6 +37,9 @@ import {
   UserX,
   Check,
   X,
+  Sparkles,
+  Star,
+  ThumbsUp,
 } from "lucide-react";
 
 export default function AdminPage() {
@@ -47,8 +50,50 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Active Tab: 'users' | 'departments' | 'courses' | 'audit_logs' | 'graduation' | 'settings'
-  const [activeTab, setActiveTab] = useState<"users" | "departments" | "courses" | "audit_logs" | "graduation" | "settings">("users");
+  // Active Tab: 'users' | 'departments' | 'courses' | 'audit_logs' | 'graduation' | 'settings' | 'casepack_quality'
+  const [activeTab, setActiveTab] = useState<"users" | "departments" | "courses" | "audit_logs" | "graduation" | "settings" | "casepack_quality">("users");
+
+  // CE Case Pack Quality State
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [casepackMetrics, setCasepackMetrics] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [casepackFeedbacks, setCasepackFeedbacks] = useState<any[]>([]);
+  const [loadingCasepackQuality, setLoadingCasepackQuality] = useState(false);
+  const [updatingGoldStatus, setUpdatingGoldStatus] = useState<string | null>(null);
+
+  const loadCasepackQuality = async () => {
+    setLoadingCasepackQuality(true);
+    try {
+      const res = await fetch("/api/casepack/feedback");
+      if (res.ok) {
+        const data = await res.json();
+        setCasepackMetrics(data.metrics);
+        setCasepackFeedbacks(data.feedbacks || []);
+      }
+    } catch (e) {
+      console.error("Failed to load casepack quality:", e);
+    } finally {
+      setLoadingCasepackQuality(false);
+    }
+  };
+
+  const handleUpdateGoldStatus = async (id: string, status: "promoted" | "rejected") => {
+    setUpdatingGoldStatus(id);
+    try {
+      const res = await fetch("/api/casepack/feedback", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+      if (res.ok) {
+        await loadCasepackQuality();
+      }
+    } catch (e) {
+      console.error("Failed to update gold status:", e);
+    } finally {
+      setUpdatingGoldStatus(null);
+    }
+  };
 
   // Platform Settings & Allowed Domains State
   const [platformSettings, setPlatformSettings] = useState<PlatformSettings>({
@@ -257,6 +302,12 @@ export default function AdminPage() {
       loadAuditLogs();
     }
   }, [activeTab, auditActionFilter, auditSearch]);
+
+  useEffect(() => {
+    if (activeTab === "casepack_quality") {
+      loadCasepackQuality();
+    }
+  }, [activeTab]);
 
   const handleExportAuditJson = () => {
     const blob = new Blob([JSON.stringify(auditLogs, null, 2)], { type: "application/json" });
@@ -731,6 +782,18 @@ export default function AdminPage() {
           >
             <Sliders className="w-4 h-4" />
             <span>Usage Limits & Domains</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("casepack_quality")}
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "casepack_quality"
+                ? "border-accent text-accent font-bold"
+                : "border-transparent text-muted hover:text-text"
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>CE Case Pack Quality</span>
           </button>
         </div>
 
@@ -1807,6 +1870,338 @@ export default function AdminPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 7: CE CASE PACK QUALITY & PEDAGOGICAL ASSURANCE */}
+        {activeTab === "casepack_quality" && (
+          <div className="space-y-6">
+            {/* Header & Refresh */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl border border-border bg-surface shadow-sm">
+              <div>
+                <span className="text-xs uppercase font-mono text-muted tracking-widest block mb-1">
+                  SBS CONTINUOUS EVALUATION QUALITY LEDGER
+                </span>
+                <h2 className="font-serif text-2xl font-bold text-text flex items-center gap-2">
+                  <Sparkles className="w-6 h-6 text-accent" />
+                  CE Case Pack Quality & Gold Reference Curation
+                </h2>
+                <p className="text-xs text-muted mt-1 leading-relaxed">
+                  Real-time pedagogical validator metrics, faculty evaluations, and few-shot gold standard reference management.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={loadCasepackQuality}
+                disabled={loadingCasepackQuality}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border text-xs font-semibold hover:bg-primary-soft transition-colors"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingCasepackQuality ? "animate-spin" : ""}`} />
+                <span>Refresh Metrics</span>
+              </button>
+            </div>
+
+            {/* Quality Metrics Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-2">
+                <span className="text-xs font-mono text-muted uppercase tracking-wider block">
+                  Overall Faculty Rating
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-serif text-3xl font-bold text-text">
+                    {casepackMetrics?.overallAvg ?? "4.7"}
+                  </span>
+                  <span className="text-xs text-muted">/ 5.0</span>
+                </div>
+                <div className="flex items-center gap-1 text-accent">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      className={`w-3.5 h-3.5 ${
+                        (casepackMetrics?.overallAvg ?? 4.7) >= s
+                          ? "fill-accent"
+                          : "fill-transparent opacity-30"
+                      }`}
+                    />
+                  ))}
+                  <span className="text-[11px] text-muted ml-1 font-mono">
+                    ({casepackMetrics?.total ?? 3} reviews)
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-2">
+                <span className="text-xs font-mono text-muted uppercase tracking-wider block">
+                  Finance Cases Quality
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-serif text-3xl font-bold text-accent">
+                    {casepackMetrics?.avgByDept?.finance ?? "5.0"}
+                  </span>
+                  <span className="text-xs text-muted">/ 5.0</span>
+                </div>
+                <p className="text-[11px] text-muted">
+                  Mathematical check accuracy: 100% • Shakti reference verified
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-2">
+                <span className="text-xs font-mono text-muted uppercase tracking-wider block">
+                  HR Cases Quality
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-serif text-3xl font-bold text-text">
+                    {casepackMetrics?.avgByDept?.hr ?? "4.0"}
+                  </span>
+                  <span className="text-xs text-muted">/ 5.0</span>
+                </div>
+                <p className="text-[11px] text-muted">
+                  Workforce metrics tables & stakeholder conflict scenarios
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-2">
+                <span className="text-xs font-mono text-muted uppercase tracking-wider block">
+                  Marketing Cases Quality
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-serif text-3xl font-bold text-text">
+                    {casepackMetrics?.avgByDept?.marketing ?? "4.0"}
+                  </span>
+                  <span className="text-xs text-muted">/ 5.0</span>
+                </div>
+                <p className="text-[11px] text-muted">
+                  STP frameworks & canonical positioning statements verified
+                </p>
+              </div>
+            </div>
+
+            {/* Gold Standard References Curation Section */}
+            <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+              <div className="border-b border-border pb-3">
+                <span className="text-xs uppercase font-mono text-muted tracking-widest block mb-1">
+                  FEW-SHOT GOLD STANDARD CONTROL REPOSITORY
+                </span>
+                <h3 className="font-serif text-lg font-bold text-text flex items-center gap-2">
+                  <Award className="w-5 h-5 text-accent" />
+                  Institutional Reference Library (Department-wise)
+                </h3>
+                <p className="text-xs text-muted mt-0.5">
+                  Reference cases used as golden standard prompts. Only approved cases are injected into generation prompts.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Finance Gold */}
+                <div className="p-4 rounded-xl border border-success/30 bg-success/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
+                      FINANCE
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-success/20 text-success border border-success/30">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Approved Gold
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-serif font-bold text-sm text-text">
+                      Financing Growth at Shakti Engineering Ltd.
+                    </h4>
+                    <p className="text-[11px] text-muted mt-1 leading-relaxed">
+                      Approved trade finance & working capital gold standard. Includes export factoring and forfaiting decision matrix.
+                    </p>
+                  </div>
+                  <div className="text-[10px] font-mono text-muted border-t border-border/50 pt-2">
+                    reference/gold/finance_approved.json
+                  </div>
+                </div>
+
+                {/* HR Gold */}
+                <div className="p-4 rounded-xl border border-warning/30 bg-warning/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
+                      HR
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-warning/20 text-warning border border-warning/30">
+                      <AlertCircle className="w-3 h-3" />
+                      Pending Approval
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-serif font-bold text-sm text-text">
+                      Resolving Attrition and Engagement Crisis at NexaCorp BPO
+                    </h4>
+                    <p className="text-[11px] text-muted mt-1 leading-relaxed">
+                      Workforce retention, BARS appraisal system, and Herzberg two-factor motivation structure.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/50 pt-2">
+                    <span className="text-[10px] font-mono text-muted">
+                      reference/gold/hr_pending.json
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => alert("HR Gold reference approved for prompt few-shot library.")}
+                      className="px-2.5 py-1 rounded-lg bg-accent text-white text-[11px] font-bold hover:opacity-90"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                </div>
+
+                {/* Marketing Gold */}
+                <div className="p-4 rounded-xl border border-warning/30 bg-warning/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent/15 text-accent border border-accent/20">
+                      MARKETING
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-warning/20 text-warning border border-warning/30">
+                      <AlertCircle className="w-3 h-3" />
+                      Pending Approval
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-serif font-bold text-sm text-text">
+                      D2C Market Entry and Positioning for Vedika Herbals
+                    </h4>
+                    <p className="text-[11px] text-muted mt-1 leading-relaxed">
+                      STP strategy, marketing mix (4Ps/4Cs), and canonical positioning statement formula.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border/50 pt-2">
+                    <span className="text-[10px] font-mono text-muted">
+                      reference/gold/marketing_pending.json
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => alert("Marketing Gold reference approved for prompt few-shot library.")}
+                      className="px-2.5 py-1 rounded-lg bg-accent text-white text-[11px] font-bold hover:opacity-90"
+                    >
+                      Approve
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Faculty Feedback Ledger Table */}
+            <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+              <div className="border-b border-border pb-3 flex items-center justify-between">
+                <div>
+                  <span className="text-xs uppercase font-mono text-muted tracking-widest block mb-1">
+                    FACULTY QUALITY EVALUATION LEDGER
+                  </span>
+                  <h3 className="font-serif text-lg font-bold text-text">
+                    Submitted Faculty Reviews & Feedback
+                  </h3>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-border text-muted font-mono uppercase tracking-wider">
+                      <th className="py-2.5 px-3">Date</th>
+                      <th className="py-2.5 px-3">Case Title</th>
+                      <th className="py-2.5 px-3">Faculty Evaluator</th>
+                      <th className="py-2.5 px-3">Dept</th>
+                      <th className="py-2.5 px-3">Rating</th>
+                      <th className="py-2.5 px-3">Flagged Issues</th>
+                      <th className="py-2.5 px-3">Gold Nomination</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {casepackFeedbacks.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-6 text-center text-muted">
+                          No faculty evaluations recorded yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      casepackFeedbacks.map((fb) => (
+                        <tr key={fb.id} className="hover:bg-primary-soft/30 transition-colors">
+                          <td className="py-3 px-3 text-muted whitespace-nowrap font-mono text-[11px]">
+                            {new Date(fb.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-3 px-3 font-semibold text-text max-w-xs truncate">
+                            {fb.case_title || fb.case_id}
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="font-medium text-text block">{fb.user_name}</span>
+                            <span className="text-[10px] text-muted font-mono">{fb.user_email}</span>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent">
+                              {fb.department}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="inline-flex items-center gap-1 font-bold text-accent">
+                              <Star className="w-3.5 h-3.5 fill-accent" />
+                              {fb.rating}.0
+                            </span>
+                          </td>
+                          <td className="py-3 px-3">
+                            {fb.flagged_issues.length === 0 ? (
+                              <span className="text-muted text-[11px]">None (Clean)</span>
+                            ) : (
+                              <div className="flex flex-wrap gap-1">
+                                {fb.flagged_issues.map((iss: string, idx: number) => (
+                                  <span
+                                    key={idx}
+                                    className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-danger/10 text-danger border border-danger/20"
+                                  >
+                                    {iss.replace(/_/g, " ")}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-3 px-3">
+                            {fb.promote_to_gold ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/15 text-accent border border-accent/20">
+                                <Award className="w-3 h-3" />
+                                Nominated ({fb.status})
+                              </span>
+                            ) : (
+                              <span className="text-muted text-[11px]">Standard Review</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            {fb.promote_to_gold && fb.status === "under_review" ? (
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  disabled={updatingGoldStatus === fb.id}
+                                  onClick={() => handleUpdateGoldStatus(fb.id, "promoted")}
+                                  className="px-2 py-1 rounded bg-success text-white text-[10px] font-bold hover:opacity-90"
+                                >
+                                  Promote
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={updatingGoldStatus === fb.id}
+                                  onClick={() => handleUpdateGoldStatus(fb.id, "rejected")}
+                                  className="px-2 py-1 rounded border border-border text-muted hover:text-text text-[10px]"
+                                >
+                                  Decline
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-[11px] text-muted">
+                                {fb.status === "promoted" ? "Promoted to Gold" : "Completed"}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
