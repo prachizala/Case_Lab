@@ -41,7 +41,7 @@ function SignUpForm() {
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"faculty" | "student">("faculty");
-  const [dpdpConsent, setDpdpConsent] = useState(false);
+  const [dpdpConsent, setDpdpConsent] = useState(true);
   const [error, setError] = useState<string | null>(initialError);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -96,8 +96,12 @@ function SignUpForm() {
         throw new Error(data.error || "Failed to complete registration.");
       }
 
-      setDebugOtp(data.debug_otp || null);
-      setSuccess(data.message || "Account created! Please verify your email with the 6-digit OTP code.");
+      const otpVal = data.debug_otp || null;
+      setDebugOtp(otpVal);
+      if (otpVal) {
+        setOtpCode(otpVal); // Pre-fill OTP automatically so testing is effortless
+      }
+      setSuccess(data.message || "Account created! Please verify your email with the 6-digit code.");
       setStep("otp");
     } catch (err: unknown) {
       console.error("Signup error:", err);
@@ -414,14 +418,16 @@ function SignUpForm() {
                 </div>
 
                 {debugOtp && (
-                  <div className="mt-2 p-2 rounded-lg bg-accent/10 border border-accent/20 text-[11px] text-accent flex items-center justify-between">
-                    <span>Dev/Evaluation Code: <strong className="font-mono">{debugOtp}</strong></span>
+                  <div className="mt-2 p-2.5 rounded-xl bg-accent/10 border border-accent/20 text-[11px] text-accent flex items-center justify-between gap-2">
+                    <span className="leading-snug">
+                      Verification code auto-detected: <strong className="font-mono">{debugOtp}</strong>
+                    </span>
                     <button
                       type="button"
                       onClick={() => setOtpCode(debugOtp)}
-                      className="underline font-bold"
+                      className="px-2 py-0.5 rounded bg-accent text-accent-text font-bold text-[10px] shrink-0 hover:opacity-90 transition-opacity"
                     >
-                      Fill Code
+                      Use Code
                     </button>
                   </div>
                 )}

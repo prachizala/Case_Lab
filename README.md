@@ -112,6 +112,10 @@
   - User Data Portability (one-click JSON data export).
   - Right to be Forgotten (complete user account and activity anonymization/erasure).
   - Transparent consent logging and immutable system audit trails.
+- **Institutional Token Budget Engine**:
+  - Accurate Groq API usage tracking: counts `prompt_tokens`, `completion_tokens`, and `total_tokens` directly from Groq responses (bypassing per-minute rate-limit headers).
+  - 500,000 monthly token limit with configurable thresholds (`WARN_AT=80`, `CRITICAL_AT=95`).
+  - Warning banner with SVG progress ring, monospace telemetry, model/feature breakdown drawer, and 100% budget blocking.
 
 ---
 
@@ -229,6 +233,11 @@ Open your browser and visit:
 | `NEXT_PUBLIC_SUPABASE_URL` | Prod | `"https://your-id.supabase.co"` | Supabase instance URL (optional in dev) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Prod | `"eyJhbGci..."` | Supabase anonymous public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Prod | `"eyJhbGci..."` | Supabase privileged service-role key |
+| `GROQ_API_KEY` | No | `"gsk_..."` | Groq AI SDK key (server-only; simulated fallback if blank) |
+| `TOKEN_BUDGET` | No | `500000` | Monthly institutional token allocation limit |
+| `WARN_AT` | No | `80` | Warning banner percentage threshold (80-94% orange state) |
+| `CRITICAL_AT` | No | `95` | Critical alert percentage threshold (95%+ red state) |
+| `NEXT_PUBLIC_QUOTA_UPGRADE_URL` | No | `"/pricing"` | Destination link for Quota Upgrade button |
 | `ANTHROPIC_API_KEY` | No | `"sk-ant-..."` | Claude API key (simulated offline mode used if blank) |
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | No | `"rzp_test_..."` | Razorpay key ID for alumni subscriptions |
 | `RAZORPAY_KEY_SECRET` | No | `"test_secret_..."` | Razorpay secret for signature validation |

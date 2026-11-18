@@ -9,6 +9,7 @@ import { FileSourceImporter } from "@/components/FileSourceImporter";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { CaseNarrativeView } from "@/components/CaseNarrativeView";
 import { CECasePackView } from "@/components/casepack/CECasePackView";
+import { TokenBudgetBanner } from "@/components/TokenBudgetBanner";
 import { CECasePack } from "@/lib/casepack/schema";
 import { CasePackValidationReport, validateCasePackComplete } from "@/lib/casepack/validate";
 import { getDepartmentProfile, getAllDepartmentProfiles } from "@/config/casepack/departments";
@@ -1222,31 +1223,7 @@ function CreateCaseContent() {
         )}
 
         {/* TOKEN BUDGET ALERT BANNER */}
-        {budgetInfo?.is_warning_threshold && (
-          <div className="p-4 rounded-2xl border border-warning/40 bg-warning/10 text-text flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="p-2 bg-warning text-white rounded-xl shadow shrink-0 mt-0.5">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="font-serif font-bold text-sm tracking-wide">
-                    Institutional Token Allocation Warning: {budgetInfo.usage_percentage}% Consumed
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-warning text-white font-mono text-[10px] font-bold uppercase">
-                    Quota Warning
-                  </span>
-                </div>
-                <p className="text-xs text-muted leading-relaxed">
-                  {COLLEGE_NAME_WITH_SHORT} has utilized {budgetInfo.tokens_used_this_month.toLocaleString()} of its {budgetInfo.monthly_budget_tokens.toLocaleString()} monthly AI token budget.
-                </p>
-              </div>
-            </div>
-            <span className="px-3 py-1 rounded-full bg-warning text-white text-[10px] font-bold uppercase shrink-0">
-              80% Threshold
-            </span>
-          </div>
-        )}
+        <TokenBudgetBanner />
 
         {/* 2-Column Responsive Layout: 8 cols Form / 4 cols Strategic Profile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">

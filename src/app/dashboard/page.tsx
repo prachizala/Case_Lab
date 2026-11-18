@@ -7,6 +7,7 @@ import { getCachedUser } from "@/lib/auth-client";
 import { StateLoading } from "@/components/StateLoading";
 import { Profile, CaseStudy, CaseSignal, TokenBudgetInfo, DashboardTelemetry, RecentActivityItem } from "@/lib/types";
 import { COLLEGE_NAME, COLLEGE_NAME_WITH_SHORT, COLLEGE_SHORT, AI_ENGINE_LABEL } from "@/config/college";
+import { TokenBudgetBanner } from "@/components/TokenBudgetBanner";
 import {
   Sparkles,
   BookOpen,
@@ -302,151 +303,8 @@ export default function DashboardPage({
           </div>
         )}
 
-        {/* INSTITUTIONAL AI TOKEN BUDGET ALERT: COMPACT PILL WITH CIRCULAR PROGRESS RING */}
-        {budget && (budget.usage_percentage >= 80 || budget.is_warning_threshold) && (!budgetDismissed || budget.usage_percentage >= 100) && (
-          <div
-            className={`p-4 rounded-2xl border transition-all shadow-sm space-y-3 ${
-              budget.usage_percentage >= 100
-                ? "border-red-600/70 bg-red-500/10 text-text"
-                : budget.usage_percentage >= 90
-                ? "border-red-500/50 bg-red-500/10 text-text"
-                : "border-amber-500/50 bg-amber-500/10 text-text"
-            }`}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3.5 min-w-0">
-                {/* SVG CIRCULAR PROGRESS RING */}
-                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
-                  <svg className="w-11 h-11 -rotate-90" viewBox="0 0 36 36">
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="15"
-                      fill="none"
-                      className="stroke-muted/20"
-                      strokeWidth="3"
-                    />
-                    <circle
-                      cx="18"
-                      cy="18"
-                      r="15"
-                      fill="none"
-                      strokeWidth="3.2"
-                      strokeDasharray="94.25"
-                      strokeDashoffset={94.25 - (94.25 * Math.min(100, budget.usage_percentage)) / 100}
-                      strokeLinecap="round"
-                      className={
-                        budget.usage_percentage >= 100
-                          ? "stroke-red-600"
-                          : budget.usage_percentage >= 90
-                          ? "stroke-red-500"
-                          : "stroke-amber-500"
-                      }
-                    />
-                  </svg>
-                  <span className="absolute text-[10px] font-mono font-bold text-text">
-                    {budget.usage_percentage}%
-                  </span>
-                </div>
-
-                <div className="space-y-0.5 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-serif font-bold text-xs sm:text-sm text-text">
-                      {budget.usage_percentage >= 100
-                        ? "AI Token Quota Exhausted"
-                        : budget.usage_percentage >= 90
-                        ? "Critical Token Allocation Alert"
-                        : "Institutional Token Budget Warning"}
-                    </span>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-white font-mono text-[9px] font-bold uppercase tracking-wider ${
-                        budget.usage_percentage >= 100
-                          ? "bg-red-600"
-                          : budget.usage_percentage >= 90
-                          ? "bg-red-500"
-                          : "bg-amber-500"
-                      }`}
-                    >
-                      {budget.usage_percentage >= 100 ? "Blocked" : `${budget.usage_percentage}% Used`}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted font-mono truncate">
-                    Used {budget.tokens_used_this_month.toLocaleString()} / {budget.monthly_budget_tokens.toLocaleString()} tokens •{" "}
-                    <strong>{budget.remaining_tokens.toLocaleString()} remaining</strong>
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Controls & Department Drawer Toggle */}
-              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                {budget.department_breakdown && budget.department_breakdown.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setDeptBreakdownOpen(!deptBreakdownOpen)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface text-text hover:bg-muted/10 text-xs font-medium transition-colors"
-                  >
-                    <PieChart className="w-3.5 h-3.5 text-accent" />
-                    <span>Breakdown</span>
-                    {deptBreakdownOpen ? (
-                      <ChevronUp className="w-3.5 h-3.5" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                )}
-
-                <Link
-                  href="/pricing"
-                  className="px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-xs transition-all flex items-center gap-1"
-                >
-                  <span>Quota Upgrade</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-
-                {budget.usage_percentage < 100 && (
-                  <button
-                    onClick={handleDismissBudget}
-                    className="p-1.5 rounded-lg text-muted hover:text-text hover:bg-surface/50 transition-colors"
-                    title="Dismiss alert for this session"
-                    aria-label="Dismiss alert"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* EXPANDABLE DEPARTMENT ALLOCATION BREAKDOWN */}
-            {deptBreakdownOpen && budget.department_breakdown && (
-              <div className="pt-2 border-t border-border/40 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 animate-fadeIn">
-                {budget.department_breakdown.map((dept) => (
-                  <div
-                    key={dept.department_id}
-                    className="p-3 rounded-xl bg-surface-raised border border-[#D9E1EC] dark:border-border text-xs space-y-1.5 shadow-2xs"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-serif font-bold text-text truncate pr-1">
-                        {dept.department_name}
-                      </span>
-                      <span className="font-mono font-bold text-accent shrink-0">
-                        {dept.percentage}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted/20 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className="h-full bg-accent rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, dept.percentage)}%` }}
-                      />
-                    </div>
-                    <p className="text-[10px] font-mono text-muted text-right">
-                      {dept.tokens_used.toLocaleString()} tokens
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* INSTITUTIONAL TOKEN BUDGET WARNING BANNER */}
+        <TokenBudgetBanner />
 
         {/* 1. HERO GREETING BANNER WITH NON-CROPPED WATERMARK & "TODAY AT THE CASE CENTRE" */}
         <div className="p-6 md:p-8 rounded-3xl hero-banner text-white shadow-xl relative overflow-hidden folder-card">
