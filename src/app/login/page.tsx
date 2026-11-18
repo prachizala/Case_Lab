@@ -227,9 +227,6 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="mt-1 text-[10px] text-muted font-sans">
-                Demo Password: <button type="button" onClick={() => setPassword("password123")} className="px-1 py-0.5 rounded bg-muted/15 font-mono text-text font-bold hover:bg-accent/20 hover:text-accent transition-colors">password123</button>
-              </p>
             </div>
 
             <button
