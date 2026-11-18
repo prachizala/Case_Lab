@@ -9,7 +9,8 @@
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
     "test": "tsx scripts/test-acceptance.ts",
-    "test:validators": "tsx scripts/test-casepack-validators.ts"
+    "test:validators": "tsx scripts/test-casepack-validators.ts",
+    "test:exports": "tsx scripts/test-casepack-export.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

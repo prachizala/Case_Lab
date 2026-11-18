@@ -6,6 +6,7 @@ import * as path from "path";
 import { APP_NAME, COLLEGE_NAME, COLLEGE_SHORT } from "@/config/college";
 import { THEME_TOKENS, hexToRgb } from "@/config/theme";
 import { authenticateUser } from "@/lib/session";
+import { CECasePack } from "@/lib/casepack/schema";
 
 // In-memory cache for Devanagari font base64
 let cachedDevanagariBase64: string | null = null;
@@ -52,7 +53,16 @@ export async function GET(
       );
     }
 
-    const content = caseStudy.content;
+    // Determine export mode: "full" (faculty/admin) vs "student" (handout)
+    const { searchParams } = new URL(req.url);
+    const requestedMode = searchParams.get("mode") || "full";
+    const mode = user.role === "student" ? "student" : requestedMode;
+    const isStudentHandout = mode === "student";
+
+    const content = caseStudy.content as any;
+    const isCEPack =
+      caseStudy.type === "ce_pack" || (content && "case" in content && "questions" in content);
+
     const doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -78,7 +88,7 @@ export async function GET(
     const contentWidth = pageWidth - margin * 2;
     let y = 18;
 
-    // Palette tokens for print-friendly rendering
+    // Palette tokens
     const primaryRgb = hexToRgb(THEME_TOKENS.light.primary);
     const primarySoftRgb = hexToRgb(THEME_TOKENS.light.primarySoft);
     const accentRgb = hexToRgb(THEME_TOKENS.light.accent);
@@ -97,15 +107,338 @@ export async function GET(
       }
     };
 
-    // 1. INSTITUTIONAL HEADER & LOGO PLACEHOLDER
-    // Logo Placeholder Badge
+    // =========================================================================
+    // BRANCH A: CE CASE PACK PDF EXPORT
+    // =========================================================================
+    if (isCEPack) {
+      const pack = content as CECasePack;
+      const meta = pack.meta || ({} as any);
+
+      // 1. Institutional Exam Header
+      doc.setFillColor(...primaryRgb);
+      doc.roundedRect(margin, y, 14, 14, 2, 2, "F");
+      doc.setTextColor(...accentTextRgb);
+      doc.setFontSize(8);
+      doc.text(COLLEGE_SHORT, margin + 2.5, y + 9);
+
+      doc.setTextColor(...primaryRgb);
+      doc.setFontSize(12);
+      doc.text(COLLEGE_NAME.toUpperCase(), margin + 18, y + 6);
+      doc.setFontSize(8);
+      doc.setTextColor(...textMutedRgb);
+      doc.text(
+        `DEPARTMENT OF ${(meta.department || "Business Studies").toUpperCase()} • CONTINUOUS EVALUATION ${meta.ce_no || "CE-3"}`,
+        margin + 18,
+        y + 11
+      );
+
+      y += 18;
+      doc.setDrawColor(...accentRgb);
+      doc.setLineWidth(0.8);
+      doc.line(margin, y, margin + contentWidth, y);
+      y += 6;
+
+      // 2. Metadata Specification Strip
+      doc.setFillColor(...primarySoftRgb);
+      doc.roundedRect(margin, y, contentWidth, 10, 2, 2, "F");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...textRgb);
+      const metaLine = `Course: ${meta.course_code || "FIN-501"}   |   Set: ${meta.set || "A"}   |   Max Marks: ${meta.max_marks || 40}   |   Level: ${meta.level || "MBA / PGDM"}   |   Mode: ${isStudentHandout ? "Student Handout" : "Faculty Master Pack"}`;
+      doc.text(metaLine, margin + 4, y + 6.5);
+      y += 14;
+
+      // Instructions Box
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(...borderRgb);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(margin, y, contentWidth, 14, 1.5, 1.5, "FD");
+      doc.setFontSize(7.5);
+      doc.setTextColor(...textRgb);
+      doc.text("INSTRUCTIONS TO CANDIDATES:", margin + 3, y + 4.5);
+      doc.setTextColor(...textMutedRgb);
+      doc.text(
+        "1. Read the case carefully. 2. Answer all questions using case facts, figures, and established theoretical frameworks.",
+        margin + 3,
+        y + 8.5
+      );
+      doc.text(
+        "3. Support arguments with step-by-step quantitative calculations and comparative tables.",
+        margin + 3,
+        y + 12
+      );
+      y += 18;
+
+      // 3. Case Title & Narrative
+      doc.setTextColor(...primaryRgb);
+      doc.setFontSize(14);
+      const titleLines = doc.splitTextToSize(pack.case.title, contentWidth);
+      doc.text(titleLines, margin, y);
+      y += titleLines.length * 6 + 4;
+
+      pack.case.sections.forEach((sec) => {
+        checkPageBreak(25);
+        doc.setFontSize(11);
+        doc.setTextColor(...accentRgb);
+        doc.text(sec.heading, margin, y);
+        y += 5.5;
+
+        doc.setFontSize(8.5);
+        doc.setTextColor(...textRgb);
+        sec.paragraphs.forEach((p) => {
+          checkPageBreak(15);
+          const pLines = doc.splitTextToSize(p, contentWidth);
+          doc.text(pLines, margin, y);
+          y += pLines.length * 4.2 + 3;
+        });
+
+        if (sec.bullets && sec.bullets.length > 0) {
+          sec.bullets.forEach((b) => {
+            checkPageBreak(10);
+            const bLines = doc.splitTextToSize(`• ${b}`, contentWidth - 4);
+            doc.text(bLines, margin + 3, y);
+            y += bLines.length * 4.2 + 2;
+          });
+        }
+        y += 2;
+      });
+
+      // 4. Data Tables
+      if (pack.case.data_tables && pack.case.data_tables.length > 0) {
+        pack.case.data_tables.forEach((table) => {
+          checkPageBreak(40);
+          doc.setFontSize(10);
+          doc.setTextColor(...primaryRgb);
+          doc.text(table.title, margin, y);
+          y += 5;
+
+          const numCols = table.columns.length;
+          const colWidth = contentWidth / numCols;
+          const rowH = 6;
+
+          // Header
+          doc.setFillColor(...primaryRgb);
+          doc.rect(margin, y, contentWidth, rowH, "F");
+          doc.setFontSize(7.5);
+          doc.setTextColor(...accentTextRgb);
+          table.columns.forEach((col, cIdx) => {
+            doc.text(col, margin + cIdx * colWidth + 2, y + 4.2);
+          });
+          y += rowH;
+
+          // Rows
+          doc.setTextColor(...textRgb);
+          table.rows.forEach((row, rIdx) => {
+            checkPageBreak(rowH + 2);
+            if (rIdx % 2 === 1) {
+              doc.setFillColor(...bgRgb);
+              doc.rect(margin, y, contentWidth, rowH, "F");
+            }
+            doc.setDrawColor(...borderRgb);
+            doc.setLineWidth(0.2);
+            doc.rect(margin, y, contentWidth, rowH, "S");
+
+            row.forEach((cell, cIdx) => {
+              const str = String(cell);
+              const truncated = str.length > 35 ? str.slice(0, 32) + "..." : str;
+              doc.text(truncated, margin + cIdx * colWidth + 2, y + 4.2);
+            });
+            y += rowH;
+          });
+          y += 6;
+        });
+      }
+
+      // 5. Questions Section
+      checkPageBreak(35);
+      doc.setFontSize(12);
+      doc.setTextColor(...primaryRgb);
+      doc.text(`EXAMINATION QUESTIONS [Total: ${meta.max_marks || 40} Marks]`, margin, y);
+      y += 6;
+
+      pack.questions.forEach((q, idx) => {
+        checkPageBreak(25);
+        doc.setFontSize(9);
+        doc.setTextColor(...accentRgb);
+        doc.text(
+          `Question ${idx + 1} [${q.marks || 20} Marks] [Bloom: ${q.bloom_verb}]:`,
+          margin,
+          y
+        );
+        y += 4.5;
+
+        doc.setFontSize(8.5);
+        doc.setTextColor(...textRgb);
+        const qLines = doc.splitTextToSize(q.text, contentWidth);
+        doc.text(qLines, margin, y);
+        y += qLines.length * 4.2 + 3;
+
+        if (q.concepts && q.concepts.length > 0) {
+          doc.setFontSize(7.5);
+          doc.setTextColor(...textMutedRgb);
+          doc.text(`Tested Concepts: ${q.concepts.join(", ")}`, margin, y);
+          y += 5;
+        }
+      });
+
+      // 6. Faculty Model Answers (Excluded for student handout)
+      if (!isStudentHandout && pack.answers && pack.answers.length > 0) {
+        doc.addPage();
+        y = 18;
+
+        // Confidential Warning Banner
+        doc.setFillColor(254, 242, 242);
+        doc.setDrawColor(239, 68, 68);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, y, contentWidth, 12, 1.5, 1.5, "FD");
+        doc.setFontSize(9);
+        doc.setTextColor(185, 28, 28);
+        doc.text("FACULTY CONFIDENTIAL — FOR EVALUATION ONLY", margin + 4, y + 5);
+        doc.setFontSize(7.5);
+        doc.text("Model answer keys, comparative benchmarks, and scoring rubrics.", margin + 4, y + 9);
+        y += 18;
+
+        doc.setFontSize(13);
+        doc.setTextColor(...primaryRgb);
+        doc.text("Model Answer Key & Benchmark Solutions", margin, y);
+        y += 7;
+
+        pack.answers.forEach((ans) => {
+          checkPageBreak(30);
+          doc.setFontSize(10.5);
+          doc.setTextColor(...accentRgb);
+          doc.text(`Model Answer for Question ${ans.question_id}`, margin, y);
+          y += 5;
+
+          doc.setFontSize(8);
+          doc.setTextColor(...textRgb);
+          const introLines = doc.splitTextToSize(`1. Introduction: ${ans.introduction}`, contentWidth);
+          doc.text(introLines, margin, y);
+          y += introLines.length * 4 + 4;
+
+          // Sections
+          ans.sections.forEach((sec) => {
+            checkPageBreak(20);
+            doc.setFontSize(8.5);
+            doc.setTextColor(...primaryRgb);
+            doc.text(sec.heading, margin, y);
+            y += 4;
+
+            doc.setFontSize(8);
+            doc.setTextColor(...textRgb);
+            if (sec.points && sec.points.length > 0) {
+              sec.points.forEach((pt) => {
+                checkPageBreak(10);
+                const ptLines = doc.splitTextToSize(`• ${pt}`, contentWidth - 4);
+                doc.text(ptLines, margin + 3, y);
+                y += ptLines.length * 4 + 1.5;
+              });
+            }
+
+            if (sec.evaluation && sec.evaluation.length > 0) {
+              sec.evaluation.forEach((ev) => {
+                checkPageBreak(10);
+                const evLines = doc.splitTextToSize(`Evaluation: ${ev}`, contentWidth - 4);
+                doc.text(evLines, margin + 3, y);
+                y += evLines.length * 4 + 1.5;
+              });
+            }
+
+            if (sec.limitation) {
+              checkPageBreak(10);
+              const limLines = doc.splitTextToSize(`Limitation: ${sec.limitation}`, contentWidth - 4);
+              doc.setTextColor(180, 83, 9);
+              doc.text(limLines, margin + 3, y);
+              doc.setTextColor(...textRgb);
+              y += limLines.length * 4 + 2;
+            }
+          });
+
+          // Comparison Table
+          if (ans.comparison_table) {
+            checkPageBreak(35);
+            doc.setFontSize(8.5);
+            doc.setTextColor(...primaryRgb);
+            doc.text("Comparative Analysis Matrix:", margin, y);
+            y += 4.5;
+
+            const numCols = ans.comparison_table.columns.length;
+            const colWidth = contentWidth / numCols;
+            const rowH = 6;
+
+            // Header
+            doc.setFillColor(243, 244, 246);
+            doc.rect(margin, y, contentWidth, rowH, "F");
+            doc.setFontSize(7.5);
+            doc.setTextColor(...primaryRgb);
+            ans.comparison_table.columns.forEach((col, cIdx) => {
+              doc.text(col, margin + cIdx * colWidth + 2, y + 4.2);
+            });
+            y += rowH;
+
+            // Rows
+            doc.setTextColor(...textRgb);
+            ans.comparison_table.rows.forEach((row, rIdx) => {
+              checkPageBreak(rowH + 2);
+              if (rIdx % 2 === 1) {
+                doc.setFillColor(249, 250, 251);
+                doc.rect(margin, y, contentWidth, rowH, "F");
+              }
+              doc.setDrawColor(...borderRgb);
+              doc.setLineWidth(0.2);
+              doc.rect(margin, y, contentWidth, rowH, "S");
+
+              row.forEach((cell, cIdx) => {
+                const str = String(cell);
+                const truncated = str.length > 35 ? str.slice(0, 32) + "..." : str;
+                doc.text(truncated, margin + cIdx * colWidth + 2, y + 4.2);
+              });
+              y += rowH;
+            });
+            y += 5;
+          }
+
+          if (ans.overall_assessment) {
+            checkPageBreak(15);
+            doc.setFontSize(8);
+            doc.setTextColor(...textRgb);
+            const oaLines = doc.splitTextToSize(`Overall Assessment: ${ans.overall_assessment}`, contentWidth);
+            doc.text(oaLines, margin, y);
+            y += oaLines.length * 4 + 3;
+          }
+
+          checkPageBreak(15);
+          doc.setFontSize(8);
+          doc.setTextColor(...textRgb);
+          const concLines = doc.splitTextToSize(`Conclusion: ${ans.conclusion}`, contentWidth);
+          doc.text(concLines, margin, y);
+          y += concLines.length * 4 + 6;
+        });
+      }
+
+      const pdfOutput = doc.output("arraybuffer");
+      const safeTitle = (pack.case.title || "CE_Case_Pack")
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .slice(0, 40);
+      const filename = `${safeTitle}_${isStudentHandout ? "Student_Handout" : "Full_Pack"}.pdf`;
+
+      return new NextResponse(pdfOutput, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+        },
+      });
+    }
+
+    // =========================================================================
+    // BRANCH B: STANDARD CASE PDF EXPORT (Existing Classic Flow)
+    // =========================================================================
+    // 1. Institutional Header
     doc.setFillColor(...primaryRgb);
     doc.roundedRect(margin, y, 14, 14, 2, 2, "F");
     doc.setTextColor(...accentTextRgb);
     doc.setFontSize(8);
     doc.text(COLLEGE_SHORT, margin + 2.5, y + 9);
 
-    // College Name & System Subtitle
     doc.setTextColor(...primaryRgb);
     doc.setFontSize(12);
     doc.text(COLLEGE_NAME.toUpperCase(), margin + 18, y + 6);
@@ -113,47 +446,29 @@ export async function GET(
     doc.setTextColor(...textMutedRgb);
     doc.text(`${APP_NAME} • AI Business Curriculum Repository`, margin + 18, y + 11);
 
-    // Decorative Trim Line
     y += 18;
     doc.setDrawColor(...accentRgb);
     doc.setLineWidth(0.8);
     doc.line(margin, y, margin + contentWidth, y);
     y += 8;
 
-    // 2. CASE TITLE
+    // 2. Case Title
     doc.setTextColor(...primaryRgb);
     doc.setFontSize(16);
     const titleLines = doc.splitTextToSize(caseStudy.title, contentWidth);
     doc.text(titleLines, margin, y);
     y += titleLines.length * 7 + 4;
 
-    // 3. METADATA SPECIFICATIONS STRIP
+    // 3. Metadata Strip
     doc.setFillColor(...primarySoftRgb);
     doc.roundedRect(margin, y, contentWidth, 12, 2, 2, "F");
     doc.setFontSize(8);
     doc.setTextColor(...textRgb);
-
     const metaText = `Type: ${caseStudy.type.toUpperCase()} CASE   |   Format: ${caseStudy.format.toUpperCase()}   |   Industry: ${caseStudy.industry}   |   Level: ${caseStudy.level}   |   Language: ${caseStudy.language.toUpperCase()}`;
     doc.text(metaText, margin + 4, y + 7.5);
     y += 18;
 
-    // Real Signal Protocol Alert if applicable
-    if (caseStudy.format === "real_signal" || content.verify_facts_flag) {
-      doc.setFillColor(...primarySoftRgb);
-      doc.setDrawColor(...warningRgb);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(margin, y, contentWidth, 12, 2, 2, "FD");
-      doc.setFontSize(8);
-      doc.setTextColor(...warningRgb);
-      doc.text(
-        "VERIFY FACTS BEFORE CLASS: This teaching case incorporates observable live signals. Cross-verify filings.",
-        margin + 4,
-        y + 7.5
-      );
-      y += 16;
-    }
-
-    // 4. EXECUTIVE SUMMARY
+    // 4. Executive Summary
     checkPageBreak(30);
     doc.setFontSize(12);
     doc.setTextColor(...primaryRgb);
@@ -166,7 +481,7 @@ export async function GET(
     doc.text(summaryLines, margin, y);
     y += summaryLines.length * 5 + 8;
 
-    // 5. BACKGROUND & CONTEXT
+    // 5. Background & Context
     checkPageBreak(35);
     doc.setFontSize(12);
     doc.setTextColor(...primaryRgb);
@@ -179,7 +494,7 @@ export async function GET(
     doc.text(bgLines, margin, y);
     y += bgLines.length * 5 + 8;
 
-    // 6. OPERATIONAL CHALLENGE
+    // 6. Operational Challenge
     checkPageBreak(35);
     doc.setFontSize(12);
     doc.setTextColor(...primaryRgb);
@@ -192,66 +507,7 @@ export async function GET(
     doc.text(challengeLines, margin, y);
     y += challengeLines.length * 5 + 8;
 
-    // 7. EXHIBIT 1: KEY DATA TABLE
-    checkPageBreak(50);
-    doc.setFontSize(11);
-    doc.setTextColor(...primaryRgb);
-    doc.text("Exhibit 1: Quantitative Indicators & Operating Metrics", margin, y);
-    y += 6;
-
-    // Table Header
-    const colWidths = [60, 40, 35, contentWidth - 135];
-    const rowHeight = 7.5;
-
-    doc.setFillColor(...primaryRgb);
-    doc.rect(margin, y, contentWidth, rowHeight, "F");
-    doc.setFontSize(8.5);
-    doc.setTextColor(...accentTextRgb);
-
-    let x = margin + 2;
-    doc.text("Financial / Operating Metric", x, y + 5);
-    x += colWidths[0];
-    doc.text("Value", x, y + 5);
-    x += colWidths[1];
-    doc.text("Period", x, y + 5);
-    x += colWidths[2];
-    doc.text("Pedagogical Notes", x, y + 5);
-    y += rowHeight;
-
-    // Table Body
-    doc.setTextColor(...textRgb);
-    content.key_data.forEach((row, idx) => {
-      checkPageBreak(rowHeight + 2);
-      if (idx % 2 === 1) {
-        doc.setFillColor(...bgRgb);
-        doc.rect(margin, y, contentWidth, rowHeight, "F");
-      }
-      doc.setDrawColor(...borderRgb);
-      doc.setLineWidth(0.2);
-      doc.rect(margin, y, contentWidth, rowHeight, "S");
-
-      let cellX = margin + 2;
-      doc.text(doc.splitTextToSize(row.metric, colWidths[0] - 4)[0] || "", cellX, y + 5);
-      cellX += colWidths[0];
-      doc.text(row.value, cellX, y + 5);
-      cellX += colWidths[1];
-      doc.text(row.period || "—", cellX, y + 5);
-      cellX += colWidths[2];
-      doc.text(row.notes || "illustrative", cellX, y + 5);
-
-      y += rowHeight;
-    });
-
-    doc.setFontSize(7.5);
-    doc.setTextColor(...textMutedRgb);
-    doc.text(
-      content.figures_disclaimer || "All figures are illustrative pedagogical models for classroom analysis.",
-      margin,
-      y + 5
-    );
-    y += 12;
-
-    // 8. DECISION POINT
+    // 7. Decision Point
     checkPageBreak(25);
     doc.setFontSize(12);
     doc.setTextColor(...primaryRgb);
@@ -264,7 +520,7 @@ export async function GET(
     doc.text(decisionLines, margin, y);
     y += decisionLines.length * 5.5 + 8;
 
-    // 9. DISCUSSION QUESTIONS
+    // 8. Discussion Questions
     checkPageBreak(40);
     doc.setFontSize(12);
     doc.setTextColor(...primaryRgb);
@@ -273,33 +529,13 @@ export async function GET(
 
     doc.setFontSize(9);
     doc.setTextColor(...textRgb);
-    content.discussion_questions.forEach((q, idx) => {
+    (content.discussion_questions || []).forEach((q: string, idx: number) => {
       checkPageBreak(12);
       const qText = `${idx + 1}. ${q}`;
       const qLines = doc.splitTextToSize(qText, contentWidth - 4);
       doc.text(qLines, margin + 2, y);
       y += qLines.length * 4.5 + 2.5;
     });
-
-    // 10. FACILITATOR TEACHING NOTE
-    if (content.teaching_note?.frameworks && content.teaching_note.frameworks.length > 0) {
-      checkPageBreak(45);
-      y += 4;
-      doc.setFontSize(12);
-      doc.setTextColor(10, 17, 40);
-      doc.text("Facilitator Teaching Note (Confidential)", margin, y);
-      y += 6;
-
-      doc.setFontSize(9);
-      doc.setTextColor(60, 60, 60);
-      content.teaching_note.frameworks.forEach((fw) => {
-        checkPageBreak(12);
-        const fwText = `• ${fw.name}: ${fw.application} (Takeaway: ${fw.key_takeaway})`;
-        const fwLines = doc.splitTextToSize(fwText, contentWidth - 4);
-        doc.text(fwLines, margin + 2, y);
-        y += fwLines.length * 4.5 + 2;
-      });
-    }
 
     const pdfOutput = doc.output("arraybuffer");
     const safeTitle = caseStudy.title.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40);
