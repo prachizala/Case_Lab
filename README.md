@@ -247,7 +247,7 @@ Open your browser and visit:
 
 ## 👥 Built-In Test Personas & Role Switcher
 
-When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is accessible directly in the top navigation profile dropdown and login page. All demo accounts use the standard password: `password123`.
+When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is accessible directly in the top navigation profile dropdown and login page for instant authentication without password entry. If logging in via standard credentials, seed demo accounts utilize the password configured via the `DEMO_USER_PASSWORD` environment variable (or one-time generated secure credentials printed during `npm run seed`).
 
 | Role | Persona Name | Institutional Email | Key Permissions |
 |---|---|---|---|

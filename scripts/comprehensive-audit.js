@@ -85,7 +85,7 @@ async function runAudit() {
         action: 'signup',
         name: 'Audit Registered Student',
         email: `candidate.${Date.now()}@shantibschool.edu.in`,
-        password: 'Password123!',
+        password: process.env.DEMO_USER_PASSWORD || 'SBS_Secure2026!Exam',
         role: 'student',
         dpdp_consent: true
       })
@@ -105,7 +105,7 @@ async function runAudit() {
         action: 'signup',
         name: 'Gmail Student',
         email: 'user@gmail.com',
-        password: 'Password123!',
+        password: process.env.DEMO_USER_PASSWORD || 'SBS_Secure2026!Exam',
         role: 'student',
         dpdp_consent: true
       })
@@ -126,7 +126,7 @@ async function runAudit() {
         action: 'signup',
         name: 'Wrong Domain Student',
         email: 'user@shantibschool.edu',
-        password: 'Password123!',
+        password: process.env.DEMO_USER_PASSWORD || 'SBS_Secure2026!Exam',
         role: 'student',
         dpdp_consent: true
       })

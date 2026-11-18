@@ -1559,6 +1559,26 @@ class MockStore {
     return true;
   }
 
+  private user_passwords: Map<string, string> = new Map();
+
+  setUserPassword(userIdOrEmail: string, password: string): void {
+    const p = this.profiles.find((item) => item.id === userIdOrEmail || item.email.toLowerCase() === userIdOrEmail.toLowerCase());
+    const key = p ? p.id : userIdOrEmail.toLowerCase().trim();
+    this.user_passwords.set(key, hashOtp(password));
+  }
+
+  verifyUserPassword(userIdOrEmail: string, candidatePassword: string): boolean {
+    const p = this.profiles.find((item) => item.id === userIdOrEmail || item.email.toLowerCase() === userIdOrEmail.toLowerCase());
+    const key = p ? p.id : userIdOrEmail.toLowerCase().trim();
+    const storedHash = this.user_passwords.get(key);
+    if (storedHash) {
+      return storedHash === hashOtp(candidatePassword);
+    }
+    // Default fallback for demo seed accounts if not explicitly set
+    const defaultDemoPassword = process.env.DEMO_USER_PASSWORD || "SBS_Demo2026!Secure";
+    return candidatePassword === defaultDemoPassword;
+  }
+
   verifyUserOtp(userIdOrEmail: string, otp: string): { success: boolean; message: string; profile?: Profile } {
     const p = this.profiles.find((item) => item.id === userIdOrEmail || item.email.toLowerCase() === userIdOrEmail.toLowerCase());
     if (!p) return { success: false, message: "User not found" };

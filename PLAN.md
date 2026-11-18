@@ -14,7 +14,7 @@ This document outlines the architectural migration from the in-memory data store
 ### Core Objectives:
 1. **Real Backend with Real Database:** Supabase PostgreSQL + Auth completely replacing `src/lib/mock-db.ts` via an abstraction data-access layer (`src/lib/db/*`) with zero disruption to frontend page contracts.
 2. **Soft Charcoal Dark Mode:** Neutral "light black" (`#151517`, `#1B1B1E`, `#202023`, `#2A2A2E`) eliminating all blue-tinted dark backgrounds while preserving official SBS light mode.
-3. **Strict 3-Role & 3-User Architecture:** Exactly three roles (`admin`, `faculty`, `student`) and three demo accounts with `password123`.
+3. **Strict 3-Role & 3-User Architecture:** Exactly three roles (`admin`, `faculty`, `student`) and three demo accounts configured via `DEMO_USER_PASSWORD`.
 4. **Sub-Second Performance & Streaming:** Claude token streaming (< 2s TTFT), parallelized API queries, static caching, server connection pooling.
 5. **Single Source of Truth Auth:** Eliminating stale client cache through strict server session hydration and `@supabase/ssr` cookies.
 
@@ -131,7 +131,7 @@ The table below catalogs every public method exported by `MockDatabase` (`mockSt
 - **`student`**: Case reading (approved/published only), answer submissions, portfolio, certificates, self analytics.
 *(Legacy roles `reviewer` and `alumni` are completely removed. Alumni status is modeled as `is_graduated: boolean` on `profiles` with lifetime access).*
 
-### Seed Demo Users (Password: `password123`):
+### Seed Demo Users (Password configured via `DEMO_USER_PASSWORD`):
 1. **Admin Persona:**
    - Name: `Admin` (with legacy alias `Dr. Neha Sharma`)
    - Email: `admin@shantibschool.edu.in` (aliases: `ADMIN01`, `admin`, `neha.sharma@shantibschool.edu.in`)

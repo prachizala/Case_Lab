@@ -16,6 +16,10 @@ import {
   isProductionEnv,
   assertNoDemoOtpInProduction,
   checkOtpResendRateLimit,
+  validatePasswordStrength,
+  checkLoginLockout,
+  recordLoginFailure,
+  resetLoginFailures,
 } from "@/lib/auth-security";
 import { isEmailProviderConfigured, sendOtpEmail } from "@/lib/email/send";
 
@@ -51,6 +55,18 @@ export async function POST(req: NextRequest) {
       if (!email || !password || !name) {
         return NextResponse.json(
           { error: "Name, email, and password are required." },
+          { status: 400 }
+        );
+      }
+
+      // Enforce enterprise password policy (>= 10 chars, upper, lower, number, no common words)
+      const pwdPolicy = validatePasswordStrength(password);
+      if (!pwdPolicy.valid) {
+        return NextResponse.json(
+          {
+            error: pwdPolicy.errors[0],
+            details: pwdPolicy.errors,
+          },
           { status: 400 }
         );
       }
@@ -128,6 +144,7 @@ export async function POST(req: NextRequest) {
       };
 
       mockStore.addProfile(newProfile);
+      mockStore.setUserPassword(newProfile.id, password);
 
       // Flow 1: Pending Admin Approval (Production without email provider)
       if (isPendingAdminApproval) {
@@ -268,20 +285,41 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const rateKey = `login:${email.toLowerCase().trim()}:${clientIp}`;
-      const rate = checkAuthRateLimit(rateKey, 10, 15 * 60 * 1000);
-      if (!rate.allowed) {
+      // Check lockout from 5 previous failed attempts (15-minute lockout)
+      const lockout = checkLoginLockout(email, clientIp);
+      if (lockout.locked) {
         return NextResponse.json(
-          { error: "Too many login attempts. Please wait 15 minutes." },
+          { error: `Account is temporarily locked due to multiple failed login attempts. Please wait ${lockout.waitMinutes} minute(s).` },
           { status: 429 }
         );
       }
 
       const profile = mockStore.getProfile(email.toLowerCase().trim());
       if (!profile) {
+        const failure = recordLoginFailure(email, clientIp);
+        const remaining = Math.max(0, 5 - failure.failures);
         return NextResponse.json(
-          { error: "Invalid credentials or account not found." },
-          { status: 401 }
+          {
+            error: failure.locked
+              ? "Maximum 5 failed login attempts exceeded. Account is locked for 15 minutes."
+              : `Invalid credentials. ${remaining} attempt(s) remaining before temporary lockout.`,
+          },
+          { status: failure.locked ? 429 : 401 }
+        );
+      }
+
+      // Verify password against stored hash or configured demo password
+      const isPasswordValid = mockStore.verifyUserPassword(profile.id, password);
+      if (!isPasswordValid) {
+        const failure = recordLoginFailure(email, clientIp);
+        const remaining = Math.max(0, 5 - failure.failures);
+        return NextResponse.json(
+          {
+            error: failure.locked
+              ? "Maximum 5 failed login attempts exceeded. Account is locked for 15 minutes."
+              : `Invalid credentials. ${remaining} attempt(s) remaining before temporary lockout.`,
+          },
+          { status: failure.locked ? 429 : 401 }
         );
       }
 
@@ -292,6 +330,9 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Successful login resets failure tracker
+      resetLoginFailures(email, clientIp);
+
       const response = NextResponse.json({
         success: true,
         user: profile,
@@ -300,6 +341,33 @@ export async function POST(req: NextRequest) {
       // Set signed, tamper-proof session cookie
       await setSessionCookie(response, profile.id);
 
+      return response;
+    }
+
+    if (action === "demo-login") {
+      // Allowed only in dev/demo environments
+      if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE !== "true") {
+        return NextResponse.json(
+          { error: "One-click demo persona access is restricted to development and evaluation environments." },
+          { status: 403 }
+        );
+      }
+
+      if (!email) {
+        return NextResponse.json({ error: "Email is required." }, { status: 400 });
+      }
+
+      const profile = mockStore.getProfile(email.toLowerCase().trim());
+      if (!profile) {
+        return NextResponse.json({ error: "Demo account not found." }, { status: 404 });
+      }
+
+      const response = NextResponse.json({
+        success: true,
+        user: profile,
+      });
+
+      await setSessionCookie(response, profile.id);
       return response;
     }
 

@@ -331,12 +331,16 @@ function SignUpForm() {
                   <input
                     type="password"
                     required
+                    minLength={10}
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
                   />
                 </div>
+                <p className="mt-1 text-[10px] text-muted">
+                  Minimum 10 characters with uppercase, lowercase, and numbers.
+                </p>
               </div>
 
               {/* Role Selection */}

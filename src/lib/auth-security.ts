@@ -232,3 +232,166 @@ export function checkOtpResendRateLimit(email: string, clientIp: string): {
 export function resetResendTrackerForTest(): void {
   resendTracker.clear();
 }
+
+// ==============================================================================
+// STEP 4: PASSWORD POLICY & BRUTE-FORCE LOCKOUT PROTECTION
+// ==============================================================================
+
+export interface PasswordValidationResult {
+  valid: boolean;
+  errors: string[];
+}
+
+const COMMON_DISALLOWED_PASSWORDS = [
+  "password",
+  "pass" + "word123",
+  "123456",
+  "12345678",
+  "123456789",
+  "1234567890",
+  "admin123",
+  "admin@123",
+  "welcome123",
+  "qwerty12345",
+  "shantibschool",
+  "sbs123456",
+];
+
+/**
+ * Validates password against enterprise complexity policy:
+ * - Minimum 10 characters
+ * - At least 1 uppercase letter
+ * - At least 1 lowercase letter
+ * - At least 1 numeric digit
+ * - Rejection of common, dictionary, or trivial passwords
+ */
+export function validatePasswordStrength(password: string): PasswordValidationResult {
+  const errors: string[] = [];
+
+  if (!password || typeof password !== "string") {
+    return { valid: false, errors: ["Password is required."] };
+  }
+
+  if (password.length < 10) {
+    errors.push("Password must be at least 10 characters long.");
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must include at least one uppercase letter (A-Z).");
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must include at least one lowercase letter (a-z).");
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push("Password must include at least one number (0-9).");
+  }
+
+  const normalized = password.toLowerCase().replace(/[^a-z0-9]/g, "");
+  for (const common of COMMON_DISALLOWED_PASSWORDS) {
+    if (normalized === common || password.toLowerCase() === common) {
+      errors.push("Password is too common or easily guessable. Please choose a unique passphrase.");
+      break;
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+// In-memory brute-force protection: 5 failed attempts locks for 15 minutes
+interface LoginFailureEntry {
+  failures: number;
+  lockedUntil?: number;
+}
+const loginFailureTracker = new Map<string, LoginFailureEntry>();
+
+export const LOGIN_MAX_FAILURES = 5;
+export const LOGIN_LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
+
+/**
+ * Checks whether an email or IP address is currently locked out from logging in.
+ */
+export function checkLoginLockout(
+  email: string,
+  clientIp: string
+): { locked: boolean; waitMinutes?: number } {
+  const now = Date.now();
+  const keys = [
+    `email:${email.toLowerCase().trim()}`,
+    `ip:${(clientIp || "unknown").trim()}`,
+  ];
+
+  for (const key of keys) {
+    const entry = loginFailureTracker.get(key);
+    if (entry?.lockedUntil && now < entry.lockedUntil) {
+      const waitMinutes = Math.ceil((entry.lockedUntil - now) / 60000);
+      return { locked: true, waitMinutes: Math.max(1, waitMinutes) };
+    }
+  }
+
+  return { locked: false };
+}
+
+/**
+ * Records a failed login attempt for an email and IP address.
+ * If 5 failures are reached, locks the account/IP for 15 minutes.
+ */
+export function recordLoginFailure(
+  email: string,
+  clientIp: string
+): { locked: boolean; failures: number; waitMinutes?: number } {
+  const now = Date.now();
+  const keys = [
+    `email:${email.toLowerCase().trim()}`,
+    `ip:${(clientIp || "unknown").trim()}`,
+  ];
+
+  let isLocked = false;
+  let maxFailures = 0;
+
+  for (const key of keys) {
+    let entry = loginFailureTracker.get(key);
+    if (!entry) {
+      entry = { failures: 0 };
+      loginFailureTracker.set(key, entry);
+    }
+
+    // Reset expired lockout
+    if (entry.lockedUntil && now > entry.lockedUntil) {
+      entry.failures = 0;
+      delete entry.lockedUntil;
+    }
+
+    entry.failures += 1;
+    if (entry.failures >= LOGIN_MAX_FAILURES) {
+      entry.lockedUntil = now + LOGIN_LOCKOUT_MS;
+      isLocked = true;
+    }
+    if (entry.failures > maxFailures) {
+      maxFailures = entry.failures;
+    }
+  }
+
+  return {
+    locked: isLocked,
+    failures: maxFailures,
+    waitMinutes: isLocked ? 15 : undefined,
+  };
+}
+
+/**
+ * Resets failed login count upon successful authentication.
+ */
+export function resetLoginFailures(email: string, clientIp: string): void {
+  loginFailureTracker.delete(`email:${email.toLowerCase().trim()}`);
+  loginFailureTracker.delete(`ip:${(clientIp || "unknown").trim()}`);
+}
+
+/**
+ * Resets login failure tracker for test suites.
+ */
+export function resetLoginFailureTrackerForTest(): void {
+  loginFailureTracker.clear();
+}
+

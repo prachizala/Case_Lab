@@ -15,7 +15,8 @@
     "test:budget": "tsx scripts/test-token-budget.ts",
     "test:otp": "tsx scripts/test-otp-security.ts",
     "test:consent": "tsx scripts/test-dpdp-consent.ts",
-    "test:student-access": "tsx scripts/test-student-generation-access.ts"
+    "test:student-access": "tsx scripts/test-student-generation-access.ts",
+    "test:password": "tsx scripts/test-password-security.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

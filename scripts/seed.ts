@@ -6,7 +6,41 @@ import * as path from "path";
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-export const DEMO_PASSWORD = "password123";
+export function generateRandomPassword(length = 18): string {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghjkmnpqrstuvwxyz";
+  const numbers = "23456789";
+  const symbols = "!@#$%^&*";
+  const all = upper + lower + numbers + symbols;
+
+  const randomInt = (max: number) => {
+    const array = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(array);
+    return array[0] % max;
+  };
+
+  let pass = "";
+  pass += upper[randomInt(upper.length)];
+  pass += lower[randomInt(lower.length)];
+  pass += numbers[randomInt(numbers.length)];
+  pass += symbols[randomInt(symbols.length)];
+
+  for (let i = 4; i < length; i++) {
+    pass += all[randomInt(all.length)];
+  }
+  return pass;
+}
+
+export function getSeedPasswordForUser(email: string): string {
+  if (process.env.DEMO_USER_PASSWORD) {
+    return process.env.DEMO_USER_PASSWORD;
+  }
+  const generated = generateRandomPassword(18);
+  console.log(`[SEED CREDENTIAL] One-time generated password for ${email}: ${generated}`);
+  return generated;
+}
+
+export const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "SBS_Demo2026!Secure";
 
 export interface DemoUserSeed {
   id: string;
@@ -328,10 +362,25 @@ export const OUTCOMES = [
 ];
 
 export async function runSeed() {
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    process.env.VERCEL_ENV === "production";
+  const allowProduction = process.argv.includes("--allow-production");
+
+  if (isProduction && !allowProduction) {
+    throw new Error(
+      "FATAL: Database seed script cannot run against production environments without the explicit --allow-production flag."
+    );
+  }
+
   console.log("==============================================================================");
   console.log("🌱 SBS CaseLab (Shanti Business School): Supabase Database Seed Engine");
   console.log("==============================================================================");
-  console.log("🔑 DEMO PASSWORD SCHEME FOR ALL USERS:  password123");
+  console.log(
+    process.env.DEMO_USER_PASSWORD
+      ? "🔑 DEMO PASSWORD: Using configured DEMO_USER_PASSWORD environment variable."
+      : "🔑 DEMO PASSWORD: Generated strong random credentials (16+ chars, crypto) per user."
+  );
   console.log("👥 EXACT THREE SEED DEMO USERS:");
   DEMO_USERS.forEach((u) => {
     console.log(`   • [${u.role.toUpperCase()}] ${u.name} <${u.email}> (${u.program || u.department_code})`);
@@ -377,10 +426,11 @@ export async function runSeed() {
       const { data: listData } = await supabase.auth.admin.listUsers();
       const existingUser = listData?.users?.find((u) => u.email?.toLowerCase() === user.email.toLowerCase());
 
+      const userPassword = getSeedPasswordForUser(user.email);
       if (existingUser) {
         console.log(`  ✓ Auth user exists: ${user.email} (Updating password & metadata)`);
         await supabase.auth.admin.updateUserById(existingUser.id, {
-          password: DEMO_PASSWORD,
+          password: userPassword,
           email_confirm: true,
           user_metadata: {
             name: user.name,
@@ -395,7 +445,7 @@ export async function runSeed() {
         await supabase.auth.admin.createUser({
           id: user.id,
           email: user.email,
-          password: DEMO_PASSWORD,
+          password: userPassword,
           email_confirm: true,
           user_metadata: {
             name: user.name,
