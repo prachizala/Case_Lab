@@ -127,7 +127,7 @@ export async function GET(
       doc.setFontSize(8);
       doc.setTextColor(...textMutedRgb);
       doc.text(
-        `DEPARTMENT OF ${(meta.department || "Business Studies").toUpperCase()} • CONTINUOUS EVALUATION ${meta.ce_no || "CE-3"}`,
+        `DEPARTMENT OF ${(meta.department || "Business Studies").toUpperCase()} • CASE STUDY & DISCUSSION PACK`,
         margin + 18,
         y + 11
       );

@@ -7,10 +7,10 @@ import { authenticateUser } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   try {
-    // Only faculty and admin can generate cases (students strictly restricted)
-    const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin"]);
+    // Faculty, admin, and students can generate cases
+    const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin", "student"]);
     if (errorResponse || !user) {
-      return errorResponse || NextResponse.json({ error: "Forbidden. Only faculty and administrators can generate case studies." }, { status: 403 });
+      return errorResponse || NextResponse.json({ error: "Forbidden. Please sign in to generate case studies." }, { status: 403 });
     }
 
     const body = await req.json();

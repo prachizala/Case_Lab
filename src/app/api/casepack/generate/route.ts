@@ -33,13 +33,13 @@ const RequestBodySchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Authentication: Faculty and Admin access only
-    const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin"]);
+    // 1. Authentication: Faculty, Admin, and Student access
+    const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin", "student"]);
     if (errorResponse || !user) {
       return (
         errorResponse ||
         NextResponse.json(
-          { error: "Forbidden. Only faculty and administrators can generate CE Case Packs." },
+          { error: "Forbidden. Please sign in to generate Case Packs." },
           { status: 403 }
         )
       );
