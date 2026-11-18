@@ -1,4 +1,5 @@
 import { COLLEGE_NAME, COLLEGE_NAME_WITH_SHORT, ALLOWED_EMAIL_DOMAIN, getNextMonthResetKolkata, isSbsDomain } from "@/config/college";
+import { hashOtp, verifyHashedOtp, OTP_MAX_ATTEMPTS, OTP_LOCKOUT_MS } from "@/lib/auth-security";
 import {
   Profile,
   UserType,
@@ -1541,8 +1542,11 @@ class MockStore {
   setUserOtp(userIdOrEmail: string, otp: string, expiresAt: string): boolean {
     const p = this.profiles.find((item) => item.id === userIdOrEmail || item.email.toLowerCase() === userIdOrEmail.toLowerCase());
     if (!p) return false;
-    p.verification_otp = otp;
+    // Always store hashed OTP (SHA-256)
+    p.verification_otp = otp.length === 64 ? otp : hashOtp(otp);
     p.otp_expires_at = expiresAt;
+    p.otp_attempts = 0;
+    p.otp_locked_until = null;
     p.updated_at = new Date().toISOString();
     return true;
   }
@@ -1555,6 +1559,15 @@ class MockStore {
       return { success: true, message: "Email is already verified", profile: this.getProfile(p.id) };
     }
 
+    // Check lockout
+    if (p.otp_locked_until && new Date() < new Date(p.otp_locked_until)) {
+      const waitMinutes = Math.ceil((new Date(p.otp_locked_until).getTime() - Date.now()) / 60000);
+      return {
+        success: false,
+        message: `Verification is locked due to multiple incorrect attempts. Please wait ${waitMinutes} minutes.`,
+      };
+    }
+
     if (!p.verification_otp) {
       return { success: false, message: "No verification code requested. Please request a new OTP." };
     }
@@ -1563,13 +1576,35 @@ class MockStore {
       return { success: false, message: "Verification code has expired. Please request a new code." };
     }
 
-    if (p.verification_otp.trim() !== otp.trim()) {
-      return { success: false, message: "Invalid verification code. Please check and try again." };
+    // Verify using constant-time comparison on hash or legacy fallback
+    const isValid = p.verification_otp.length === 64
+      ? verifyHashedOtp(otp, p.verification_otp)
+      : p.verification_otp.trim() === otp.trim();
+
+    if (!isValid) {
+      p.otp_attempts = (p.otp_attempts || 0) + 1;
+      if (p.otp_attempts >= OTP_MAX_ATTEMPTS) {
+        p.otp_locked_until = new Date(Date.now() + OTP_LOCKOUT_MS).toISOString();
+        return {
+          success: false,
+          message: "Maximum verification attempts exceeded. Verification is locked for 15 minutes.",
+        };
+      }
+      const remaining = OTP_MAX_ATTEMPTS - p.otp_attempts;
+      return {
+        success: false,
+        message: `Invalid verification code. ${remaining} attempt${remaining === 1 ? "" : "s"} remaining.`,
+      };
     }
 
+    // Success: single-use, clear codes and attempts
     p.email_verified_at = new Date().toISOString();
     p.verification_otp = null;
     p.otp_expires_at = null;
+    p.otp_attempts = 0;
+    p.otp_locked_until = null;
+    p.is_approved = true;
+    p.approval_status = "approved";
     const isSbs = isSbsDomain(p.email, this.allowed_domains);
     p.user_type = isSbs ? "sbs_member" : "external";
     p.sbs_eligible = isSbs;

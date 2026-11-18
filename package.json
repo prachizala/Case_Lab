@@ -12,7 +12,8 @@
     "test:validators": "tsx scripts/test-casepack-validators.ts",
     "test:exports": "tsx scripts/test-casepack-export.ts",
     "test:feedback-syllabus": "tsx scripts/test-casepack-feedback-syllabus.ts",
-    "test:budget": "tsx scripts/test-token-budget.ts"
+    "test:budget": "tsx scripts/test-token-budget.ts",
+    "test:otp": "tsx scripts/test-otp-security.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

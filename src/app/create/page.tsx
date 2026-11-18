@@ -420,7 +420,7 @@ function CreateCaseContent() {
       if (!res.ok) {
         throw new Error(data.error || "Failed to resend code.");
       }
-      setOtpMessage(data.debug_otp ? `New OTP generated: ${data.debug_otp}` : "A new verification code has been sent.");
+      setOtpMessage("A new 6-digit verification code has been dispatched.");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to resend code.";
       setOtpError(msg);
