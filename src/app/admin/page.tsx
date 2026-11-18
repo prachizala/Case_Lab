@@ -108,6 +108,10 @@ export default function AdminPage() {
   const [editingSbsLimit, setEditingSbsLimit] = useState<number>(30);
   const [savingSettings, setSavingSettings] = useState<boolean>(false);
   const [domainUpdating, setDomainUpdating] = useState<boolean>(false);
+  const [studentGenPolicy, setStudentGenPolicy] = useState<{ enabled: boolean; dailyLimit: number }>({
+    enabled: false,
+    dailyLimit: 3,
+  });
 
   // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -171,6 +175,9 @@ export default function AdminPage() {
       if (data.allowedDomains) {
         setAllowedDomains(data.allowedDomains);
       }
+      if (data.studentCaseGeneration) {
+        setStudentGenPolicy(data.studentCaseGeneration);
+      }
       if (data.departments && data.departments.length > 0 && !newCourseDeptId) {
         setNewCourseDeptId(data.departments[0].id);
       }
@@ -229,6 +236,9 @@ export default function AdminPage() {
       if (data.allowedDomains) {
         setAllowedDomains(data.allowedDomains);
       }
+      if (data.studentCaseGeneration) {
+        setStudentGenPolicy(data.studentCaseGeneration);
+      }
       setNewDomainInput("");
       triggerNotification(data.message || `Domain @${domain} added.`);
       loadAdminData();
@@ -260,6 +270,9 @@ export default function AdminPage() {
       if (!res.ok) throw new Error(data.error || "Failed to remove domain.");
       if (data.allowedDomains) {
         setAllowedDomains(data.allowedDomains);
+      }
+      if (data.studentCaseGeneration) {
+        setStudentGenPolicy(data.studentCaseGeneration);
       }
       triggerNotification(data.message || `Domain @${domain} removed.`);
       loadAdminData();
@@ -1868,6 +1881,49 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Card 3: Student Case Generation Policy (Read-Only) */}
+              <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-border">
+                  <div className="p-2 rounded-xl bg-accent/10 text-accent">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-text">
+                      Student Case Generation Access
+                    </h3>
+                    <p className="text-xs text-muted">
+                      Role-based pedagogy security & practice generation policy
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_CASE_GENERATION</p>
+                      <p className="text-[11px] text-muted">Allow students to generate practice cases</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold ${studentGenPolicy.enabled ? "bg-success/15 text-success border border-success/30" : "bg-muted/15 text-muted border border-border"}`}>
+                      {studentGenPolicy.enabled ? "ENABLED (true)" : "DISABLED (false - Default)"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_GENERATION_LIMIT</p>
+                      <p className="text-[11px] text-muted">Daily cap for student practice generations</p>
+                    </div>
+                    <span className="font-mono font-bold text-text bg-surface px-2.5 py-1 rounded-lg border border-border">
+                      {studentGenPolicy.dailyLimit} cases / day / student
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/20 text-text text-[11px] leading-relaxed">
+                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. To modify these values, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=true</code> and <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> in your server environment variables (e.g., Vercel Project Settings or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">.env.local</code>) and redeploy.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -2163,6 +2219,49 @@ export default function AdminPage() {
                     >
                       Approve
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Student Case Generation Policy (Read-Only) */}
+              <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-border">
+                  <div className="p-2 rounded-xl bg-accent/10 text-accent">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-text">
+                      Student Case Generation Access
+                    </h3>
+                    <p className="text-xs text-muted">
+                      Role-based pedagogy security & practice generation policy
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_CASE_GENERATION</p>
+                      <p className="text-[11px] text-muted">Allow students to generate practice cases</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold ${studentGenPolicy.enabled ? "bg-success/15 text-success border border-success/30" : "bg-muted/15 text-muted border border-border"}`}>
+                      {studentGenPolicy.enabled ? "ENABLED (true)" : "DISABLED (false - Default)"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_GENERATION_LIMIT</p>
+                      <p className="text-[11px] text-muted">Daily cap for student practice generations</p>
+                    </div>
+                    <span className="font-mono font-bold text-text bg-surface px-2.5 py-1 rounded-lg border border-border">
+                      {studentGenPolicy.dailyLimit} cases / day / student
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/20 text-text text-[11px] leading-relaxed">
+                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. To modify these values, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=true</code> and <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> in your server environment variables (e.g., Vercel Project Settings or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">.env.local</code>) and redeploy.
                   </div>
                 </div>
               </div>

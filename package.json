@@ -14,7 +14,8 @@
     "test:feedback-syllabus": "tsx scripts/test-casepack-feedback-syllabus.ts",
     "test:budget": "tsx scripts/test-token-budget.ts",
     "test:otp": "tsx scripts/test-otp-security.ts",
-    "test:consent": "tsx scripts/test-dpdp-consent.ts"
+    "test:consent": "tsx scripts/test-dpdp-consent.ts",
+    "test:student-access": "tsx scripts/test-student-generation-access.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

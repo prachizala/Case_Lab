@@ -189,6 +189,7 @@ export interface CaseStudy {
   language: CaseLanguage;
   complexity: number; // 1 - 10
   tags?: string[]; // Pedagogy tags & keywords
+  student_practice?: boolean; // Student practice case flag
   content: CaseContent;
   source_notes?: string;
   version?: number; // current version number
@@ -201,6 +202,7 @@ export interface CaseStudy {
 export interface UsageLog {
   id: string;
   user_id: string;
+  user_role?: string;
   tokens_used: number;
   prompt_tokens?: number;
   completion_tokens?: number;

@@ -28,9 +28,10 @@ export async function recordGenerationUsage(
   userId: string,
   tokens: number,
   model: string,
-  caseId?: string
+  caseId?: string,
+  userRole?: string
 ) {
-  return mockStore.logUsage(userId, tokens, model, caseId);
+  return mockStore.logUsage(userId, tokens, model, caseId, userRole);
 }
 
 // In-memory rate limiter for auth operations (OTP request/verification, signup, login)

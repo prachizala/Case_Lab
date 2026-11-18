@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateUser } from "@/lib/session";
+import { isStudentCaseGenerationEnabled } from "@/lib/case-permissions";
 import {
   FINANCE_DEPARTMENT_PROFILE,
   HR_DEPARTMENT_PROFILE,
@@ -17,6 +18,16 @@ interface ExtractedUnit {
 export async function POST(req: NextRequest) {
   const auth = await authenticateUser(req, ["admin", "faculty", "student"]);
   if (auth.errorResponse) return auth.errorResponse;
+
+  if (auth.user?.role === "student" && !isStudentCaseGenerationEnabled()) {
+    return NextResponse.json(
+      {
+        error: "Students are restricted from syllabus extraction and case generation. Contact your course faculty.",
+        error_code: "STUDENT_GENERATION_DISABLED",
+      },
+      { status: 403 }
+    );
+  }
 
   try {
     const formData = await req.formData();

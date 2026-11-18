@@ -2358,7 +2358,7 @@ function CreateCaseContent() {
               <div className="p-6 rounded-2xl border-2 border-accent bg-surface shadow-xl space-y-5">
                 <CECasePackView
                   casePack={generatedCasePack}
-                  isStudent={false}
+                  isStudent={currentUser?.role === "student"}
                   validationReport={casePackValidation}
                   onRerunChecks={handleRerunChecks}
                   onAutoFix={handleAutoFix}
@@ -2688,18 +2688,6 @@ function CreateCaseContent() {
                     onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ""))}
                     className="w-full py-2.5 px-3 rounded-xl border border-border bg-surface-raised text-text font-mono font-bold text-center text-xl tracking-widest focus:outline-hidden focus:ring-2 focus:ring-accent"
                   />
-                  {currentUser?.verification_otp && (
-                    <div className="mt-2 p-2 rounded-lg bg-accent/10 border border-accent/20 text-[11px] text-accent flex items-center justify-between">
-                      <span>Dev Code: <strong className="font-mono">{currentUser.verification_otp}</strong></span>
-                      <button
-                        type="button"
-                        onClick={() => setOtpInput(currentUser.verification_otp || "")}
-                        className="underline font-bold text-[11px]"
-                      >
-                        Autofill
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">

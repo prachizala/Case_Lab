@@ -30,6 +30,10 @@ export async function GET(req: NextRequest) {
     courses,
     platformSettings: mockStore.getPlatformSettings(),
     allowedDomains: mockStore.getAllowedDomains(),
+    studentCaseGeneration: {
+      enabled: process.env.STUDENT_CASE_GENERATION === "true",
+      dailyLimit: parseInt(process.env.STUDENT_GENERATION_LIMIT || "3", 10) || 3,
+    },
     stats: {
       totalUsers: profiles.length,
       sbsMembersCount: profiles.filter((p) => p.user_type === "sbs_member").length,
