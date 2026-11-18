@@ -24,7 +24,8 @@
     "pdf-parse": "^1.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.0.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
