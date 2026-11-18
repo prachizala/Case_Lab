@@ -8,6 +8,10 @@ import { StrategicProfile } from "@/components/StrategicProfile";
 import { FileSourceImporter } from "@/components/FileSourceImporter";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { CaseNarrativeView } from "@/components/CaseNarrativeView";
+import { CECasePackView } from "@/components/casepack/CECasePackView";
+import { CECasePack } from "@/lib/casepack/schema";
+import { CasePackValidationReport, validateCasePackComplete } from "@/lib/casepack/validate";
+import { getDepartmentProfile, getAllDepartmentProfiles } from "@/config/casepack/departments";
 import { TOP_CASE_COMPANIES, CaseCompanyPreset } from "@/config/companies";
 import {
   CaseBloomsLevel,
@@ -142,9 +146,29 @@ function CreateCaseContent() {
   const searchParams = useSearchParams();
 
   // Core Configuration State
-  const [type, setType] = useState<CaseType>("full");
+  const [type, setType] = useState<CaseType>("ce_pack");
   const [format, setFormat] = useState<CaseFormat>("hypothetical");
   const [budgetInfo, setBudgetInfo] = useState<TokenBudgetInfo | null>(null);
+
+  // CE Case Pack Configuration State
+  const [department, setDepartment] = useState<"finance" | "hr" | "marketing">("finance");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([
+    "Factoring (Recourse vs. Non-Recourse)",
+    "Forfaiting & Export Receivables Financing",
+    "Leasing (Operating vs. Financial / Lease vs. Buy)",
+    "Hire Purchase Financing & Asset Ownership",
+    "Credit Rating Mechanisms & Sovereign/Corporate Methodologies",
+  ]);
+  const [includeAnswerKey, setIncludeAnswerKey] = useState<boolean>(true);
+  const [casePackLength, setCasePackLength] = useState<"standard" | "short">("standard");
+  const [generatedCasePack, setGeneratedCasePack] = useState<CECasePack | null>(null);
+  const [casePackValidation, setCasePackValidation] = useState<CasePackValidationReport | null>(null);
+  const [isAutoFixing, setIsAutoFixing] = useState<boolean>(false);
+  const [isSavingCasePack, setIsSavingCasePack] = useState<boolean>(false);
+  const [saveCasePackSuccess, setSaveCasePackSuccess] = useState<boolean>(false);
+  const [streamingProgress, setStreamingProgress] = useState<number>(0);
+  const [streamingStepName, setStreamingStepName] = useState<string>("");
+  const [streamingText, setStreamingText] = useState<string>("");
 
   // Phase 2: Domain, Difficulty, Audience
   const [domain, setDomain] = useState<CaseDomain>("Strategy");
@@ -566,6 +590,139 @@ function CreateCaseContent() {
     setSignalsModalOpen(false);
   };
 
+  // CE Case Pack Handlers
+  const handleDepartmentChange = (dept: "finance" | "hr" | "marketing") => {
+    setDepartment(dept);
+    if (dept === "finance") {
+      setSelectedTopics([
+        "Factoring (Recourse vs. Non-Recourse)",
+        "Forfaiting & Export Receivables Financing",
+        "Leasing (Operating vs. Financial / Lease vs. Buy)",
+        "Hire Purchase Financing & Asset Ownership",
+        "Credit Rating Mechanisms & Sovereign/Corporate Methodologies",
+      ]);
+      setIndustry("Industrial Machinery & Manufacturing");
+      setDomain("Finance");
+    } else if (dept === "hr") {
+      setSelectedTopics([
+        "Workforce Planning & Headcount Forecasting",
+        "OKR Frameworks & KPI Cascading",
+        "Executive Compensation & ESOP Design",
+        "Attrition Analysis & Retention Interventions",
+      ]);
+      setIndustry("Modern Retail & Omnichannel Commerce");
+      setDomain("HR");
+    } else if (dept === "marketing") {
+      setSelectedTopics([
+        "Market Segmentation & Target Persona Selection",
+        "Value Proposition Design & Customer Job-to-be-Done",
+        "Value-Based vs. Cost-Plus Pricing Strategies",
+        "D2C vs. Modern Trade Distribution Channel Conflicts",
+      ]);
+      setIndustry("Organic Consumer Goods & FMCG");
+      setDomain("Marketing");
+    }
+  };
+
+  const handleToggleTopic = (topic: string) => {
+    setSelectedTopics((prev) =>
+      prev.includes(topic) ? (prev.length > 1 ? prev.filter((t) => t !== topic) : prev) : [...prev, topic]
+    );
+  };
+
+  const handleRerunChecks = () => {
+    if (generatedCasePack) {
+      const rep = validateCasePackComplete(generatedCasePack);
+      setCasePackValidation(rep);
+    }
+  };
+
+  const handleAutoFix = async () => {
+    if (!generatedCasePack) return;
+    setIsAutoFixing(true);
+    try {
+      const res = await fetch("/api/casepack/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          department,
+          topic: selectedTopics,
+          concepts: selectedTopics,
+          length: casePackLength,
+          include_rubric: includeAnswerKey,
+          industry: activeIndustry,
+          geography: locationMarket,
+          course_id: selectedCourseId,
+          custom_notes: `Auto-fix requested. Please remediate the following failures: ${casePackValidation?.criticalFailures.join(", ") || "none"}. Warnings: ${casePackValidation?.warnings.join("; ") || "none"}`,
+        }),
+      });
+      if (!res.ok) throw new Error("Auto-fix generation failed");
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) return;
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
+        for (const part of parts) {
+          if (part.includes("event: complete")) {
+            const dataLine = part.split("\n").find((l) => l.startsWith("data: "));
+            if (dataLine) {
+              const parsed = JSON.parse(dataLine.replace("data: ", ""));
+              if (parsed.casePack) {
+                setGeneratedCasePack(parsed.casePack);
+                setCasePackValidation(validateCasePackComplete(parsed.casePack));
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Auto-fix failed:", err);
+      alert("Auto-fix could not complete.");
+    } finally {
+      setIsAutoFixing(false);
+    }
+  };
+
+  const handleSaveCasePack = async () => {
+    if (!generatedCasePack) return;
+    setIsSavingCasePack(true);
+    setSaveCasePackSuccess(false);
+    try {
+      const newCaseId = `case-ce-${Date.now()}`;
+      const res = await fetch("/api/cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: newCaseId,
+          title: generatedCasePack.case.title,
+          type: "ce_pack",
+          format,
+          industry: activeIndustry,
+          function: functionalFocus,
+          language,
+          complexity,
+          level,
+          content: generatedCasePack,
+          status: "draft",
+          visibility: "sbs_only",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save CE Case Pack");
+      setSaveCasePackSuccess(true);
+      setTimeout(() => router.push(`/cases/${newCaseId}`), 1200);
+    } catch (err) {
+      console.error("Save CE Case Pack error:", err);
+      alert("Failed to save Case Pack.");
+    } finally {
+      setIsSavingCasePack(false);
+    }
+  };
+
   // Cancel generation handler
   const handleCancelGeneration = () => {
     if (abortControllerRef.current) {
@@ -584,6 +741,109 @@ function CreateCaseContent() {
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
+
+    // CE Case Pack Generation with SSE Streaming
+    if (type === "ce_pack") {
+      setStreamingText("");
+      setStreamingProgress(5);
+      setStreamingStepName("1. Drafting Teaching Case Narrative...");
+      setGeneratedCasePack(null);
+      setCasePackValidation(null);
+
+      try {
+        const payload = {
+          department,
+          topic: selectedTopics,
+          concepts: selectedTopics,
+          length: casePackLength,
+          include_rubric: includeAnswerKey,
+          industry: activeIndustry,
+          geography: locationMarket,
+          course_id: selectedCourseId,
+          custom_notes: sourceNotes,
+        };
+
+        const res = await fetch("/api/casepack/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Generation failed with status ${res.status}`);
+        }
+
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        if (!reader) throw new Error("No response stream available.");
+
+        let buffer = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop() || "";
+
+          for (const part of parts) {
+            const lines = part.split("\n");
+            const eventLine = lines.find((l) => l.startsWith("event: "));
+            const dataLine = lines.find((l) => l.startsWith("data: "));
+            if (!eventLine || !dataLine) continue;
+
+            const eventType = eventLine.replace("event: ", "").trim();
+            const dataRaw = dataLine.replace("data: ", "").trim();
+
+            if (eventType === "progress") {
+              try {
+                const prog = JSON.parse(dataRaw);
+                setGenerationStep(prog.step || 1);
+                setStreamingProgress(prog.percent || 0);
+                setStreamingStepName(prog.message || prog.step_name || "");
+              } catch {}
+            } else if (eventType === "text_delta") {
+              try {
+                const delta = JSON.parse(dataRaw);
+                setStreamingText((prev) => prev + (delta.delta || ""));
+              } catch {}
+            } else if (eventType === "complete") {
+              try {
+                const completeData = JSON.parse(dataRaw);
+                if (completeData.casePack) {
+                  setGeneratedCasePack(completeData.casePack);
+                  const valReport = validateCasePackComplete(completeData.casePack);
+                  setCasePackValidation(valReport);
+                }
+              } catch {}
+            } else if (eventType === "error") {
+              try {
+                const errJson = JSON.parse(dataRaw);
+                throw new Error(errJson.message || "Generation stream error.");
+              } catch (e: any) {
+                throw new Error(e.message || "Generation stream error.");
+              }
+            }
+          }
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") {
+          console.log("CE Case Pack generation canceled by user.");
+          return;
+        }
+        console.error("CE Case Pack generation failed:", err);
+        const msg = err instanceof Error ? err.message : "Failed to generate CE Case Pack.";
+        setGenerationError({
+          message: msg,
+          retryable: true,
+        });
+      } finally {
+        setIsGenerating(false);
+      }
+      return;
+    }
 
     // Simulate multi-step progress transitions
     const stepTimer1 = setTimeout(() => setGenerationStep(2), 2500);
@@ -966,13 +1226,19 @@ function CreateCaseContent() {
                 <span className="text-xs text-accent font-semibold">Step 1 of 5</span>
               </div>
 
-              {/* Case Type 3-Way Selector */}
+              {/* Case Type 4-Way Selector */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-text block">
                   Select Pedagogical Model & Length
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                   {[
+                    {
+                      id: "ce_pack" as CaseType,
+                      title: "CE Case Pack",
+                      badge: "Exam + Solutions",
+                      desc: "Accredited Continuous Evaluation Pack: Teaching Case + Exam Questions + Faculty Model Answer Key & Solutions.",
+                    },
                     {
                       id: "short" as CaseType,
                       title: "Short Case",
@@ -1019,6 +1285,149 @@ function CreateCaseContent() {
                   ))}
                 </div>
               </div>
+
+              {/* CE Case Pack Department & Syllabus Configuration */}
+              {type === "ce_pack" && (
+                <div className="mt-3 p-4 rounded-xl border border-accent/30 bg-accent/5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
+                    <div>
+                      <span className="text-xs font-bold text-accent uppercase font-mono tracking-wider block">
+                        Department Profile & Syllabus Alignment
+                      </span>
+                      <p className="text-xs text-muted">
+                        Select department to load syllabus units, frameworks, and pedagogical rules.
+                      </p>
+                    </div>
+
+                    {/* Department Selector */}
+                    <div className="inline-flex p-1 bg-surface rounded-xl border border-border shrink-0">
+                      {(["finance", "hr", "marketing"] as const).map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => handleDepartmentChange(d)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
+                            department === d
+                              ? "bg-accent text-accent-text shadow-sm"
+                              : "text-muted hover:text-text"
+                          }`}
+                        >
+                          {d.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Units & Topics Multi-Select */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs font-semibold text-text">
+                      <span>Curricular Topics (Grouped by Unit)</span>
+                      <span className="text-[11px] text-muted">
+                        {selectedTopics.length} selected
+                      </span>
+                    </div>
+
+                    <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+                      {getDepartmentProfile(department).units.map((u) => (
+                        <div key={u.unit} className="p-3 rounded-lg border border-border/70 bg-surface/90 space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-text">
+                              Unit {u.unit}: {u.title}
+                            </span>
+                            {u.quantitative && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-warning/15 text-warning border border-warning/30">
+                                Quantitative
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {u.topics.map((t) => {
+                              const isSelected = selectedTopics.includes(t);
+                              return (
+                                <button
+                                  key={t}
+                                  type="button"
+                                  onClick={() => handleToggleTopic(t)}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                                    isSelected
+                                      ? "bg-accent/15 border-accent text-accent font-semibold"
+                                      : "bg-surface border-border text-muted hover:text-text"
+                                  }`}
+                                >
+                                  {isSelected && <span className="mr-1">✓</span>}
+                                  {t}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CE Pack Controls: Answer Key Toggle & Target Length */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border/60 text-xs">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                      <div>
+                        <span className="font-bold text-text block">
+                          Include Model Answer Key
+                        </span>
+                        <span className="text-[11px] text-muted">
+                          Faculty/Admin only (hidden from students)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIncludeAnswerKey(!includeAnswerKey)}
+                        className={`w-11 h-6 rounded-full transition-colors relative p-0.5 ${
+                          includeAnswerKey ? "bg-accent" : "bg-muted/40"
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full bg-white transition-transform ${
+                            includeAnswerKey ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border">
+                      <div>
+                        <span className="font-bold text-text block">
+                          Target Length
+                        </span>
+                        <span className="text-[11px] text-muted">
+                          {casePackLength === "standard" ? "Standard (~1,200 words)" : "Short (~600 words)"}
+                        </span>
+                      </div>
+                      <div className="inline-flex p-0.5 bg-primary-soft rounded-lg border border-border">
+                        <button
+                          type="button"
+                          onClick={() => setCasePackLength("standard")}
+                          className={`px-2.5 py-1 rounded-md text-xs font-semibold ${
+                            casePackLength === "standard"
+                              ? "bg-surface text-text shadow-xs"
+                              : "text-muted hover:text-text"
+                          }`}
+                        >
+                          Standard
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCasePackLength("short")}
+                          className={`px-2.5 py-1 rounded-md text-xs font-semibold ${
+                            casePackLength === "short"
+                              ? "bg-surface text-text shadow-xs"
+                              : "text-muted hover:text-text"
+                          }`}
+                        >
+                          Short
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Factual Basis Toggle: Hypothetical vs Real Signal */}
               <div className="pt-2 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -1766,7 +2175,9 @@ function CreateCaseContent() {
                     <div className="flex items-center gap-2">
                       <RefreshCw className="w-5 h-5 text-accent animate-spin" />
                       <span className="font-serif font-bold text-sm text-text">
-                        Generating Case with {AI_ENGINE_LABEL}...
+                        {type === "ce_pack"
+                          ? `Generating CE Case Pack (${department.toUpperCase()})...`
+                          : `Generating Case with ${AI_ENGINE_LABEL}...`}
                       </span>
                     </div>
                     <button
@@ -1779,24 +2190,58 @@ function CreateCaseContent() {
                   </div>
 
                   {/* Multi-Step Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-muted">
-                      <span>Step {generationStep} of 5:</span>
-                      <span className="text-accent font-bold">
-                        {generationStep === 1 && "1. Researching & Fact Verification"}
-                        {generationStep === 2 && "2. Structuring Pedagogical Architecture"}
-                        {generationStep === 3 && "3. Drafting Business Dilemma & Context"}
-                        {generationStep === 4 && "4. Generating Exhibits & Financial Models"}
-                        {generationStep === 5 && "5. Polishing Discussion Questions & Flow"}
-                      </span>
+                  {type === "ce_pack" ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-muted">
+                        <span>Step {generationStep} of 4:</span>
+                        <span className="text-accent font-bold">
+                          {streamingStepName || (
+                            generationStep === 1
+                              ? "1. Case Narrative (Indian context & data tables)"
+                              : generationStep === 2
+                              ? "2. Examination Questions (Bloom taxonomy)"
+                              : generationStep === 3
+                              ? "3. Model Answer Key & Teaching Notes"
+                              : "4. Programmatic Checks & Quality Validation"
+                          )}
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 bg-primary-soft rounded-full overflow-hidden p-0.5 border border-border">
+                        <div
+                          className="h-full bg-accent rounded-full transition-all duration-300"
+                          style={{
+                            width: `${streamingProgress || Math.round((generationStep / 4) * 100)}%`,
+                          }}
+                        />
+                      </div>
+
+                      {/* Live streaming text snippet */}
+                      {streamingText && (
+                        <div className="mt-2 p-3 rounded-xl bg-primary-soft/60 border border-border text-xs font-mono text-muted max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                          {streamingText.slice(-600)}
+                        </div>
+                      )}
                     </div>
-                    <div className="w-full h-2.5 bg-primary-soft rounded-full overflow-hidden p-0.5 border border-border">
-                      <div
-                        className="h-full bg-accent rounded-full transition-all duration-500"
-                        style={{ width: `${(generationStep / 5) * 100}%` }}
-                      />
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-semibold text-muted">
+                        <span>Step {generationStep} of 5:</span>
+                        <span className="text-accent font-bold">
+                          {generationStep === 1 && "1. Researching & Fact Verification"}
+                          {generationStep === 2 && "2. Structuring Pedagogical Architecture"}
+                          {generationStep === 3 && "3. Drafting Business Dilemma & Context"}
+                          {generationStep === 4 && "4. Generating Exhibits & Financial Models"}
+                          {generationStep === 5 && "5. Polishing Discussion Questions & Flow"}
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 bg-primary-soft rounded-full overflow-hidden p-0.5 border border-border">
+                        <div
+                          className="h-full bg-accent rounded-full transition-all duration-500"
+                          style={{ width: `${(generationStep / 5) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <button
@@ -1806,13 +2251,38 @@ function CreateCaseContent() {
                 >
                   <Sparkles className="w-5 h-5 text-accent-text" />
                   <span>
-                    Generate {type === "short" ? "Short Case (~2 pp)" : type === "research" ? "Case Research (Multi-Firm)" : "Full Teaching Case"} ({language.toUpperCase()})
+                    {type === "ce_pack"
+                      ? `Generate CE Case Pack (${department.toUpperCase()})`
+                      : type === "short"
+                      ? "Generate Short Case (~2 pp)"
+                      : type === "research"
+                      ? "Generate Case Research (Multi-Firm)"
+                      : "Generate Full Teaching Case"}{" "}
+                    ({language.toUpperCase()})
                   </span>
                 </button>
               )}
             </div>
 
-            {/* 9. GENERATED CASE PREVIEW TABS & CONTROLS */}
+            {/* 9A. GENERATED CE CASE PACK (TABBED RESULT VIEW) */}
+            {generatedCasePack && (
+              <div className="p-6 rounded-2xl border-2 border-accent bg-surface shadow-xl space-y-5">
+                <CECasePackView
+                  casePack={generatedCasePack}
+                  isStudent={false}
+                  validationReport={casePackValidation}
+                  onRerunChecks={handleRerunChecks}
+                  onAutoFix={handleAutoFix}
+                  isAutoFixing={isAutoFixing}
+                  onSave={handleSaveCasePack}
+                  isSaving={isSavingCasePack}
+                  saveSuccess={saveCasePackSuccess}
+                  showExportControls={false}
+                />
+              </div>
+            )}
+
+            {/* 9B. GENERATED STANDARD CASE PREVIEW TABS & CONTROLS */}
             {generatedCase && (
               <div className="p-6 rounded-2xl border-2 border-accent bg-surface shadow-xl space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">

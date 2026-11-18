@@ -88,6 +88,7 @@ const InteractiveFinancialExhibit = dynamic(
   { ssr: false }
 );
 import { CaseNarrativeView } from "@/components/CaseNarrativeView";
+import { CECasePackView } from "@/components/casepack/CECasePackView";
 
 export default function CaseDetailPage({
   params,
@@ -1323,7 +1324,16 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
           </div>
         )}
 
-        {/* CASE HEADER DOSSIER CARD */}
+        {caseStudy.type === "ce_pack" || (content && "case" in (content as any) && "questions" in (content as any)) ? (
+          <CECasePackView
+            casePack={content as any}
+            isStudent={isStudent}
+            caseId={caseId}
+            showExportControls={true}
+          />
+        ) : (
+          <>
+            {/* CASE HEADER DOSSIER CARD */}
         <div className="p-6 md:p-8 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary text-on-primary">
@@ -2127,6 +2137,8 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
 
           </div> {/* Close Main Sections Container */}
         </div> {/* Close 2-Column Layout */}
+          </>
+        )}
 
         {/* MODAL: RUBRIC MANAGER & AI SUGGESTER (FACULTY & ADMIN) */}
         {rubricModalOpen && (

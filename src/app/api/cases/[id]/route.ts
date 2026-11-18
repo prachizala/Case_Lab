@@ -39,13 +39,18 @@ export async function GET(
   }
 
 
-  // Academic confidentiality safeguard: strictly strip teaching note from student response
+  // Academic confidentiality safeguard: strictly strip answer key, teaching note, quality/checks from student response
   let caseToReturn = { ...foundCase };
   if (user.role === "student") {
-    if (caseToReturn.content && caseToReturn.content.teaching_note) {
-      const sanitizedContent = { ...caseToReturn.content };
+    if (caseToReturn.content) {
+      const sanitizedContent = { ...caseToReturn.content } as Record<string, unknown>;
       delete sanitizedContent.teaching_note;
-      caseToReturn.content = sanitizedContent;
+      delete sanitizedContent.teaching_notes;
+      delete sanitizedContent.answers;
+      delete sanitizedContent.answer_key;
+      delete sanitizedContent.quality;
+      delete sanitizedContent.validation;
+      caseToReturn.content = sanitizedContent as any;
     }
   }
 

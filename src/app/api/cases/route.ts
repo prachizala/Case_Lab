@@ -135,10 +135,15 @@ export async function GET(req: NextRequest) {
 
   if (user.role === "student") {
     cases = cases.map((c) => {
-      if (c.content && c.content.teaching_note) {
-        const sanitizedContent = { ...c.content };
+      if (c.content) {
+        const sanitizedContent = { ...c.content } as Record<string, unknown>;
         delete sanitizedContent.teaching_note;
-        return { ...c, content: sanitizedContent };
+        delete sanitizedContent.teaching_notes;
+        delete sanitizedContent.answers;
+        delete sanitizedContent.answer_key;
+        delete sanitizedContent.quality;
+        delete sanitizedContent.validation;
+        return { ...c, content: sanitizedContent as any };
       }
       return c;
     });
