@@ -54,7 +54,7 @@ export const CaseQuestionSchema = z.object({
 
 export const AnswerSectionSchema = z.object({
   heading: z.string().min(1),
-  points: z.array(z.string()).default([]),
+  points: z.array(z.string()).optional().default([]),
   evaluation: z.array(z.string()).optional(),
   limitation: z.string().optional(),
   overall: z.string().optional(),
