@@ -875,8 +875,12 @@ function CreateCaseContent() {
           console.log("CE Case Pack generation canceled by user.");
           return;
         }
-        console.error("CE Case Pack generation failed:", err);
-        const msg = err instanceof Error ? err.message : "Failed to generate CE Case Pack.";
+        const isNetworkErr = err instanceof TypeError && (err.message.includes("fetch") || err.message.includes("network"));
+        const msg = isNetworkErr
+          ? "Unable to reach the server. Please verify the local CaseLab server is running on port 3000 and try again."
+          : err instanceof Error
+          ? err.message
+          : "Failed to generate CE Case Pack.";
         setGenerationError({
           message: msg,
           retryable: true,
@@ -986,8 +990,12 @@ function CreateCaseContent() {
         console.log("Generation canceled by user.");
         return;
       }
-      console.error("Generation failed:", err);
-      const msg = err instanceof Error ? err.message : "Failed to generate case study.";
+      const isNetworkErr = err instanceof TypeError && (err.message.includes("fetch") || err.message.includes("network"));
+      const msg = isNetworkErr
+        ? "Unable to reach the server. Please verify the local CaseLab server is running on port 3000 and try again."
+        : err instanceof Error
+        ? err.message
+        : "Failed to generate case study.";
       setGenerationError({
         message: msg,
         retryable: true,
