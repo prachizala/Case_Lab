@@ -108,95 +108,109 @@ export function StrategicProfile({
   };
 
   return (
-    <div className="lg:sticky lg:top-24 rounded-2xl border border-border bg-surface shadow-lg p-5 space-y-5 transition-all">
+    <div className="lg:sticky lg:top-24 rounded-2xl border border-border bg-surface shadow-md p-5 space-y-4 transition-all">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center">
-            <Compass className="w-4 h-4" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-xs">
+            <Compass className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="font-serif text-sm font-bold text-text">
-              Strategic Profile
+              Case Summary
             </h3>
-            <p className="text-[11px] text-muted">
-              Real-time pedagogical spec
+            <p className="text-xs text-muted">
+              Live configuration overview
             </p>
           </div>
         </div>
 
-        <div className="px-2.5 py-1 rounded-full bg-primary-soft border border-border text-[11px] font-semibold text-text">
-          {configuredStepsCount}/5 Configured
+        <div className="px-2.5 py-1 rounded-full bg-primary-soft border border-border text-xs font-medium text-text">
+          Draft Spec
         </div>
       </div>
 
       {/* Complexity Gauge */}
-      <div className="p-4 rounded-xl bg-primary-soft/50 border border-border">
-        <div className="flex items-center justify-between mb-2">
+      <div className="p-3.5 rounded-xl bg-primary-soft/40 border border-border space-y-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-text">
-            <Gauge className="w-4 h-4 text-accent" />
-            <span>Complexity Gauge</span>
+            <Gauge className="w-4 h-4 text-primary" />
+            <span>Complexity Level</span>
           </div>
-          <span className="font-mono text-base font-bold text-primary">
+          <span className="font-mono text-sm font-bold text-text">
             {complexity} / 10
           </span>
         </div>
 
         {/* Visual Gauge Bar */}
-        <div className="w-full h-3 bg-border/50 rounded-full overflow-hidden p-0.5">
+        <div className="w-full h-2.5 bg-border/60 rounded-full overflow-hidden p-0.5">
           <div
             className={`h-full rounded-full transition-all duration-300 ${complexityTier.bar}`}
             style={{ width: `${(complexity / 10) * 100}%` }}
           />
         </div>
 
-        <p className={`text-[11px] font-medium mt-2 ${complexityTier.color}`}>
-          Tier: {complexityTier.label}
+        <p className="text-xs text-muted flex items-center justify-between">
+          <span>Tier: <strong className="text-text font-semibold">{complexityTier.label}</strong></span>
+          <span>{difficulty}</span>
         </p>
       </div>
 
-      {/* Live Specifications Grid */}
-      <div className="grid grid-cols-2 gap-2.5 text-xs">
-        <div className="p-3 rounded-lg border border-border bg-surface/60">
-          <span className="text-[10px] uppercase font-bold text-muted tracking-wider">
-            Case Format
-          </span>
-          <div className="mt-1 font-semibold text-text truncate">
+      {/* Clean Structured Summary List */}
+      <div className="space-y-2.5 text-xs">
+        <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
+          <span className="text-muted font-medium shrink-0">Format:</span>
+          <span className="font-semibold text-text text-right truncate">
             {typeLabels[type] || `${type} Case`}
-          </div>
-          <span className="text-[10px] text-accent capitalize">{format.replace("_", " ")}</span>
-        </div>
-
-        <div className="p-3 rounded-lg border border-border bg-surface/60">
-          <span className="text-[10px] uppercase font-bold text-muted tracking-wider">
-            Domain & Depth
           </span>
-          <div className="mt-1 font-semibold text-text truncate">
+        </div>
+
+        <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
+          <span className="text-muted font-medium shrink-0">Department:</span>
+          <span className="font-semibold text-text text-right">
             {domain}
-          </div>
-          <span className="text-[10px] text-muted">{difficulty} • {targetAudience}</span>
+          </span>
         </div>
 
-        <div className="p-3 rounded-lg border border-border bg-surface/60">
-          <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-muted tracking-wider">
-            <Clock className="w-3 h-3 text-accent" />
-            <span>Class Time</span>
-          </div>
-          <div className="mt-1 font-semibold text-text">
-            {metrics.estDuration}
-          </div>
-          <span className="text-[10px] text-muted">~{metrics.targetWords.toLocaleString()} words</span>
+        <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
+          <span className="text-muted font-medium shrink-0">Audience:</span>
+          <span className="font-semibold text-text text-right">
+            {targetAudience}
+          </span>
         </div>
 
-        <div className="p-3 rounded-lg border border-border bg-surface/60">
-          <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-muted tracking-wider">
-            <Cpu className="w-3 h-3 text-accent" />
-            <span>AI Resource Est.</span>
+        {primaryCompany && (
+          <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
+            <span className="text-muted font-medium shrink-0">Entity:</span>
+            <span className="font-semibold text-text text-right truncate max-w-[170px]">
+              {primaryCompany}
+            </span>
           </div>
-          <div className="mt-1 font-semibold text-accent">
-            ~{metrics.estTokens.toLocaleString()} tokens
-          </div>
-          <span className="text-[10px] text-muted">~{metrics.estSeconds}s generation</span>
+        )}
+
+        <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
+          <span className="text-muted font-medium shrink-0 flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-muted" /> Class Time:
+          </span>
+          <span className="font-semibold text-text text-right">
+            {metrics.estDuration} <span className="text-muted font-normal">(~{metrics.targetWords.toLocaleString()} words)</span>
+          </span>
+        </div>
+
+        <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
+          <span className="text-muted font-medium shrink-0 flex items-center gap-1">
+            <Cpu className="w-3.5 h-3.5 text-muted" /> AI Estimate:
+          </span>
+          <span className="font-mono font-bold text-text text-right">
+            ~{metrics.estTokens.toLocaleString()} tokens <span className="text-muted font-sans font-normal text-[11px]">(~{metrics.estSeconds}s)</span>
+          </span>
+        </div>
+
+        <div className="flex items-start justify-between py-1.5 gap-2">
+          <span className="text-muted font-medium shrink-0">Source Basis:</span>
+          <span className="font-semibold text-text text-right capitalize">
+            {format === "real_signal" ? "Real Signal" : "Hypothetical"}
+          </span>
         </div>
       </div>
 

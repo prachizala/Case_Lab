@@ -416,12 +416,6 @@ export function AppShell({ children }: AppShellProps) {
             {/* Theme Toggle (40px) */}
             <ThemeToggle />
 
-            {/* Role Badge Indicator (40px) */}
-            <div className="hidden sm:inline-flex items-center gap-1.5 h-10 px-3 rounded-xl bg-white/10 border border-white/15 text-[10px] font-mono font-bold tracking-wider uppercase text-white shrink-0">
-              <UserCheck className="w-3.5 h-3.5 text-accent" />
-              <span>{roleLabel}</span>
-            </div>
-
             {/* USER PROFILE AVATAR & DROPDOWN MENU (40px) */}
             <div className="relative shrink-0" ref={userDropdownRef}>
               <button
@@ -666,26 +660,28 @@ export function AppShell({ children }: AppShellProps) {
         )}
       </header>
 
-      {/* 3. SUBTLE BREADCRUMB STRIP UNDER TOP BAR (ALIGNED WITH PAGECONTAINER) */}
-      <section className="w-full bg-[var(--breadcrumb-bg)] border-b border-border py-2.5 text-xs backdrop-blur-xs transition-colors">
-        <PageContainer className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-muted min-w-0">
-            <span className="font-serif font-bold text-primary dark:text-text truncate hidden sm:inline">
-              {COLLEGE_NAME} Pedagogical Engine
-            </span>
-            <span className="hidden sm:inline text-muted/60">•</span>
-            <span className="font-semibold text-text truncate">
-              {activeBreadcrumbTitle}
-            </span>
-          </div>
+      {/* 3. SUBTLE BREADCRUMB STRIP UNDER TOP BAR (Hidden on /create to maximize above-the-fold space) */}
+      {pathname !== "/create" && (
+        <section className="w-full bg-[var(--breadcrumb-bg)] border-b border-border py-2.5 text-xs backdrop-blur-xs transition-colors">
+          <PageContainer className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-muted min-w-0">
+              <span className="font-serif font-bold text-primary dark:text-text truncate hidden sm:inline">
+                {COLLEGE_NAME} Pedagogical Engine
+              </span>
+              <span className="hidden sm:inline text-muted/60">•</span>
+              <span className="font-semibold text-text truncate">
+                {activeBreadcrumbTitle}
+              </span>
+            </div>
 
-          <div className="flex items-center gap-3 text-[11px] text-muted shrink-0 font-mono">
-            <span className="hidden md:inline">
-              Campus Session: <strong className="text-text font-bold">AY 2026-27</strong>
-            </span>
-          </div>
-        </PageContainer>
-      </section>
+            <div className="flex items-center gap-3 text-[11px] text-muted shrink-0 font-mono">
+              <span className="hidden md:inline">
+                Campus Session: <strong className="text-text font-bold">AY 2026-27</strong>
+              </span>
+            </div>
+          </PageContainer>
+        </section>
+      )}
 
       {/* 4. MAIN CANVAS WORKSPACE (FULL PAGE WIDTH, CENTERED WITH PAGECONTAINER) */}
       <main className="flex-1 w-full py-6 md:py-8 overflow-x-hidden">

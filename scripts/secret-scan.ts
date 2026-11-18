@@ -11,7 +11,7 @@ interface Violation {
 const PATTERNS_TO_FLAG = [
   { name: "Live Groq API Key", regex: /gsk_[a-zA-Z0-9]{20,}/g },
   { name: "Live Supabase Service Key / JWT", regex: /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_-]{50,}\.[a-zA-Z0-9_-]{30,}/g },
-  { name: "Hardcoded Demo Password (password123)", regex: new RegExp(["pass", "word123"].join(""), "gi") },
+  { name: "Hardcoded Demo Password Pattern", regex: new RegExp(["pass", "word123"].join(""), "gi") },
   { name: "Verification Code Auto-Detect Banner", regex: new RegExp(["Verification code auto", "-detected"].join(""), "gi") },
 ];
 
