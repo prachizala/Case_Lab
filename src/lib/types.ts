@@ -56,6 +56,7 @@ export interface Profile {
   dpdp_consent_at?: string; // DPDP Act 2023 consent timestamp
   consent_version?: string; // DPDP consent specification version
   policy_version?: string; // Privacy Policy version accepted
+  consent_withdrawn_at?: string; // DPDP Act 2023 consent withdrawal timestamp
   avatar_url?: string | null;
   created_at?: string;
   updated_at?: string;

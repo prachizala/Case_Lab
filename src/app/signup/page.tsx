@@ -41,7 +41,7 @@ function SignUpForm() {
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"faculty" | "student">("faculty");
-  const [dpdpConsent, setDpdpConsent] = useState(true);
+  const [dpdpConsent, setDpdpConsent] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -370,25 +370,37 @@ function SignUpForm() {
                 </div>
               </div>
 
-              {/* DPDP Act 2023 Consent Checkbox */}
-              <div className="pt-2">
-                <label className="flex items-start gap-2.5 cursor-pointer select-none text-muted">
+              {/* DPDP Act 2023 Consent Checkbox & Plain Disclosure */}
+              <div className="pt-2 p-3 rounded-xl border border-border bg-surface-raised space-y-2 text-muted">
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     required
                     checked={dpdpConsent}
                     onChange={(e) => setDpdpConsent(e.target.checked)}
-                    className="mt-0.5 rounded text-accent focus:ring-accent w-4 h-4"
+                    className="mt-0.5 rounded text-accent focus:ring-accent w-4 h-4 shrink-0"
                   />
-                  <span className="text-[11px] leading-relaxed">
+                  <span className="text-[11px] leading-relaxed text-text font-medium">
                     I give explicit statutory consent under the{" "}
-                    <strong className="text-text">DPDP Act 2023</strong>{" "}
-                    for {COLLEGE_NAME_WITH_SHORT} to process my educational records, submissions, and credentials as detailed in the{" "}
-                    <Link href="/privacy" target="_blank" className="underline text-accent font-semibold">
-                      Privacy Policy
-                    </Link>.
+                    <strong>Digital Personal Data Protection (DPDP) Act 2023</strong>{" "}
+                    for {COLLEGE_NAME_WITH_SHORT} to collect and process my personal data for academic case evaluations.
                   </span>
                 </label>
+
+                <div className="text-[10px] leading-relaxed text-muted border-t border-border/60 pt-2 space-y-1">
+                  <p>
+                    <strong className="text-text">Data collected:</strong> Name, institutional email, chosen role, submitted case answers, analytical grades, and Dean&apos;s certificates.
+                  </p>
+                  <p>
+                    <strong className="text-text">Purpose & Access:</strong> Used exclusively for business case simulations, academic grading, and accreditation tracking. Accessible only by authorized faculty and college administrators.
+                  </p>
+                  <p>
+                    <strong className="text-text">Retention & Your Rights:</strong> Retained for active academic cycles or until account deletion. You retain the statutory right to access, export, or withdraw consent and request permanent erasure anytime via the{" "}
+                    <Link href="/privacy" target="_blank" className="underline text-accent font-semibold">
+                      Privacy Policy & DPDP Portal
+                    </Link>.
+                  </p>
+                </div>
               </div>
 
               <button

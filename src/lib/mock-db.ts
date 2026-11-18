@@ -1370,6 +1370,14 @@ class MockStore {
     return { ...p };
   }
 
+  updateProfile(id: string, updates: Partial<Profile>): Profile | null {
+    const p = this.profiles.find((item) => item.id === id || item.email.toLowerCase() === id.toLowerCase());
+    if (!p) return null;
+    Object.assign(p, updates);
+    p.updated_at = new Date().toISOString();
+    return { ...p };
+  }
+
   toggleReviewer(id: string, isReviewer: boolean): Profile | null {
     const p = this.profiles.find((item) => item.id === id || item.email === id);
     if (!p) return null;

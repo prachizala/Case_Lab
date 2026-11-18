@@ -55,6 +55,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Mandatory statutory consent under DPDP Act 2023
+      if (body.dpdp_consent !== true) {
+        return NextResponse.json(
+          { error: "Statutory consent under the DPDP Act 2023 is mandatory to create an academic account and process educational records." },
+          { status: 400 }
+        );
+      }
+
       // Rate limit signup attempts by IP/email
       const rateKey = `signup:${email.toLowerCase().trim()}:${clientIp}`;
       const rate = checkAuthRateLimit(rateKey, 5, 15 * 60 * 1000);
