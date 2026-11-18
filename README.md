@@ -247,7 +247,7 @@ Open your browser and visit:
 
 ## 👥 Built-In Test Personas & Role Switcher
 
-When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is accessible directly in the top navigation profile dropdown and login page. All demo accounts use the standard password: `password123`.
+When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is accessible directly in the top navigation profile dropdown and login page for instant authentication without password entry. If logging in via standard credentials, seed demo accounts utilize the password configured via the `DEMO_USER_PASSWORD` environment variable (or one-time generated secure credentials printed during `npm run seed`).
 
 | Role | Persona Name | Institutional Email | Key Permissions |
 |---|---|---|---|
@@ -368,9 +368,12 @@ SBS CaseLab adheres to strict academic integrity standards and Indian data priva
 - **Role-Based Access Control (RBAC)**: Enforced via `src/middleware.ts` to guard administrative, faculty, reviewer, and student routes.
 - **Academic Integrity Engine**: Captures writing duration, paste bursts, and AI probability to ensure ethical student analysis.
 - **DPDP Act 2023 Compliance**:
-  - **Data Export (`/api/user/data-export`)**: Users can download an encrypted copy of all personal submissions, grades, and profile metadata.
+  - **Data Export (`/api/user/data-export`)**: Users can download a machine-readable JSON copy of all personal submissions, grades, and profile metadata.
   - **Right to Erasure (`/api/user/data-delete`)**: Immediate anonymization and purging of identifiable user records upon verified request.
+  - **Right to Withdraw Consent (`/api/user/consent-withdraw`)**: Users can withdraw statutory consent anytime via `/privacy`.
   - **Comprehensive Audit Trails**: Timestamped tracking of all administrative role adjustments, quota modifications, and case status changes.
+
+> ⚖️ **Legal Counsel Confirmation Required**: All statutory notices, consent disclosures, retention windows, and privacy policies in this repository are foundational compliance implementations under the Digital Personal Data Protection (DPDP) Act 2023 and must be formally verified and confirmed by the college's legal team before live production deployment.
 
 ---
 

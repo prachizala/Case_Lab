@@ -29,6 +29,7 @@ export default function PrivacyPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [actionMessage, setActionMessage] = useState<{
     type: "success" | "error";
@@ -82,6 +83,35 @@ export default function PrivacyPage() {
       });
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleWithdrawConsent = async () => {
+    if (!confirm("Are you sure you want to withdraw statutory consent under DPDP Act 2023? Active processing of case analyses will be suspended.")) {
+      return;
+    }
+    setWithdrawing(true);
+    setActionMessage(null);
+    try {
+      const userId = currentUser?.id || "usr-student-1";
+      const res = await fetch("/api/user/consent-withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to withdraw consent");
+      setActionMessage({
+        type: "success",
+        text: data.message || "Consent withdrawn successfully. Active data processing suspended.",
+      });
+    } catch (err: any) {
+      setActionMessage({
+        type: "error",
+        text: err.message || "Failed to withdraw consent.",
+      });
+    } finally {
+      setWithdrawing(false);
     }
   };
 
@@ -178,16 +208,16 @@ export default function PrivacyPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Export Card */}
             <div className="p-6 rounded-2xl border border-border bg-primary-soft/30 flex flex-col justify-between space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-accent font-bold text-sm">
                   <Download className="w-4 h-4" />
-                  <span>Right to Access & Portability (Section 11)</span>
+                  <span>Right to Access & Portability (Sec 11)</span>
                 </div>
                 <p className="text-xs text-muted leading-relaxed">
-                  Download a comprehensive, machine-readable JSON export of your complete profile, submitted answers, AI grading feedback, certificate ledger, subscription history, and tamper-evident audit logs.
+                  Download a comprehensive, machine-readable JSON export of your complete profile, submitted answers, AI grading feedback, certificate ledger, subscription history, and audit logs.
                 </p>
               </div>
 
@@ -211,15 +241,44 @@ export default function PrivacyPage() {
               </button>
             </div>
 
+            {/* Withdraw Consent Card */}
+            <div className="p-6 rounded-2xl border border-border bg-surface flex flex-col justify-between space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-text font-bold text-sm">
+                  <ShieldCheck className="w-4 h-4 text-accent" />
+                  <span>Right to Withdraw Consent (Sec 6)</span>
+                </div>
+                <p className="text-xs text-muted leading-relaxed">
+                  Withdraw statutory consent under the DPDP Act 2023 at any time. Active AI processing is suspended without deleting completed Dean&apos;s awards or past coursework history.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                disabled={withdrawing}
+                onClick={handleWithdrawConsent}
+                className="w-full py-3 px-4 border border-border bg-surface hover:bg-muted/10 text-text rounded-xl font-serif font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2"
+              >
+                {withdrawing ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Processing Withdrawal...</span>
+                  </>
+                ) : (
+                  <span>Withdraw Statutory Consent</span>
+                )}
+              </button>
+            </div>
+
             {/* Erasure Card */}
             <div className="p-6 rounded-2xl border border-danger/30 bg-danger/10 flex flex-col justify-between space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-danger font-bold text-sm">
                   <Trash2 className="w-4 h-4" />
-                  <span>Right to Erasure & Forgetting (Section 12)</span>
+                  <span>Right to Erasure (Sec 12)</span>
                 </div>
                 <p className="text-xs text-text leading-relaxed">
-                  Permanently delete your user profile, all case submissions, AI evaluations, certificates, and billing records from our Postgres databases and memory caches. This action is irreversible.
+                  Permanently delete your user profile, all case submissions, AI evaluations, certificates, and billing records from databases and memory caches. This is irreversible.
                 </p>
               </div>
 
@@ -229,7 +288,7 @@ export default function PrivacyPage() {
                 className="w-full py-3 px-4 bg-danger hover:bg-danger/90 text-white rounded-xl font-serif font-bold text-xs shadow transition-all flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete My Account and Data</span>
+                <span>Delete My Account & Data</span>
               </button>
             </div>
           </div>

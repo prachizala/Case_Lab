@@ -90,6 +90,14 @@ export function validateEnv(strictSupabaseCheck = false): EnvConfig {
     }
   }
 
+  // Production security check: Refuse to boot if DEMO_OTP_ON_SCREEN is enabled in production
+  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
+  if (isProduction && process.env.DEMO_OTP_ON_SCREEN === "true") {
+    throw new Error(
+      "FATAL SECURITY VIOLATION: DEMO_OTP_ON_SCREEN cannot be set to true in production or Vercel production environments."
+    );
+  }
+
   cachedEnv = config;
   return config;
 }

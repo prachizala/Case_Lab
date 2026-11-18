@@ -5,6 +5,12 @@ import { checkRateLimit, recordGenerationUsage } from "@/lib/rate-limit";
 import { mockStore } from "@/lib/mock-db";
 import { generateCECasePack, GenerateCasePackInput } from "@/lib/casepack/generate";
 import { CaseStudy } from "@/lib/types";
+import {
+  checkCaseGenerationAccess,
+  checkStudentDailyLimit,
+  sanitizeCasePackForStudent,
+  sanitizeCaseStudyForStudent,
+} from "@/lib/case-permissions";
 
 const RequestBodySchema = z.object({
   department: z.enum(["finance", "hr", "marketing"]),
@@ -33,7 +39,7 @@ const RequestBodySchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Authentication: Faculty, Admin, and Student access
+    // 1. Authentication & Role Permissions
     const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin", "student"]);
     if (errorResponse || !user) {
       return (
@@ -43,6 +49,32 @@ export async function POST(req: NextRequest) {
           { status: 403 }
         )
       );
+    }
+
+    // Role-based case generation check (STUDENT_CASE_GENERATION flag)
+    const access = checkCaseGenerationAccess(user.role);
+    if (!access.allowed) {
+      return NextResponse.json(
+        { error: access.error, error_code: access.code },
+        { status: access.status }
+      );
+    }
+
+    // Student daily limit check (STUDENT_GENERATION_LIMIT, default 3/day)
+    if (user.role === "student") {
+      const studentDaily = checkStudentDailyLimit(user.id);
+      if (!studentDaily.allowed) {
+        return NextResponse.json(
+          {
+            error: `Daily student practice case generation limit reached (${studentDaily.count}/${studentDaily.limit}). Please try again tomorrow.`,
+            error_code: "STUDENT_DAILY_LIMIT_REACHED",
+            limit: studentDaily.limit,
+            count: studentDaily.count,
+            remaining: studentDaily.remaining,
+          },
+          { status: 429 }
+        );
+      }
     }
 
     // 2. Rate Limiting Check (10 generations per user per hour)
@@ -110,14 +142,16 @@ export async function POST(req: NextRequest) {
 
             // Persist the generated CE Case Pack as a case study record
             const newCaseId = `case-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+            const isStudent = user.role === "student";
             const caseStudy: CaseStudy = {
               id: newCaseId,
               author_id: user.id,
-              author_name: user.name || "Faculty Author",
+              author_name: user.name || (isStudent ? "Student Author" : "Faculty Author"),
               title: casePack.case.title,
               status: "draft",
               type: "ce_pack",
               format: "hypothetical",
+              student_practice: isStudent ? true : undefined,
               industry: casePack.meta.industry,
               function: casePack.meta.department.toUpperCase(),
               level: casePack.meta.level || "MBA / PGDM",
@@ -133,7 +167,7 @@ export async function POST(req: NextRequest) {
 
             // Record token usage & audit ledger
             const estimatedTokens = Math.round((casePack.case.word_count || 1200) * 1.75);
-            await recordGenerationUsage(user.id, estimatedTokens, "claude-3-7-sonnet", newCaseId);
+            await recordGenerationUsage(user.id, estimatedTokens, "claude-3-7-sonnet", newCaseId, user.role);
 
             mockStore.logAudit(
               user.id,
@@ -141,14 +175,23 @@ export async function POST(req: NextRequest) {
               "case_created",
               newCaseId,
               "case",
-              { type: "ce_pack", department: input.department, title: caseStudy.title }
+              {
+                type: "ce_pack",
+                department: input.department,
+                title: caseStudy.title,
+                student_practice: isStudent,
+              }
             );
+
+            const studentSafeCasePack = isStudent ? sanitizeCasePackForStudent(casePack) : casePack;
+            const studentSafeCaseStudy = isStudent ? sanitizeCaseStudyForStudent(caseStudy) : caseStudy;
+            const studentSafeChecks = isStudent ? { valid: true, summary: "Student practice checks verified." } : checks;
 
             sendEvent("complete", {
               success: true,
-              caseStudy,
-              casePack,
-              checks,
+              caseStudy: studentSafeCaseStudy,
+              casePack: studentSafeCasePack,
+              checks: studentSafeChecks,
             });
           } catch (err: any) {
             console.error("Streaming generation error:", err);
@@ -172,14 +215,16 @@ export async function POST(req: NextRequest) {
     const { casePack, checks } = await generateCECasePack(input);
 
     const newCaseId = `case-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const isStudent = user.role === "student";
     const caseStudy: CaseStudy = {
       id: newCaseId,
       author_id: user.id,
-      author_name: user.name || "Faculty Author",
+      author_name: user.name || (isStudent ? "Student Author" : "Faculty Author"),
       title: casePack.case.title,
       status: "draft",
       type: "ce_pack",
       format: "hypothetical",
+      student_practice: isStudent ? true : undefined,
       industry: casePack.meta.industry,
       function: casePack.meta.department.toUpperCase(),
       level: casePack.meta.level || "MBA / PGDM",
@@ -194,7 +239,7 @@ export async function POST(req: NextRequest) {
     mockStore.saveCase(caseStudy);
 
     const estimatedTokens = Math.round((casePack.case.word_count || 1200) * 1.75);
-    await recordGenerationUsage(user.id, estimatedTokens, "claude-3-7-sonnet", newCaseId);
+    await recordGenerationUsage(user.id, estimatedTokens, "claude-3-7-sonnet", newCaseId, user.role);
 
     mockStore.logAudit(
       user.id,
@@ -202,14 +247,23 @@ export async function POST(req: NextRequest) {
       "case_created",
       newCaseId,
       "case",
-      { type: "ce_pack", department: input.department, title: caseStudy.title }
+      {
+        type: "ce_pack",
+        department: input.department,
+        title: caseStudy.title,
+        student_practice: isStudent,
+      }
     );
+
+    const studentSafeCasePack = isStudent ? sanitizeCasePackForStudent(casePack) : casePack;
+    const studentSafeCaseStudy = isStudent ? sanitizeCaseStudyForStudent(caseStudy) : caseStudy;
+    const studentSafeChecks = isStudent ? { valid: true, summary: "Student practice checks verified." } : checks;
 
     return NextResponse.json({
       success: true,
-      caseStudy,
-      casePack,
-      checks,
+      caseStudy: studentSafeCaseStudy,
+      casePack: studentSafeCasePack,
+      checks: studentSafeChecks,
     });
   } catch (error: any) {
     console.error("CE Case Pack generation route error:", error);

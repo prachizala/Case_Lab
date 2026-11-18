@@ -68,7 +68,19 @@ export async function middleware(request: NextRequest) {
 
   // 1. Student Route Protection
   // Students cannot access admin center or review queue
+  // Students cannot access case generation unless STUDENT_CASE_GENERATION is enabled
   if (userRole === "student") {
+    const studentGenerationAllowed = process.env.STUDENT_CASE_GENERATION === "true";
+
+    if (pathname.startsWith("/create") && !studentGenerationAllowed) {
+      const redirectUrl = new URL("/dashboard", request.url);
+      redirectUrl.searchParams.set(
+        "error",
+        "Students are restricted from accessing Case Generation."
+      );
+      return NextResponse.redirect(redirectUrl);
+    }
+
     if (
       pathname.startsWith("/faculty") ||
       pathname.startsWith("/admin") ||

@@ -10,6 +10,18 @@ import { mockStore } from "@/lib/mock-db";
 import { Profile, UserRole, UserType } from "@/lib/types";
 import { ALLOWED_EMAIL_DOMAIN, COLLEGE_SHORT, getNextMonthResetKolkata } from "@/config/college";
 import { checkAuthRateLimit } from "@/lib/rate-limit";
+import {
+  generateSecureOtp,
+  canShowOtpOnScreen,
+  isProductionEnv,
+  assertNoDemoOtpInProduction,
+  checkOtpResendRateLimit,
+  validatePasswordStrength,
+  checkLoginLockout,
+  recordLoginFailure,
+  resetLoginFailures,
+} from "@/lib/auth-security";
+import { isEmailProviderConfigured, sendOtpEmail } from "@/lib/email/send";
 
 export async function GET(req: NextRequest) {
   const sessionCookie = req.cookies.get(AUTH_COOKIE_NAME)?.value;
@@ -38,9 +50,31 @@ export async function POST(req: NextRequest) {
     const clientIp = req.headers.get("x-forwarded-for") || "local";
 
     if (action === "signup") {
+      assertNoDemoOtpInProduction();
+
       if (!email || !password || !name) {
         return NextResponse.json(
           { error: "Name, email, and password are required." },
+          { status: 400 }
+        );
+      }
+
+      // Enforce enterprise password policy (>= 10 chars, upper, lower, number, no common words)
+      const pwdPolicy = validatePasswordStrength(password);
+      if (!pwdPolicy.valid) {
+        return NextResponse.json(
+          {
+            error: pwdPolicy.errors[0],
+            details: pwdPolicy.errors,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Mandatory statutory consent under DPDP Act 2023
+      if (body.dpdp_consent !== true) {
+        return NextResponse.json(
+          { error: "Statutory consent under the DPDP Act 2023 is mandatory to create an academic account and process educational records." },
           { status: 400 }
         );
       }
@@ -76,11 +110,13 @@ export async function POST(req: NextRequest) {
       const isCollegeAdmin = email.toLowerCase().trim() === `admin@${ALLOWED_EMAIL_DOMAIN}`;
       const requestedRole: UserRole = (body.role === "faculty" || body.role === "student") ? body.role : "faculty";
       const newRole: UserRole = isCollegeAdmin ? "admin" : requestedRole;
-      const isApproved = isCollegeAdmin ? true : true; // Student accounts are active, role elevations are approved by Admin
+      const isProd = isProductionEnv();
+      const hasEmailProvider = isEmailProviderConfigured();
 
-      // Generate 6-digit verification OTP
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      // If no email provider is configured in production, create as pending_admin_approval
+      const isPendingAdminApproval = isProd && !hasEmailProvider && !isCollegeAdmin;
+      const isApproved = !isPendingAdminApproval;
+      const approvalStatus = isPendingAdminApproval ? "pending_admin_approval" : "approved";
 
       const userType: UserType = validation.userType;
       const newProfile: Profile = {
@@ -89,33 +125,69 @@ export async function POST(req: NextRequest) {
         name: name.trim(),
         role: newRole,
         user_type: userType,
-        email_verified_at: null, // Require email verification for all users
-        verification_otp: generatedOtp,
-        otp_expires_at: otpExpiresAt,
+        email_verified_at: null, // Require email verification
+        verification_otp: null,
+        otp_expires_at: null,
         free_cases_used_this_month: 0,
         free_cases_reset_at: getNextMonthResetKolkata(),
         department_id: null,
         plan: "standard",
         is_approved: isApproved,
+        approval_status: approvalStatus,
         sbs_eligible: userType === "sbs_member",
-        dpdp_consent: body.dpdp_consent ?? true,
+        dpdp_consent: body.dpdp_consent ?? false,
         dpdp_consent_at: new Date().toISOString(),
+        consent_version: "2023.1",
+        policy_version: "v1.2",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
       mockStore.addProfile(newProfile);
+      mockStore.setUserPassword(newProfile.id, password);
+
+      // Flow 1: Pending Admin Approval (Production without email provider)
+      if (isPendingAdminApproval) {
+        mockStore.logAudit(
+          newProfile.id,
+          newProfile.email,
+          "registration_pending",
+          newProfile.id,
+          "user",
+          { role: newProfile.role, reason: "No transactional email provider configured" }
+        );
+
+        return NextResponse.json({
+          success: true,
+          pending_approval: true,
+          message: "Your registration is submitted for admin approval",
+          user: newProfile,
+        });
+      }
+
+      // Flow 2: Live or Dev OTP Verification
+      const generatedOtp = generateSecureOtp();
+      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
       mockStore.setUserOtp(newProfile.id, generatedOtp, otpExpiresAt);
 
-      console.log(`[AUTH] Registration OTP generated for ${newProfile.email}: ${generatedOtp}`);
+      if (hasEmailProvider) {
+        await sendOtpEmail({
+          to: newProfile.email,
+          otp: generatedOtp,
+          userName: newProfile.name,
+        });
+      }
+
+      // Safe debug OTP output: ONLY when explicitly configured in non-production environments
+      const showOtp = canShowOtpOnScreen();
 
       const response = NextResponse.json({
         success: true,
-        message: "Account created successfully. Please enter the 6-digit verification code to verify your email.",
+        message: "Account created successfully. Please enter the 6-digit verification code sent to your email.",
         user: newProfile,
         user_type: userType,
         requires_verification: true,
-        debug_otp: generatedOtp, // Expose OTP for tests and local development evaluation
+        ...(showOtp ? { debug_otp: generatedOtp } : {}),
       });
 
       // Set signed, tamper-proof session cookie
@@ -125,35 +197,48 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "request-otp") {
+      assertNoDemoOtpInProduction();
       const targetEmail = email?.toLowerCase().trim() || "";
       if (!targetEmail) {
         return NextResponse.json({ error: "Email is required to request a verification code." }, { status: 400 });
       }
 
-      const rateKey = `otp-req:${targetEmail}:${clientIp}`;
-      const rate = checkAuthRateLimit(rateKey, 5, 15 * 60 * 1000);
-      if (!rate.allowed) {
+      // Enforce 3 resends per hour limit per email and IP
+      const resendCheck = checkOtpResendRateLimit(targetEmail, clientIp);
+      if (!resendCheck.allowed) {
         return NextResponse.json(
-          { error: "Too many OTP requests. Please wait 15 minutes before requesting another code." },
+          { error: "Maximum 3 resends per hour reached. Please wait before requesting another code." },
           { status: 429 }
         );
       }
 
       const profile = mockStore.getProfile(targetEmail);
+      // Generic message to prevent email enumeration
       if (!profile) {
-        return NextResponse.json({ error: "No account found with this email." }, { status: 404 });
+        return NextResponse.json({
+          success: true,
+          message: "If an account exists with this email address, a 6-digit verification code has been dispatched.",
+        });
       }
 
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+      const generatedOtp = generateSecureOtp();
+      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
       mockStore.setUserOtp(profile.id, generatedOtp, otpExpiresAt);
 
-      console.log(`[AUTH] Resent OTP for ${profile.email}: ${generatedOtp}`);
+      if (isEmailProviderConfigured()) {
+        await sendOtpEmail({
+          to: profile.email,
+          otp: generatedOtp,
+          userName: profile.name,
+        });
+      }
+
+      const showOtp = canShowOtpOnScreen();
 
       return NextResponse.json({
         success: true,
-        message: "A new 6-digit verification code has been sent to your email.",
-        debug_otp: generatedOtp,
+        message: "If an account exists with this email address, a 6-digit verification code has been dispatched.",
+        ...(showOtp ? { debug_otp: generatedOtp } : {}),
       });
     }
 
@@ -200,22 +285,53 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const rateKey = `login:${email.toLowerCase().trim()}:${clientIp}`;
-      const rate = checkAuthRateLimit(rateKey, 10, 15 * 60 * 1000);
-      if (!rate.allowed) {
+      // Check lockout from 5 previous failed attempts (15-minute lockout)
+      const lockout = checkLoginLockout(email, clientIp);
+      if (lockout.locked) {
         return NextResponse.json(
-          { error: "Too many login attempts. Please wait 15 minutes." },
+          { error: `Account is temporarily locked due to multiple failed login attempts. Please wait ${lockout.waitMinutes} minute(s).` },
           { status: 429 }
         );
       }
 
       const profile = mockStore.getProfile(email.toLowerCase().trim());
       if (!profile) {
+        const failure = recordLoginFailure(email, clientIp);
+        const remaining = Math.max(0, 5 - failure.failures);
         return NextResponse.json(
-          { error: "Invalid credentials or account not found." },
-          { status: 401 }
+          {
+            error: failure.locked
+              ? "Maximum 5 failed login attempts exceeded. Account is locked for 15 minutes."
+              : `Invalid credentials. ${remaining} attempt(s) remaining before temporary lockout.`,
+          },
+          { status: failure.locked ? 429 : 401 }
         );
       }
+
+      // Verify password against stored hash or configured demo password
+      const isPasswordValid = mockStore.verifyUserPassword(profile.id, password);
+      if (!isPasswordValid) {
+        const failure = recordLoginFailure(email, clientIp);
+        const remaining = Math.max(0, 5 - failure.failures);
+        return NextResponse.json(
+          {
+            error: failure.locked
+              ? "Maximum 5 failed login attempts exceeded. Account is locked for 15 minutes."
+              : `Invalid credentials. ${remaining} attempt(s) remaining before temporary lockout.`,
+          },
+          { status: failure.locked ? 429 : 401 }
+        );
+      }
+
+      if (!profile.is_approved || profile.approval_status === "pending_admin_approval") {
+        return NextResponse.json(
+          { error: "Your account registration is pending institutional administrator approval. You cannot sign in until approved." },
+          { status: 403 }
+        );
+      }
+
+      // Successful login resets failure tracker
+      resetLoginFailures(email, clientIp);
 
       const response = NextResponse.json({
         success: true,
@@ -225,6 +341,33 @@ export async function POST(req: NextRequest) {
       // Set signed, tamper-proof session cookie
       await setSessionCookie(response, profile.id);
 
+      return response;
+    }
+
+    if (action === "demo-login") {
+      // Allowed only in dev/demo environments
+      if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE !== "true") {
+        return NextResponse.json(
+          { error: "One-click demo persona access is restricted to development and evaluation environments." },
+          { status: 403 }
+        );
+      }
+
+      if (!email) {
+        return NextResponse.json({ error: "Email is required." }, { status: 400 });
+      }
+
+      const profile = mockStore.getProfile(email.toLowerCase().trim());
+      if (!profile) {
+        return NextResponse.json({ error: "Demo account not found." }, { status: 404 });
+      }
+
+      const response = NextResponse.json({
+        success: true,
+        user: profile,
+      });
+
+      await setSessionCookie(response, profile.id);
       return response;
     }
 

@@ -69,7 +69,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email: targetEmail, password: "password123" }),
+        body: JSON.stringify({ action: "demo-login", email: targetEmail }),
       });
 
       if (!res.ok) throw new Error("Could not log into demo account.");
@@ -141,7 +141,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => {
                       setEmail(u.email);
-                      setPassword("password123");
+                      setPassword("");
                       handleQuickDemoLogin(u.email);
                     }}
                     className="p-2.5 rounded-xl border border-border bg-surface text-center hover:border-accent hover:bg-primary-soft/40 transition-all shadow-xs group"

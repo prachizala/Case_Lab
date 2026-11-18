@@ -4,6 +4,11 @@ import { checkRateLimit, recordGenerationUsage } from "@/lib/rate-limit";
 import { mockStore } from "@/lib/mock-db";
 import { CaseBloomsLevel, CaseDifficulty, CaseDomain, CaseFormat, CaseStudy, CaseTargetAudience, CaseTone, CaseType } from "@/lib/types";
 import { authenticateUser } from "@/lib/session";
+import {
+  checkCaseGenerationAccess,
+  checkStudentDailyLimit,
+  sanitizeCaseStudyForStudent,
+} from "@/lib/case-permissions";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +16,32 @@ export async function POST(req: NextRequest) {
     const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin", "student"]);
     if (errorResponse || !user) {
       return errorResponse || NextResponse.json({ error: "Forbidden. Please sign in to generate case studies." }, { status: 403 });
+    }
+
+    // Role-based case generation check (STUDENT_CASE_GENERATION flag)
+    const access = checkCaseGenerationAccess(user.role);
+    if (!access.allowed) {
+      return NextResponse.json(
+        { error: access.error, error_code: access.code },
+        { status: access.status }
+      );
+    }
+
+    // Student daily limit check (STUDENT_GENERATION_LIMIT, default 3/day)
+    if (user.role === "student") {
+      const studentDaily = checkStudentDailyLimit(user.id);
+      if (!studentDaily.allowed) {
+        return NextResponse.json(
+          {
+            error: `Daily student practice case generation limit reached (${studentDaily.count}/${studentDaily.limit}). Please try again tomorrow.`,
+            error_code: "STUDENT_DAILY_LIMIT_REACHED",
+            limit: studentDaily.limit,
+            count: studentDaily.count,
+            remaining: studentDaily.remaining,
+          },
+          { status: 429 }
+        );
+      }
     }
 
     const body = await req.json();
@@ -252,6 +283,7 @@ export async function POST(req: NextRequest) {
 
     // 5. Construct CaseStudy record
     const caseId = `case-${Date.now()}`;
+    const isStudent = user.role === "student";
     const newCase: CaseStudy = {
       id: caseId,
       author_id: userId,
@@ -260,6 +292,7 @@ export async function POST(req: NextRequest) {
       status: "draft",
       type: params.type,
       format: params.format,
+      student_practice: isStudent ? true : undefined,
       industry: params.industry,
       function: params.functionalFocus,
       domain: params.domain,
@@ -294,19 +327,26 @@ export async function POST(req: NextRequest) {
       "case_created",
       newCase.id,
       "case",
-      { title: newCase.title, type: newCase.type, format: newCase.format }
+      {
+        title: newCase.title,
+        type: newCase.type,
+        format: newCase.format,
+        student_practice: isStudent,
+      }
     );
 
     // 6. Record usage log for token accounting & rate limiting
-    await recordGenerationUsage(userId, result.tokensUsed, result.model, caseId);
+    await recordGenerationUsage(userId, result.tokensUsed, result.model, caseId, user.role);
     mockStore.incrementUserGenerationCount(userId);
     const updatedQuota = mockStore.checkUserGenerationQuota(userId);
 
-    // 7. Return safe payload (WITHOUT any API keys)
+    // 7. Return safe payload (WITHOUT any API keys, sanitized for student)
+    const returnedCaseStudy = isStudent ? sanitizeCaseStudyForStudent(newCase) : newCase;
+
     return NextResponse.json({
       success: true,
       caseId: newCase.id,
-      caseStudy: newCase,
+      caseStudy: returnedCaseStudy,
       tokensUsed: result.tokensUsed,
       model: result.model,
       warnings,

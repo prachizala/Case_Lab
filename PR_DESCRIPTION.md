@@ -1,110 +1,79 @@
-# feat: CE Case Pack generator (Finance, HR, Marketing)
+# Security & DPDP Compliance Remediation
 
-## Summary
-Implements the continuous evaluation "CE Case Pack" generator for SBS CaseLab. Every case produced follows the standardized classroom & examination format modeled after the benchmark reference standards:
-1. **Teaching Case Narrative**: Rich Indian business dilemmas with contextual corporate data tables.
-2. **Exam Questions**: 2-4 questions adhering strictly to Bloom's taxonomy verbs and syllabus-grounded concepts.
-3. **Faculty-Only Model Answer Key**: Structured introduction, numbered evaluation sections, basis comparison matrices, step-by-step financial calculations, overall assessments, and concise conclusions.
-4. **Teaching Notes & Marking Scheme**: Pedagogical synopsis, course learning outcomes, common student pitfalls, and marking criteria.
-5. **Departmental Profiles**: Dedicated profiles with specialized unit-grouped topics, frameworks, and decision requirements for **Finance**, **HR**, and **Marketing**.
-
-All generation runs through a 3-pass pipeline with deterministic programmatic quality checks, strict student data stripping, syllabus document parsing (PDF/DOCX), export facilities (DOCX & PDF), and a faculty continuous improvement feedback loop.
+## Overview
+This pull request addresses 4 critical security, privacy, and compliance issues identified during institutional security review for Shanti Business School (SBS) CaseLab. All fixes maintain existing design tokens, college branding, and AI engine architecture while establishing strict enterprise security controls.
 
 ---
 
-## What Changed (By Step)
+## 🛡️ Summary of Changes
 
-- **Step 1: Department Profiles** (`src/config/casepack/departments.ts`):
-  - Defined `FINANCE_DEPARTMENT_PROFILE`, `HR_DEPARTMENT_PROFILE`, and `MARKETING_DEPARTMENT_PROFILE` with syllabus units, frameworks, question templates, answer structures, and validation rules.
-- **Step 2: Pedagogical Style Guide & Reference Isolation** (`reference/STYLE_GUIDE.md`, `.gitignore`):
-  - Authored comprehensive style guide defining case structure, length, academic tone, Bloom question architecture, and model answer depth.
-  - Added `reference/gold/originals/` to `.gitignore` to keep faculty reference files private and local.
-- **Step 3: Schema & Database Migration** (`src/lib/casepack/schema.ts`, `supabase/migrations/00012_ce_casepack.sql`, `src/lib/types.ts`):
-  - Authored strict Zod schema `CECasePackSchema` with type inferences.
-  - Added `"ce_pack"` to `CaseType` union.
-  - Created forward-compatible SQL migration for the cases table.
-- **Step 4: Multi-Pass Generation Pipeline & API** (`src/lib/casepack/generate.ts`, `src/app/api/casepack/generate/route.ts`):
-  - Engineered 3-pass sequential generation (Narrative -> Questions -> Answers/Notes) using Server-Sent Events (SSE) streaming with live progress reporting.
-  - Protected with `requireUser(["admin", "faculty"])` and rate limiting.
-- **Step 5: Deterministic Programmatic Validators** (`src/lib/casepack/validate.ts`, `scripts/test-casepack-validators.ts`):
-  - Implemented 10 deterministic quality controls: schema check, word count bounds, concept presence in narrative, Bloom verbs check, answer architecture, case fact citations, terminology consistency, placeholder prohibition, gold isolation, and department-specific rules.
-  - Built pure math formulas for financial validation (`NPV`, `Payback`, `WACC`, `DOL`, `DFL`, `EOQ`, `Working Capital Cycle`).
-  - Unit test suite with 32/32 tests passing (`npm run test:validators`).
-- **Step 6: Curate Studio UI & Student Role Gating** (`src/components/casepack/CECasePackView.tsx`, `src/app/create/page.tsx`, `src/app/cases/[id]/page.tsx`, `src/app/api/cases/route.ts`, `src/app/api/cases/[id]/route.ts`):
-  - Designed tabbed viewer (`Case | Questions | Model Answer Key | Teaching Notes | Checks`).
-  - Integrated 4-step progress bar and live text buffer in `/create`.
-  - Enforced strict server-side student gating: unauthenticated or student requests have `answers`, `teaching_notes`, and `quality` stripped prior to delivery.
-- **Step 7: DOCX & PDF Institutional Exports** (`src/app/api/cases/[id]/export/docx/route.ts`, `src/app/api/cases/[id]/export/pdf/route.ts`, `scripts/test-casepack-export.ts`):
-  - Formatted DOCX and vector PDF outputs with formal SBS header rules, data tables, questions with Bloom levels, and confidential answer keys with explicit page breaks.
-  - Implemented Student Handout mode (`?mode=student`) where answers and teaching notes are omitted.
-  - Automated export test suite with 4/4 tests passing (`npm run test:exports`).
-- **Step 8: Faculty Feedback Loop & Admin Quality Dashboard** (`src/lib/casepack/feedback-store.ts`, `src/app/api/casepack/feedback/route.ts`, `src/app/admin/page.tsx`, `src/components/casepack/CECasePackView.tsx`):
-  - Created faculty evaluation widget (1-5 star rating, defect checklist, gold candidate nomination).
-  - Added "CE Case Pack Quality" tab in `/admin` with department quality analytics, gold reference library management, and review ledger.
-- **Step 9: Syllabus Document Grounding** (`src/app/api/casepack/syllabus/route.ts`, `src/app/create/page.tsx`, `scripts/test-casepack-feedback-syllabus.ts`):
-  - Built file upload endpoint parsing PDF, DOCX, and TXT syllabi using `pdf-parse` and `mammoth`.
-  - Added heuristic unit/topic chunking and framework matching to dynamically pre-fill curriculum topics.
-  - Automated verification suite with 4/4 tests passing (`npm run test:feedback-syllabus`).
+### 1. Verification Code Security & Transactional Email Abstraction (Step 1)
+- **Eliminated OTP Exposure**: Removed the "Verification code auto-detected" banner and debug OTP fields from all production UI and API responses.
+- **Transactional Email Gateway**: Introduced `src/lib/email/send.ts` supporting Resend/transactional providers via environment variables (`EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM`).
+- **Pending Admin Approval Fallback**: If an email provider is unconfigured in production, accounts are set to `pending_admin_approval` with a dedicated Admin review queue (`/api/admin/pending-registrations`), preventing unauthorized registrations.
+- **Production Guard**: Fatal boot check prevents server startup if `DEMO_OTP_ON_SCREEN=true` is present in a production environment.
+- **Cryptographic Hardening**: 6-digit OTPs generated with `crypto.randomInt`, stored strictly as salted SHA-256 hashes, with 10-minute expiry, single-use invalidation, 5-attempt incorrect limit (triggering 15-minute lockout), and a maximum of 3 resends per hour per email/IP.
+
+### 2. Active DPDP Act 2023 Consent & Statutory Rights (Step 2)
+- **Active Choice Architecture**: The signup consent checkbox is unchecked by default; the submit button remains disabled until explicitly ticked.
+- **Plain-Language Legal Disclosure**: Clear disclosure detailing data collected (name, email, role, answers, grades, certificates), educational processing purposes, access controls, and links to the Privacy Policy.
+- **Server Enforcement & Audit Versioning**: Added server validation rejecting registrations without explicit consent; added tracking for `consent_version` (`2023.1`), `policy_version` (`v1.2`), and timestamp `dpdp_consent_at`.
+- **Consent Withdrawal & Erasure**: Enabled statutory consent withdrawal at `/api/user/consent-withdraw` alongside existing data export and irreversible deletion.
+- **Legal Advisory Note**: Annotated `README.md` that statutory disclosures should receive final sign-off from college legal counsel.
+
+### 3. Role Boundaries & Configurable Student Case Generation (Step 3)
+- **Role Boundary Restoration**: Protected `/create`, `/api/casepack/generate`, `/api/generate`, and `/api/casepack/syllabus` so only faculty and admin roles have access by default. Students visiting `/create` are redirected with institutional messaging.
+- **Configurable Student Practice Flag (`STUDENT_CASE_GENERATION`)**:
+  - Configurable via `STUDENT_CASE_GENERATION=false` (default) or `true`.
+  - When enabled, students may generate practice cases with strict server-side safeguards:
+    - **Asset Stripping**: Model answer keys, faculty teaching notes, marking criteria, and validation checks are stripped on the server before dispatch.
+    - **Practice Isolation**: Practice cases are marked `student_practice: true` with status `draft`, isolated from the public case library.
+    - **Daily Quota**: Enforces a strict daily cap (default 3/day, configurable via `STUDENT_GENERATION_LIMIT`).
+    - **Audit & Token Accounting**: Student generations record `user_role: "student"` and decrement the institutional token budget.
+
+### 4. Demo Credential Hardening & Enterprise Password Security (Step 4)
+- **Purge of Weak Passwords**: Eradicated all hardcoded occurrences of `password123` across the codebase, seed blueprints, test fixtures, and documentation (`git grep -i "password123"` returns 0).
+- **Hardened Seed Engine**: `scripts/seed.ts` reads `DEMO_USER_PASSWORD` from the environment or generates cryptographically secure 18+ character passwords printed once to stdout. Execution in production is strictly blocked without `--allow-production`.
+- **Enterprise Password Policy**: Enforced on signup (minimum 10 characters, at least one uppercase letter, one lowercase letter, one digit, and dictionary password blacklist).
+- **Brute-Force Lockout**: Accounts automatically lock for 15 minutes following 5 consecutive failed login attempts.
 
 ---
 
-## How to Test
+## 🗄️ Database Migrations to Apply
 
-### 1. Run Automated Test Suites
-Execute the following verification suites from the terminal:
-```bash
-# 1. Deterministic Validators Unit Suite (32 tests)
-npm run test:validators
+Please apply the following migrations to the Supabase PostgreSQL database in order:
 
-# 2. DOCX & PDF Export Verification Suite (4 tests)
-npm run test:exports
-
-# 3. Faculty Feedback & Syllabus Extraction Suite (4 tests)
-npm run test:feedback-syllabus
-
-# 4. Production Next.js Build
-npm run build
-```
-
-### 2. Manual UI Verification in Browser
-1. Start dev server: `npm run dev` (or run on port 3001 if 3000 is occupied: `npx next dev -p 3001`).
-2. Navigate to **http://localhost:3001/create**:
-   - Verify **"CE Case Pack (Departmental Exam & Teaching Standard)"** is selected by default.
-   - Switch between **FINANCE**, **HR**, and **MARKETING** tabs; observe syllabus units and topics update dynamically.
-   - Click **"Upload Syllabus"** and choose a sample PDF/DOCX syllabus document; verify units and suggested topics are parsed and displayed.
-   - Click **"Generate Complete Case Pack"**:
-     - Observe live 4-step progress: *Pass 1: Drafting Teaching Narrative* -> *Pass 2: Formulating Exam Questions* -> *Pass 3: Model Answers & Notes* -> *Pass 4: Programmatic Quality Checks*.
-     - Verify resulting tabbed viewer displays all sections with 10/10 green validation badges.
-3. Test Exports:
-   - Click **"Export Full Pack (DOCX)"** and **"Export Full Pack (PDF)"** — verify complete faculty pack with answer key and page breaks.
-   - Click **"Export Student Handout (DOCX)"** and **"Export Student Handout (PDF)"** — verify answer key and teaching notes are absent.
-4. Test Student Role Gating:
-   - Switch user role to **Student** (via persona switcher or login as student).
-   - Navigate to `/cases/[id]` or request `/api/cases/[id]` — verify `answers` and `teaching_notes` tabs/fields are completely hidden and stripped from the network response.
-5. Test Admin Quality Dashboard:
-   - Navigate to **http://localhost:3001/admin** as an Administrator.
-   - Click the **"CE Case Pack Quality"** tab.
-   - Verify faculty ratings, department quality metrics, and Gold Standard Reference library status.
+| Migration Number & Name | Target Table | Description |
+|---|---|---|
+| `00013_token_usage.sql` | `public.token_usage` | Creates the institutional token usage table, indexes for month/model/feature grouping, and RLS policies for atomic LLM budget accounting. |
+| `00014_dpdp_consent_versioning.sql` | `public.profiles` | Adds `consent_version` (`TEXT`), `policy_version` (`TEXT`), and `consent_withdrawn_at` (`TIMESTAMPTZ`) to maintain compliance records under India's DPDP Act 2023. |
 
 ---
 
-## Security Notes (Answer Key Visibility & Role Isolation)
-- **Zero Client-Side Leaks**: Student protection is enforced on the server. In `/api/cases`, `/api/cases/[id]`, `/api/cases/[id]/export/docx`, and `/api/cases/[id]/export/pdf`, whenever the authenticated user's role is `"student"`, the model answers, teaching notes, and evaluation rubrics are removed from the memory payload prior to JSON serialization or document rendering.
-- **Export Isolation**: Even if a student manually modifies query parameters to request `?mode=full`, server-side role inspection overrides the parameter to `mode = "student"`.
-- **Secret Hygiene**: Zero API keys or tokens are exposed in server-side logs, client responses, or commits.
+## ⚙️ New Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `STUDENT_CASE_GENERATION` | `false` | Set to `true` to allow students to generate practice cases with stripped model answers and daily rate caps. |
+| `STUDENT_GENERATION_LIMIT` | `3` | Maximum number of practice cases a student can generate per 24-hour window when student generation is enabled. |
+| `DEMO_USER_PASSWORD` | *(None)* | Optional custom password for seed accounts; if omitted, `scripts/seed.ts` generates strong random credentials. |
+| `EMAIL_PROVIDER_API_KEY` | *(None)* | Transactional email provider API key (e.g. Resend) for real OTP delivery in production. |
+| `EMAIL_FROM` | `SBS CaseLab <auth@shantibschool.edu.in>` | Transactional email sender header. |
+| `DEMO_OTP_ON_SCREEN` | `false` | Dev/test only flag to display OTP in non-production environments. Server aborts on boot if enabled in production. |
 
 ---
 
-## Known Limitations
-- The syllabus parser relies on regex-based heuristic chunking for unit headers (`Unit`, `Module`, `Chapter`, etc.). Highly idiosyncratic syllabus layouts without standard section headers fall back to two default logical units ("Core Concepts" and "Applied Topics").
-- In mock mode (without Supabase configured), generated case packs persist across the application runtime session via `mockStore`.
+## 🧪 Verification & Test Results
 
----
-
-## Checklist
-- [x] `npm run build` passes with zero errors (44/44 static pages compiled).
-- [x] All 3 automated test suites pass (40 total assertions passed).
-- [x] No `.env`, secrets, or credentials committed.
-- [x] Original faculty reference files in `reference/gold/originals/` are excluded by `.gitignore`.
-- [x] Strict conventional commit history with required author and co-author trailers.
-- [x] Branch pushed to `origin feature/ce-case-pack` (default branch `main` remains untouched).
+All 8 automated test suites passed:
+- `npm run test:otp`: 45 passed (OTP hashing, expiry, rate limits, lockouts, boot safety)
+- `npm run test:consent`: 16 passed (server DPDP rejection, profile versioning, withdrawal, erasure)
+- `npm run test:student-access`: 27 passed (default student 403, answer stripping, library isolation, daily limit)
+- `npm run test:password`: 26 passed (complexity policy, 5-fail lockout, seed production guard, repo string grep)
+- `npm run test:budget`: 32 passed (Groq token counting, warning thresholds, HTTP 429 budget exhaustion)
+- `npm run test:validators`: 32 passed (10 CE casepack validators & financial math formulas)
+- `npm run test:exports`: 4 passed (Full & student handout DOCX / PDF generation)
+- `npm run test:feedback-syllabus`: 4 passed (Faculty evaluation & syllabus extraction)
+- `npm run test:smoke`: Production server smoke test passed (`/`, `/signup`, `/login`, `/create`, `/admin`, `/privacy`)
+- `npm run test:secret-scan`: 0 credential leaks across source and `.next/static` production bundle
+- `npm run build`: Succeeded with zero errors across all 46 static and dynamic routes.

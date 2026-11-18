@@ -28,6 +28,7 @@ import {
   ChevronDown,
   ChevronUp,
   AlertCircle,
+  ShieldAlert,
   Eye,
   Calendar,
   Lock,
@@ -107,6 +108,10 @@ export default function AdminPage() {
   const [editingSbsLimit, setEditingSbsLimit] = useState<number>(30);
   const [savingSettings, setSavingSettings] = useState<boolean>(false);
   const [domainUpdating, setDomainUpdating] = useState<boolean>(false);
+  const [studentGenPolicy, setStudentGenPolicy] = useState<{ enabled: boolean; dailyLimit: number }>({
+    enabled: false,
+    dailyLimit: 3,
+  });
 
   // Audit Logs State
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -170,6 +175,9 @@ export default function AdminPage() {
       if (data.allowedDomains) {
         setAllowedDomains(data.allowedDomains);
       }
+      if (data.studentCaseGeneration) {
+        setStudentGenPolicy(data.studentCaseGeneration);
+      }
       if (data.departments && data.departments.length > 0 && !newCourseDeptId) {
         setNewCourseDeptId(data.departments[0].id);
       }
@@ -228,6 +236,9 @@ export default function AdminPage() {
       if (data.allowedDomains) {
         setAllowedDomains(data.allowedDomains);
       }
+      if (data.studentCaseGeneration) {
+        setStudentGenPolicy(data.studentCaseGeneration);
+      }
       setNewDomainInput("");
       triggerNotification(data.message || `Domain @${domain} added.`);
       loadAdminData();
@@ -259,6 +270,9 @@ export default function AdminPage() {
       if (!res.ok) throw new Error(data.error || "Failed to remove domain.");
       if (data.allowedDomains) {
         setAllowedDomains(data.allowedDomains);
+      }
+      if (data.studentCaseGeneration) {
+        setStudentGenPolicy(data.studentCaseGeneration);
       }
       triggerNotification(data.message || `Domain @${domain} removed.`);
       loadAdminData();
@@ -547,6 +561,22 @@ export default function AdminPage() {
     }
   };
 
+  const handlePendingAction = async (userId: string, action: "approve" | "reject") => {
+    try {
+      const res = await fetch("/api/admin/pending-registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Action failed");
+      triggerNotification(data.message || `User registration ${action}ed.`);
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to process registration");
+    }
+  };
+
   // Create Department handler
   const handleCreateDepartment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -800,6 +830,71 @@ export default function AdminPage() {
         {/* TAB 1: USERS & ROLES */}
         {activeTab === "users" && (
           <div className="space-y-4">
+            {/* PENDING REGISTRATIONS SECTION (ADMIN ONLY APPROVALS) */}
+            {profiles.filter((p) => !p.is_approved || p.approval_status === "pending_admin_approval").length > 0 && (
+              <div className="p-4 rounded-2xl border border-warning/40 bg-warning/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-warning" />
+                    <h3 className="font-serif font-bold text-sm text-text">
+                      Pending Registrations ({profiles.filter((p) => !p.is_approved || p.approval_status === "pending_admin_approval").length})
+                    </h3>
+                  </div>
+                  <span className="text-[10px] text-muted font-mono">
+                    Audit-Logged Approvals
+                  </span>
+                </div>
+                <div className="overflow-x-auto rounded-xl border border-border bg-surface">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-primary-soft/40 border-b border-border text-muted font-bold uppercase tracking-wider">
+                        <th className="p-3">User Identity</th>
+                        <th className="p-3">Requested Role</th>
+                        <th className="p-3">Submitted At</th>
+                        <th className="p-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60">
+                      {profiles
+                        .filter((p) => !p.is_approved || p.approval_status === "pending_admin_approval")
+                        .map((p) => (
+                          <tr key={p.id} className="hover:bg-primary-soft/20">
+                            <td className="p-3">
+                              <span className="font-bold text-text block">{p.name}</span>
+                              <span className="text-muted font-mono text-[11px]">{p.email}</span>
+                            </td>
+                            <td className="p-3">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary-soft text-text">
+                                {p.role}
+                              </span>
+                            </td>
+                            <td className="p-3 text-muted text-[11px] font-mono">
+                              {p.created_at ? new Date(p.created_at).toLocaleDateString() : "Recent"}
+                            </td>
+                            <td className="p-3 text-right space-x-2">
+                              <button
+                                type="button"
+                                onClick={() => handlePendingAction(p.id, "approve")}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition-colors"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handlePendingAction(p.id, "reject")}
+                                className="px-2.5 py-1 rounded-lg border border-red-500/40 text-red-600 hover:bg-red-500/10 font-bold text-[11px] transition-colors"
+                              >
+                                Reject
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Filter Bar */}
             <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
               <div className="relative flex-1 w-full">
@@ -1786,6 +1881,49 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Card 3: Student Case Generation Policy (Read-Only) */}
+              <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-border">
+                  <div className="p-2 rounded-xl bg-accent/10 text-accent">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-text">
+                      Student Case Generation Access
+                    </h3>
+                    <p className="text-xs text-muted">
+                      Role-based pedagogy security & practice generation policy
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_CASE_GENERATION</p>
+                      <p className="text-[11px] text-muted">Allow students to generate practice cases</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold ${studentGenPolicy.enabled ? "bg-success/15 text-success border border-success/30" : "bg-muted/15 text-muted border border-border"}`}>
+                      {studentGenPolicy.enabled ? "ENABLED (true)" : "DISABLED (false - Default)"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_GENERATION_LIMIT</p>
+                      <p className="text-[11px] text-muted">Daily cap for student practice generations</p>
+                    </div>
+                    <span className="font-mono font-bold text-text bg-surface px-2.5 py-1 rounded-lg border border-border">
+                      {studentGenPolicy.dailyLimit} cases / day / student
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/20 text-text text-[11px] leading-relaxed">
+                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. To modify these values, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=true</code> and <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> in your server environment variables (e.g., Vercel Project Settings or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">.env.local</code>) and redeploy.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -2081,6 +2219,49 @@ export default function AdminPage() {
                     >
                       Approve
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Student Case Generation Policy (Read-Only) */}
+              <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-border">
+                  <div className="p-2 rounded-xl bg-accent/10 text-accent">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-text">
+                      Student Case Generation Access
+                    </h3>
+                    <p className="text-xs text-muted">
+                      Role-based pedagogy security & practice generation policy
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_CASE_GENERATION</p>
+                      <p className="text-[11px] text-muted">Allow students to generate practice cases</p>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold ${studentGenPolicy.enabled ? "bg-success/15 text-success border border-success/30" : "bg-muted/15 text-muted border border-border"}`}>
+                      {studentGenPolicy.enabled ? "ENABLED (true)" : "DISABLED (false - Default)"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
+                    <div>
+                      <p className="font-semibold text-text font-mono">STUDENT_GENERATION_LIMIT</p>
+                      <p className="text-[11px] text-muted">Daily cap for student practice generations</p>
+                    </div>
+                    <span className="font-mono font-bold text-text bg-surface px-2.5 py-1 rounded-lg border border-border">
+                      {studentGenPolicy.dailyLimit} cases / day / student
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/20 text-text text-[11px] leading-relaxed">
+                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. To modify these values, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=true</code> and <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> in your server environment variables (e.g., Vercel Project Settings or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">.env.local</code>) and redeploy.
                   </div>
                 </div>
               </div>

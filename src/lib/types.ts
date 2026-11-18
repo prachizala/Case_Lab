@@ -39,9 +39,12 @@ export interface Profile {
   free_cases_reset_at?: string;
   verification_otp?: string | null;
   otp_expires_at?: string | null;
+  otp_attempts?: number;
+  otp_locked_until?: string | null;
   department_id?: string | null;
   plan: UserPlan;
   is_approved: boolean;
+  approval_status?: "approved" | "pending_admin_approval" | "rejected";
   is_reviewer?: boolean; // Faculty marked as reviewer by admin
   portfolio_public?: boolean; // Student public portfolio toggle
   watch_industries?: string[]; // Faculty watch industries (up to 8)
@@ -51,6 +54,9 @@ export interface Profile {
   sbs_eligible?: boolean; // Verified Shanti Business School affiliate
   dpdp_consent?: boolean; // DPDP Act 2023 consent
   dpdp_consent_at?: string; // DPDP Act 2023 consent timestamp
+  consent_version?: string; // DPDP consent specification version
+  policy_version?: string; // Privacy Policy version accepted
+  consent_withdrawn_at?: string; // DPDP Act 2023 consent withdrawal timestamp
   avatar_url?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -183,6 +189,7 @@ export interface CaseStudy {
   language: CaseLanguage;
   complexity: number; // 1 - 10
   tags?: string[]; // Pedagogy tags & keywords
+  student_practice?: boolean; // Student practice case flag
   content: CaseContent;
   source_notes?: string;
   version?: number; // current version number
@@ -195,6 +202,7 @@ export interface CaseStudy {
 export interface UsageLog {
   id: string;
   user_id: string;
+  user_role?: string;
   tokens_used: number;
   prompt_tokens?: number;
   completion_tokens?: number;
@@ -440,6 +448,8 @@ export type AuditAction =
   | "case_updated"
   | "registration_approved"
   | "registration_rejected"
+  | "registration_pending"
+  | "user_approved"
   | "grade_override"
   | "user_graduation"
   | "user_quota_updated"

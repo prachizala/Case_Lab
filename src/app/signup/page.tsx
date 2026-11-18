@@ -36,12 +36,12 @@ function SignUpForm() {
   const errorParam = searchParams.get("error");
   const initialError = errorParam || null;
 
-  const [step, setStep] = useState<"form" | "otp">("form");
+  const [step, setStep] = useState<"form" | "otp" | "pending_approval">("form");
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"faculty" | "student">("faculty");
-  const [dpdpConsent, setDpdpConsent] = useState(true);
+  const [dpdpConsent, setDpdpConsent] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -96,11 +96,16 @@ function SignUpForm() {
         throw new Error(data.error || "Failed to complete registration.");
       }
 
+      if (data.pending_approval) {
+        setStep("pending_approval");
+        setSuccess(data.message || "Your registration is submitted for admin approval.");
+        return;
+      }
+
       const otpVal = data.debug_otp || null;
       setDebugOtp(otpVal);
-      if (otpVal) {
-        setOtpCode(otpVal); // Pre-fill OTP automatically so testing is effortless
-      }
+      // Security: OTP is NEVER auto-filled in the input box; user must type code from email
+      setOtpCode("");
       setSuccess(data.message || "Account created! Please verify your email with the 6-digit code.");
       setStep("otp");
     } catch (err: unknown) {
@@ -326,12 +331,16 @@ function SignUpForm() {
                   <input
                     type="password"
                     required
+                    minLength={10}
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
                   />
                 </div>
+                <p className="mt-1 text-[10px] text-muted">
+                  Minimum 10 characters with uppercase, lowercase, and numbers.
+                </p>
               </div>
 
               {/* Role Selection */}
@@ -365,25 +374,37 @@ function SignUpForm() {
                 </div>
               </div>
 
-              {/* DPDP Act 2023 Consent Checkbox */}
-              <div className="pt-2">
-                <label className="flex items-start gap-2.5 cursor-pointer select-none text-muted">
+              {/* DPDP Act 2023 Consent Checkbox & Plain Disclosure */}
+              <div className="pt-2 p-3 rounded-xl border border-border bg-surface-raised space-y-2 text-muted">
+                <label className="flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     required
                     checked={dpdpConsent}
                     onChange={(e) => setDpdpConsent(e.target.checked)}
-                    className="mt-0.5 rounded text-accent focus:ring-accent w-4 h-4"
+                    className="mt-0.5 rounded text-accent focus:ring-accent w-4 h-4 shrink-0"
                   />
-                  <span className="text-[11px] leading-relaxed">
+                  <span className="text-[11px] leading-relaxed text-text font-medium">
                     I give explicit statutory consent under the{" "}
-                    <strong className="text-text">DPDP Act 2023</strong>{" "}
-                    for {COLLEGE_NAME_WITH_SHORT} to process my educational records, submissions, and credentials as detailed in the{" "}
-                    <Link href="/privacy" target="_blank" className="underline text-accent font-semibold">
-                      Privacy Policy
-                    </Link>.
+                    <strong>Digital Personal Data Protection (DPDP) Act 2023</strong>{" "}
+                    for {COLLEGE_NAME_WITH_SHORT} to collect and process my personal data for academic case evaluations.
                   </span>
                 </label>
+
+                <div className="text-[10px] leading-relaxed text-muted border-t border-border/60 pt-2 space-y-1">
+                  <p>
+                    <strong className="text-text">Data collected:</strong> Name, institutional email, chosen role, submitted case answers, analytical grades, and Dean&apos;s certificates.
+                  </p>
+                  <p>
+                    <strong className="text-text">Purpose & Access:</strong> Used exclusively for business case simulations, academic grading, and accreditation tracking. Accessible only by authorized faculty and college administrators.
+                  </p>
+                  <p>
+                    <strong className="text-text">Retention & Your Rights:</strong> Retained for active academic cycles or until account deletion. You retain the statutory right to access, export, or withdraw consent and request permanent erasure anytime via the{" "}
+                    <Link href="/privacy" target="_blank" className="underline text-accent font-semibold">
+                      Privacy Policy & DPDP Portal
+                    </Link>.
+                  </p>
+                </div>
               </div>
 
               <button
@@ -418,16 +439,14 @@ function SignUpForm() {
                 </div>
 
                 {debugOtp && (
-                  <div className="mt-2 p-2.5 rounded-xl bg-accent/10 border border-accent/20 text-[11px] text-accent flex items-center justify-between gap-2">
-                    <span className="leading-snug">
-                      Verification code auto-detected: <strong className="font-mono">{debugOtp}</strong>
-                    </span>
+                  <div className="mt-2 p-2 rounded-lg bg-surface border border-border text-[11px] text-muted flex items-center justify-between">
+                    <span>Dev/Test Code: <strong className="font-mono text-text">{debugOtp}</strong></span>
                     <button
                       type="button"
                       onClick={() => setOtpCode(debugOtp)}
-                      className="px-2 py-0.5 rounded bg-accent text-accent-text font-bold text-[10px] shrink-0 hover:opacity-90 transition-opacity"
+                      className="underline text-accent text-[10px] font-bold"
                     >
-                      Use Code
+                      Insert Code
                     </button>
                   </div>
                 )}
@@ -461,6 +480,31 @@ function SignUpForm() {
                 </button>
               </div>
             </form>
+          )}
+
+          {/* STEP 3: Pending Admin Approval State */}
+          {step === "pending_approval" && (
+            <div className="space-y-4 text-center py-4">
+              <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-600 dark:text-amber-400">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="font-serif font-bold text-base text-text">
+                  Registration Submitted for Admin Approval
+                </h3>
+                <p className="text-xs text-muted leading-relaxed max-w-sm mx-auto">
+                  Your registration is submitted for admin approval. Since transactional email delivery is not configured in this environment, an administrator must approve your account before you can sign in.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-md transition-all"
+                >
+                  <span>Return to Login</span>
+                </Link>
+              </div>
+            </div>
           )}
 
           <div className="text-center text-xs text-muted border-t border-border pt-4">
