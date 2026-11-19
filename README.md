@@ -230,6 +230,22 @@ Open your browser and visit:
 | `NEXT_PUBLIC_COLLEGE_EMAIL_DOMAIN` | No | `"shantibschool.edu.in"` | Mandatory email domain for user registration |
 | `NEXT_PUBLIC_ENABLE_DEMO_MODE` | No | `"true"` | Enables 1-click Persona Switcher in dev environments |
 | `SESSION_SECRET` | Yes | `"sbs_caselab_secure_session_..."` | Key used for encrypting session cookies |
+| `DEMO_USER_PASSWORD` | No | `"SBS_SecurePassword2026!"` | Default password for seeded accounts (if not set, random generated) |
+| `REQUIRE_ADMIN_APPROVAL` | No | `"true"` | Enforces admin verification before accounts can author or access cases |
+| `ACCESS_DURATION_MONTHS` | No | `"12"` | Grace period duration in months after batch graduation |
+| `REVIEW_REMINDER_DAYS` | No | `"3"` | Days before an assigned peer review is flagged overdue |
+| `WORDS_PER_PAGE` | No | `"500"` | Standard academic budgeting ratio for page calculations |
+| `ENROLLMENT_REGEX` | No | `"^SBS\\/[0-9]{4}\\/[0-9]{4}$"` | Validation regex for student enrollment numbers (e.g. `SBS/2024/0001`) |
+| `EMPLOYEE_ID_REGEX` | No | `"^SBS\\/FAC\\/[0-9]{3,4}$"` | Validation regex for faculty employee IDs (e.g. `SBS/FAC/101`) |
+| `FEATURE_STUDENT_ANSWERS` | No | `"false"` | Flag preserving student case answering workspace |
+| `FEATURE_CERTIFICATES` | No | `"false"` | Flag preserving student PDF certificate generation |
+| `FEATURE_PORTFOLIO` | No | `"false"` | Flag preserving student analytical portfolio |
+| `FEATURE_OBE_ANALYTICS` | No | `"false"` | Flag preserving NAAC / NBA OBE accreditation matrix |
+| `PAYMENTS_ENABLED` | No | `"false"` | Flag gating commercial alumni subscriptions and repository monetization |
+| `PAID_DOWNLOADS` | No | `"false"` | Flag gating pay-per-download for alumni and external readers |
+| `DEFAULT_CREATOR_SHARE_PCT` | No | `"60"` | Creator royalty share percentage for commercial case purchases |
+| `ALUMNI_ANNUAL_PRICE_INR` | No | `"2999"` | Annual subscription price in INR for alumni repository access |
+| `ALLOWED_EXTERNAL_COLLEGE_DOMAINS` | No | `""` | Comma-separated list of approved partner university domains |
 | `NEXT_PUBLIC_SUPABASE_URL` | Prod | `"https://your-id.supabase.co"` | Supabase instance URL (optional in dev) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Prod | `"eyJhbGci..."` | Supabase anonymous public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Prod | `"eyJhbGci..."` | Supabase privileged service-role key |
@@ -249,13 +265,27 @@ Open your browser and visit:
 
 When running locally in development mode (`NODE_ENV !== "production"` or `NEXT_PUBLIC_ENABLE_DEMO_MODE="true"`), a **Persona Switcher** is accessible directly in the top navigation profile dropdown and login page for instant authentication without password entry. If logging in via standard credentials, seed demo accounts utilize the password configured via the `DEMO_USER_PASSWORD` environment variable (or one-time generated secure credentials printed during `npm run seed`).
 
-| Role | Persona Name | Institutional Email | Key Permissions |
-|---|---|---|---|
-| **Administrator** | Dr. Neha Sharma | `neha.sharma@shantibschool.edu.in` | Curriculum approval, user management, token budgets, DPDP compliance, system audit logs |
-| **Faculty** | Ms. Reena Paswan | `reena.paswan@shantibschool.edu.in` | AI Case Studio, drafting cases, teaching notes, submission to review queue |
-| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | Case library access, case solver, rubric evaluations, personal analytical portfolio |
+### Institutional Roles & Hierarchy
+The platform enforces exactly three core database roles:
+1. **`admin`**: System administrator and dean-level governance. Exactly one admin account exists, created solely via seed or server-side provisioning. The sign-up API strictly blocks and rejects any registration with an `admin` role.
+2. **`faculty`**: Academic faculty members eligible to draft case studies, review student submissions, and participate in peer review.
+3. **`student`**: Enrolled students who can author student-led cases, submit cases for faculty review, and access published cases in the institutional repository.
 
-*(Verified institutional members on `@shantibschool.edu.in` receive 30 case generations/month; external guests receive 3 free generations/month).*
+> **Reviewer Designation**: Reviewer is **NOT** a database role. It is a boolean administrative capability flag on faculty (`is_reviewer: true`), displayed in the interface as **"Faculty Member and Reviewer"**. Reviewers cannot be unassigned if they currently have pending assigned reviews.
+
+### Access Lifecycle & Expiration Gating
+- **Access Start Date**: Set automatically on the day of institutional admin approval (calculated in `Asia/Kolkata` timezone).
+- **Student Access End Date**: Calculated as `batch.end_date + 1 year` (e.g. Batch 2024–27 ends 30 June 2027; access extends through 30 June 2028). Students enjoy free platform access throughout their studies plus one full grace year.
+- **Faculty & Admin Access End Date**: Perpetual (`null` / no expiration date) unless administratively revoked.
+- **Account Expiration Lifecycle**: A daily cron job (`/api/cron/access-expiration`) marks expired accounts. Expired users retain perpetual login access, personal DPDP exports, and the right to view and download their own past submissions via `/expired`, but are strictly barred from creating new cases, submitting, or uploading to the repository until access is renewed.
+- **Dual Login**: Registered users can authenticate using either their primary institutional `@shantibschool.edu.in` email or their verified external personal email address.
+
+| Role | Persona Name | Institutional Email | Academic Details | Key Permissions |
+|---|---|---|---|---|
+| **Administrator** | Dr. Neha Sharma | `admin@shantibschool.edu.in` | Dean / Institutional Governance | Case approval, user & role management, lookup lists, token budgets, DPDP compliance, audit logs |
+| **Faculty Member & Reviewer** | Ms. Reena Paswan | `reena.paswan@shantibschool.edu.in` | Department: BCA/IT • Course: BCA • Full-time | Case Studio authoring, teaching notes, peer review queue (`is_reviewer=true`) |
+| **Faculty Member & Reviewer** | Dr. Vikram Mehta | `vikram.mehta@shantibschool.edu.in` | Department: Finance • Course: PGDM • Full-time | Case authoring, financial exhibits, peer review queue (`is_reviewer=true`) |
+| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | BCA • Batch: 2024–27 • Roll: 01 • Enr: `SBS/2024/0001` | Case creation, submit for review, repository search, clean case downloads |
 
 ---
 
@@ -304,26 +334,48 @@ Case_Study/
 
 ## 🗄️ Database Schema & Migrations
 
-For production deployment with a live Supabase PostgreSQL database, the following numbered migrations are available in `supabase/migrations/`:
+For production deployment with a live Supabase PostgreSQL database, the repository includes 16 sequential migrations in `supabase/migrations/`. 
 
-| Migration File | Tables & Scope |
-|---|---|
-| `00001_initial_schema.sql` | `profiles`, `departments`, `courses`, `cases`, `usage_log`, RLS policies |
-| `00002_library_approval_versions.sql` | `case_versions`, `collections`, `collection_cases`, reviewer flags |
-| `00003_student_experience_rubrics_grades.sql` | `rubrics`, `rubric_criteria`, `student_answers`, `grades`, portfolios |
-| `00004_outcomes_signals_analytics.sql` | `outcomes` (CO/PO), `case_outcomes`, `signals` radar, faculty watchlists |
-| `00005_live_classroom_integrity_reflections.sql` | `classroom_sessions`, `audio_briefs`, `integrity_reports`, practitioner notes |
-| `00006_subscriptions_audit_dpdp.sql` | `subscriptions`, `audit_logs`, DPDP compliance data handlers |
-| `00007_update_college_domain_and_name.sql` | Institutional branding and `@shantibschool.edu.in` identity migration |
-| `00008_update_email_domain_to_edu_in.sql` | Domain constraints and email normalization |
-| `00009_free_usage_and_external_users.sql` | External user tiering, guest exploration quotas, and rate limiting |
+> [!WARNING]
+> **AUTOMATIC DEPLOYMENT & CI/CD NOTICE**: If this repository is connected to automatic deployment (such as Vercel, Netlify, or AWS Amplify), **the database migrations (particularly `00015` and `00016`) MUST be applied to your Supabase project in the Supabase SQL Editor BEFORE pushing to `main` or initiating a deployment build**. Running the build without applying the migrations may lead to database schema mismatch or runtime authorization errors.
 
-To deploy these migrations to your Supabase project:
+### Complete List of Database Migrations (In Execution Order)
+
+| # | Migration File | Scope & Capabilities Added |
+|---|---|---|
+| 1 | `00001_initial_schema.sql` | Base `profiles`, `departments`, `courses`, `cases`, `usage_log`, and initial RLS policies. |
+| 2 | `00002_library_approval_versions.sql` | `case_versions`, `collections`, `collection_cases`, and reviewer capability flags. |
+| 3 | `00003_student_experience_rubrics_grades.sql` | `rubrics`, `rubric_criteria`, `student_answers`, `grades`, and student portfolios. |
+| 4 | `00004_outcomes_signals_analytics.sql` | `outcomes` (CO/PO), `case_outcomes`, `signals` radar, and faculty watchlists. |
+| 5 | `00005_live_classroom_integrity_reflections.sql` | `classroom_sessions`, `audio_briefs`, `integrity_reports`, and practitioner notes. |
+| 6 | `00006_subscriptions_audit_dpdp.sql` | `subscriptions`, `audit_logs`, and DPDP Act 2023 compliance handlers. |
+| 7 | `00007_update_college_domain_and_name.sql` | Institutional branding and `@shantibschool.edu.in` identity migration. |
+| 8 | `00008_update_email_domain_to_edu_in.sql` | Domain constraints and email normalization rules. |
+| 9 | `00009_free_usage_and_external_users.sql` | External user tiering, guest exploration quotas, and rate limiting. |
+| 10 | `00010_database_upgrade.sql` | Comprehensive column migrations, foreign keys, and RLS policy consolidation. |
+| 11 | `00011_rls_security_tests.sql` | Automated pgTAP / SQL validation tests for RLS policy boundaries. |
+| 12 | `00012_ce_casepack.sql` | Continuing Education (CE) CasePack metadata, syllabus ingest, and feedback tables. |
+| 13 | `00013_token_usage.sql` | Granular per-request token usage tracking, prompts, and audit records. |
+| 14 | `00014_dpdp_consent_versioning.sql` | DPDP statutory consent version tracking (`consent_version`, `consent_at`). |
+| 15 | `00015_case_repository_schema.sql` | **Lookup tables**: `batches`, `faculty_types`, `case_categories`, `case_types`.<br>**Institutional profiles**: `personal_email`, `mobile`, `enrollment_no`, `roll_no`, `batch_id`, `faculty_type_id`, `access_start`, `access_end`, `access_status`.<br>**Repository workflow**: `review_rounds`, `review_comments`, `reviewer_rotation`, `repository_items`, `download_log`.<br>**Integrity checks**: Indian mobile regex, email domain checks, admin perpetual access. |
+| 16 | `00016_case_repository_rls_functions.sql` | **Functions & RLS**: `assign_reviewer(case_id)` atomic rotation with row lock (`FOR UPDATE`), `prevent_self_role_change()` trigger, strict RLS for peer reviews and repository items, and `student_repository_cases` secure view stripping model answer keys and teaching notes at the database level. |
+
+### How to Apply Migrations
+1. Open your **Supabase Dashboard** -> **SQL Editor**.
+2. Run the migration files in sequential order from `00001_...` through `00016_...`.
+3. Alternatively, if using the Supabase CLI:
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <your-project-id>
+   npx supabase db push
+   ```
+
+### How to Seed the Database
+To populate lookup tables (`departments`, `courses`, `batches`, `faculty_types`, `categories`, `case_types`), default admin, faculty reviewers, sample students, and repository cases:
 ```bash
-npx supabase login
-npx supabase link --project-ref <your-project-id>
-npx supabase db push
+npm run seed
 ```
+*(Seed script generates credentials from `DEMO_USER_PASSWORD` or creates secure random passwords and prints them once. It refuses to run against production without an explicit confirmation flag).*
 
 ---
 
@@ -331,17 +383,21 @@ npx supabase db push
 
 | Endpoint | Method | Description |
 |---|:---:|---|
-| `/api/auth` | `POST` | Authenticate, sign up, or switch personas |
-| `/api/generate-case` | `POST` | Stream AI case study generation with Claude 3.5 Sonnet / mock engine |
-| `/api/cases` | `GET`, `POST` | Fetch case library or save case studies |
-| `/api/cases/[id]/grade` | `POST` | Submit student answer or execute two-tier AI rubric grading |
-| `/api/review-queue` | `GET`, `POST` | Reviewer approval, change requests, and comments |
-| `/api/classroom` | `GET`, `POST` | Live Socratic session state, cold call scores, and dilemma polls |
-| `/api/export-pdf` | `POST` | Generate server-side formatted case study or certificate PDF |
-| `/api/export-docx` | `POST` | Export complete case study and exhibits as a Microsoft Word (`.docx`) file |
-| `/api/analytics/export-obe` | `GET` | Export NAAC / NBA Course and Program Outcome attainment matrix as CSV |
+| `/api/auth` | `POST` | Authenticate (dual-login with SBS or personal email), sign up, OTP requests, or switch personas |
+| `/api/lookup` | `GET` | Retrieve active academic lookup options (departments, courses, batches, faculty types, categories) |
+| `/api/cases` | `GET`, `POST` | Fetch case library or draft new case studies with lookup attributes and page targets |
+| `/api/cases/[id]/review-comments` | `GET`, `POST` | Fetch or record granular section-level review feedback in the Review Drawer |
+| `/api/cases/[id]/upload` | `POST` | Institutional Upload Gate (strictly gates approved cases, checks author consent, publishes to repository) |
+| `/api/repository` | `GET` | Faceted search across published repository items (department, course, category, query) |
+| `/api/repository/download` | `GET` | Permissioned case downloads (students receive scrubbed clean copy; faculty receive teaching notes) |
+| `/api/review-queue` | `GET`, `POST` | Peer-review queue for assigned faculty reviewers |
+| `/api/admin` | `GET`, `POST` | Dean/Admin telemetry dashboard, reviewer toggling, reviewer reassignment, access renewal |
+| `/api/admin/academic-lists` | `GET`, `POST` | Academic list CRUD (departments, courses, batches, faculty types, categories) with audit logging |
+| `/api/admin/pending-registrations` | `GET`, `POST` | Single and bulk approval/rejection of pending student and faculty registrations |
+| `/api/cron/access-expiration` | `GET`, `POST` | Daily scheduled cron to mark expired accounts, compute alumni transitions, and issue reminders |
 | `/api/user/data-export` | `GET` | Export personal user data in JSON format (DPDP Act 2023) |
 | `/api/user/data-delete` | `POST` | Exercise Right to Erasure / account anonymization (DPDP Act 2023) |
+| `/api/user/consent-withdraw` | `POST` | Revoke DPDP statutory consent |
 | `/api/payments/razorpay/order` | `POST` | Create order for alumni subscription |
 | `/api/payments/razorpay/verify` | `POST` | Verify cryptographic signature and activate subscription |
 
@@ -356,7 +412,14 @@ npx supabase db push
 | `npm run start` | Boots the compiled production server |
 | `npm run lint` | Runs Next.js ESLint verification |
 | `npm run seed` | Executes `scripts/seed.ts` to reset & seed initial database records |
-| `npm test` | Runs `scripts/test-acceptance.ts` to verify acceptance test cases |
+| `npm test` | Runs acceptance tests (`scripts/test-acceptance.ts`, 41 verified assertions) |
+| `npm run test:smoke:p7` | **Phase 7 Production Smoke Test**: 20 checks for OTP security, DPDP consent, password policy, admin sign-up blocking, student RBAC isolation, answer key scrubbing, upload gate, and RLS policies |
+| `npm run test:secret-scan` | Scans source code, scripts, and compiled `.next/` bundle for leaked secrets or hardcoded passwords |
+| `npm run test:repository-rls` | Verifies Phase 1 repository schema, migrations 15 & 16, RLS policies, and student answer key privacy |
+| `npm run test:auth` | Verifies Phase 2 role-based registration, Asia/Kolkata date math, dual login, and access gating |
+| `npm run test:workflow` | Verifies Phase 3 case creation filters, page budget targets, affirmations, and review lifecycles |
+| `npm run test:repository` | Verifies Phase 4 atomic reviewer rotation, section review comments, upload gate, and repository search |
+| `npm run test:admin` | Verifies Phase 5 telemetry metrics, reviewer workloads, reassignment, and bulk batch renewals |
 
 ---
 

@@ -18,6 +18,7 @@
     "test:student-access": "tsx scripts/test-student-generation-access.ts",
     "test:password": "tsx scripts/test-password-security.ts",
     "test:smoke": "tsx scripts/smoke-test.ts",
+    "test:smoke:p7": "tsx scripts/test-phase7-production-smoke.ts",
     "test:repository-rls": "tsx scripts/test-repository-rls.ts",
     "test:auth": "tsx scripts/test-auth-lifecycle.ts",
     "test:workflow": "tsx scripts/test-create-workflow.ts",

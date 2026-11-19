@@ -140,6 +140,15 @@ export function sanitizeCaseStudyForStudent(caseStudy: CaseStudy): CaseStudy {
         return q;
       });
     }
+    if (Array.isArray(content.questions)) {
+      content.questions = content.questions.map((q: any) => {
+        if (typeof q === "object" && q !== null) {
+          const { suggested_answer, model_answer, solution, ...rest } = q;
+          return rest;
+        }
+        return q;
+      });
+    }
     sanitized.content = content;
   }
 
