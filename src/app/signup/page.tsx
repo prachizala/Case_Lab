@@ -5,14 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { validateEmailDomain } from "@/lib/auth";
-import { invalidateAuthCache } from "@/lib/auth-client";
 import {
   ALLOWED_EMAIL_DOMAIN,
   COLLEGE_NAME_WITH_SHORT,
   COLLEGE_SHORT,
   APP_NAME,
   isSbsDomain,
-  isDisposableEmail,
 } from "@/config/college";
 import {
   ShieldAlert,
@@ -21,11 +19,18 @@ import {
   Mail,
   User,
   ArrowRight,
-  KeyRound,
-  RefreshCw,
   Sparkles,
-  Globe,
+  Building2,
+  GraduationCap,
+  Phone,
+  BadgeAlert,
+  Clock,
+  Check,
+  Eye,
+  EyeOff,
+  AlertCircle,
 } from "lucide-react";
+import { Department, Course, AcademicBatch, FacultyType } from "@/lib/types";
 
 function SignUpForm() {
   const router = useRouter();
@@ -36,78 +41,151 @@ function SignUpForm() {
   const errorParam = searchParams.get("error");
   const initialError = errorParam || null;
 
-  const [step, setStep] = useState<"form" | "otp" | "pending_approval">("form");
+  const [step, setStep] = useState<"form" | "pending_approval">("form");
+  const [userType, setUserType] = useState<"student" | "faculty">("student");
+
+  // Common fields
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
+  const [personalEmail, setPersonalEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [enrollmentNo, setEnrollmentNo] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"faculty" | "student">("faculty");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Student specific fields
+  const [courseId, setCourseId] = useState("");
+  const [batchId, setBatchId] = useState("");
+  const [rollNo, setRollNo] = useState("");
+
+  // Faculty specific fields
+  const [departmentId, setDepartmentId] = useState("");
+  const [facultyTypeId, setFacultyTypeId] = useState("");
+
+  // DPDP Consent (Mandatory unchecked by default)
   const [dpdpConsent, setDpdpConsent] = useState(false);
+
+  // Lookup data from API
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [batches, setBatches] = useState<AcademicBatch[]>([]);
+  const [facultyTypes, setFacultyTypes] = useState<FacultyType[]>([]);
+
   const [error, setError] = useState<string | null>(initialError);
-  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // OTP Verification state
-  const [otpCode, setOtpCode] = useState("");
-  const [debugOtp, setDebugOtp] = useState<string | null>(null);
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
-  const [resendingOtp, setResendingOtp] = useState(false);
+  useEffect(() => {
+    async function loadLookupData() {
+      try {
+        const res = await fetch("/api/lookup");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data) {
+            setDepartments(json.data.departments || []);
+            setCourses(json.data.courses || []);
+            setBatches(json.data.batches || []);
+            setFacultyTypes(json.data.facultyTypes || []);
+            if (json.data.batches?.length > 0) setBatchId(json.data.batches[0].id);
+            if (json.data.courses?.length > 0) setCourseId(json.data.courses[0].id);
+            if (json.data.departments?.length > 0) setDepartmentId(json.data.departments[0].id);
+            if (json.data.facultyTypes?.length > 0) setFacultyTypeId(json.data.facultyTypes[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch academic lookups:", err);
+      }
+    }
+    loadLookupData();
+  }, []);
 
-  // Email classification indicators
   const trimmedEmail = email.trim().toLowerCase();
-  const isDisposable = trimmedEmail.length > 3 && isDisposableEmail(trimmedEmail);
-  const isSbs = trimmedEmail.length > 3 && isSbsDomain(trimmedEmail);
-  const isStandardEmail = trimmedEmail.includes("@") && trimmedEmail.includes(".") && !isDisposable && !isSbs;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
 
+    // 1. Consent Validation
     if (!dpdpConsent) {
-      setError("Statutory consent is required under the DPDP Act 2023 to process educational records.");
+      setError("Statutory consent under DPDP Act 2023 is mandatory to register an academic repository account.");
       return;
     }
 
+    // 2. Passwords Match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match. Please re-enter your password.");
+      return;
+    }
+
+    // 3. Email Check
     const check = validateEmailDomain(email);
     if (!check.isValid) {
-      setError(check.errorMessage || "Please provide a valid email address.");
+      setError(check.errorMessage || "Please provide a valid official SBS email address.");
+      return;
+    }
+
+    // 4. Personal Email Check
+    if (!personalEmail || !personalEmail.includes("@")) {
+      setError("A valid personal email address (e.g. Gmail/Outlook) is required for alumni access.");
+      return;
+    }
+
+    if (isSbsDomain(personalEmail)) {
+      setError("Personal email must be an external address, not an official @shantibschool.edu.in address.");
+      return;
+    }
+
+    // 5. Mobile Check
+    if (!mobile || mobile.replace(/\D/g, "").length < 10) {
+      setError("Please provide a valid 10-digit Indian mobile number.");
+      return;
+    }
+
+    // 6. Enrollment / Employee ID Check
+    if (!enrollmentNo.trim()) {
+      setError(userType === "student" ? "Enrollment Number is required." : "Employee ID is required.");
       return;
     }
 
     setLoading(true);
 
     try {
+      const payload: any = {
+        action: "signup",
+        user_type: userType,
+        role: userType,
+        name: name.trim(),
+        email: trimmedEmail,
+        personal_email: personalEmail.trim().toLowerCase(),
+        mobile: mobile.trim(),
+        enrollment_no: enrollmentNo.trim(),
+        password,
+        confirm_password: confirmPassword,
+        dpdp_consent: true,
+        course_id: courseId,
+      };
+
+      if (userType === "student") {
+        payload.batch_id = batchId;
+        payload.roll_no = rollNo.trim() || null;
+      } else {
+        payload.department_id = departmentId;
+        payload.faculty_type_id = facultyTypeId;
+      }
+
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "signup",
-          name,
-          email: trimmedEmail,
-          password,
-          role,
-          dpdp_consent: true,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to complete registration.");
+        throw new Error(data.error || "Failed to submit registration.");
       }
 
-      if (data.pending_approval) {
-        setStep("pending_approval");
-        setSuccess(data.message || "Your registration is submitted for admin approval.");
-        return;
-      }
-
-      const otpVal = data.debug_otp || null;
-      setDebugOtp(otpVal);
-      // Security: OTP is NEVER auto-filled in the input box; user must type code from email
-      setOtpCode("");
-      setSuccess(data.message || "Account created! Please verify your email with the 6-digit code.");
-      setStep("otp");
+      setStep("pending_approval");
     } catch (err: unknown) {
       console.error("Signup error:", err);
       const msg = err instanceof Error ? err.message : "Registration failed.";
@@ -117,85 +195,10 @@ function SignUpForm() {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
-    if (!otpCode || otpCode.trim().length !== 6) {
-      setError("Please enter the complete 6-digit verification code.");
-      return;
-    }
-
-    setVerifyingOtp(true);
-
-    try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "verify-otp",
-          email: trimmedEmail,
-          otp: otpCode.trim(),
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Verification failed. Please check your code.");
-      }
-
-      invalidateAuthCache();
-      setSuccess("Email verified successfully! Taking you to the case generator...");
-      setTimeout(() => {
-        window.location.href = "/create";
-      }, 1200);
-    } catch (err: unknown) {
-      console.error("OTP verification error:", err);
-      const msg = err instanceof Error ? err.message : "Failed to verify code.";
-      setError(msg);
-    } finally {
-      setVerifyingOtp(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    setError(null);
-    setSuccess(null);
-    setResendingOtp(true);
-
-    try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "request-otp",
-          email: trimmedEmail,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to resend code.");
-      }
-
-      setDebugOtp(data.debug_otp || null);
-      setSuccess(data.message || "A new 6-digit verification code has been generated.");
-    } catch (err: unknown) {
-      console.error("OTP resend error:", err);
-      const msg = err instanceof Error ? err.message : "Failed to resend code.";
-      setError(msg);
-    } finally {
-      setResendingOtp(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background text-text flex flex-col justify-between p-4 sm:p-8">
       {/* Top Brand Nav */}
-      <div className="flex items-center justify-between max-w-5xl mx-auto w-full">
+      <div className="flex items-center justify-between max-w-4xl mx-auto w-full">
         <Link href="/" className="flex items-center gap-3">
           <div className="h-10 px-2.5 py-1 rounded-xl bg-white border border-border shadow-xs flex items-center justify-center shrink-0">
             <img
@@ -205,330 +208,409 @@ function SignUpForm() {
             />
           </div>
           <div>
-            <span className="font-serif font-bold text-lg text-text">
-              {APP_NAME}
-            </span>
-            <span className="text-[10px] uppercase font-bold text-accent block tracking-widest">
+            <span className="font-bold text-sm tracking-tight text-text block leading-tight">
               {COLLEGE_NAME_WITH_SHORT}
             </span>
+            <span className="text-xs text-text-muted">Academic Case Study Repository</span>
           </div>
         </Link>
         <ThemeToggle />
       </div>
 
-      {/* Main Card */}
-      <div className="max-w-md mx-auto w-full my-8">
-        <div className="p-8 rounded-3xl border border-border bg-surface shadow-xl space-y-6">
-          <div className="text-center space-y-2">
-            <div className="mx-auto w-fit p-2 rounded-2xl bg-white border border-border/80 shadow-xs mb-2">
-              <img
-                src="/sbs-logo.png"
-                alt="Shanti Business School Logo"
-                className="h-10 w-auto object-contain mx-auto"
-              />
+      {/* Main Container */}
+      <div className="max-w-2xl w-full mx-auto my-8">
+        {step === "pending_approval" ? (
+          <div className="bg-surface rounded-3xl border border-border p-8 sm:p-10 shadow-lg text-center">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-6">
+              <Clock className="w-8 h-8" />
             </div>
-            <h1 className="font-serif text-2xl font-bold text-text">
-              {step === "otp" ? "Verify Your Email" : "Create CaseLab Account"}
-            </h1>
-            <p className="text-xs text-muted leading-relaxed">
-              {step === "otp" ? (
-                <span>
-                  Enter the 6-digit verification code sent to{" "}
-                  <strong className="font-mono text-text">{email}</strong>
-                </span>
-              ) : (
-                <span>
-                  Sign up with any valid email. SBS members get 30 cases/month. External guests get 3 free cases/month.
-                </span>
-              )}
+
+            <h2 className="text-2xl font-bold text-text mb-3">
+              Registration Submitted for Institutional Approval
+            </h2>
+            <p className="text-sm text-text-muted max-w-md mx-auto mb-6 leading-relaxed">
+              Your account has been created in <span className="font-semibold text-text">Pending</span> status. Dean Academics / Case Centre Administrator reviews each registration to maintain repository integrity.
             </p>
+
+            <div className="bg-surface-hover/50 rounded-2xl p-5 border border-border text-left text-xs space-y-2 mb-8 max-w-md mx-auto">
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-text-muted">Full Name</span>
+                <span className="font-semibold text-text">{name}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-text-muted">Role</span>
+                <span className="font-semibold text-text capitalize">{userType}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-text-muted">Official SBS Email</span>
+                <span className="font-semibold text-text">{trimmedEmail}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-border">
+                <span className="text-text-muted">Personal Email</span>
+                <span className="font-semibold text-text">{personalEmail}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-text-muted">{userType === "student" ? "Batch & Program" : "Department"}</span>
+                <span className="font-semibold text-text">
+                  {userType === "student"
+                    ? `${batches.find((b) => b.id === batchId)?.label || "2024-27"}`
+                    : `${departments.find((d) => d.id === departmentId)?.name || "Faculty"}`}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/login"
+                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors shadow-xs"
+              >
+                Go to Sign In
+              </Link>
+              <a
+                href="mailto:admin@shantibschool.edu.in?subject=CaseLab%20Registration%20Verification"
+                className="px-6 py-2.5 rounded-xl bg-surface border border-border hover:bg-surface-hover text-text text-sm transition-colors"
+              >
+                Contact Case Centre
+              </a>
+            </div>
           </div>
-
-          {/* Error Banner */}
-          {error && (
-            <div className="p-3.5 rounded-xl border border-danger/30 bg-danger/15 text-danger text-xs flex items-start gap-2.5">
-              <ShieldAlert className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-              <div className="font-medium leading-relaxed">{error}</div>
+        ) : (
+          <div className="bg-surface rounded-3xl border border-border p-6 sm:p-10 shadow-lg">
+            <div className="text-center mb-8">
+              <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full">
+                Institutional Access
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text mt-3">
+                Register for SBS CaseLab
+              </h2>
+              <p className="text-xs sm:text-sm text-text-muted mt-1.5">
+                Create teaching cases, participate in blind peer reviews, and publish to the repository.
+              </p>
             </div>
-          )}
 
-          {/* Success Banner */}
-          {success && (
-            <div className="p-3.5 rounded-xl border border-success/30 bg-success/15 text-success text-xs flex items-start gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
-              <div className="font-medium leading-relaxed">{success}</div>
-            </div>
-          )}
+            {error && (
+              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs sm:text-sm flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
 
-          {/* STEP 1: Registration Form */}
-          {step === "form" && (
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Step 1: Role Selector - First Field */}
               <div>
-                <label className="font-semibold text-text mb-1 block">
-                  Full Name
+                <label className="block text-xs font-semibold uppercase tracking-wider text-text mb-2">
+                  I am a: <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-muted absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Student Name or Faculty Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setUserType("student")}
+                    className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
+                      userType === "student"
+                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                        : "bg-surface border-border text-text-muted hover:border-text-muted"
+                    }`}
+                  >
+                    <GraduationCap className="w-4 h-4" />
+                    <span>Student</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUserType("faculty")}
+                    className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
+                      userType === "faculty"
+                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                        : "bg-surface border-border text-text-muted hover:border-text-muted"
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    <span>Faculty Member</span>
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <label className="font-semibold text-text mb-1 flex items-center justify-between">
-                  <span>Email Address</span>
-                  <span className="text-[10px] text-muted font-normal">
-                    Institutional or personal
-                  </span>
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-muted absolute left-3 top-2.5" />
+              {/* Common Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Zala Prachi / Ms. Reena Paswan"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    Official SBS Email <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="email"
                     required
-                    placeholder="you@shantibschool.edu.in or you@gmail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono text-xs"
+                    placeholder={`name@${ALLOWED_EMAIL_DOMAIN}`}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
-
-                {/* Inline Classification & Status Indicators */}
-                {isDisposable && (
-                  <p className="mt-1.5 text-[11px] text-danger flex items-center gap-1.5">
-                    <ShieldAlert className="w-3.5 h-3.5 text-danger shrink-0" />
-                    <span>Temporary or disposable email domains are blocked.</span>
-                  </p>
-                )}
-
-                {isSbs && (
-                  <p className="mt-1.5 text-[11px] text-success flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-success shrink-0" />
-                    <span>Official SBS domain recognized — 30 fair-use cases/month</span>
-                  </p>
-                )}
-
-                {isStandardEmail && (
-                  <p className="mt-1.5 text-[11px] text-accent flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-accent shrink-0" />
-                    <span>External Guest account — 3 free case generations/month</span>
-                  </p>
-                )}
               </div>
 
-              <div>
-                <label className="font-semibold text-text mb-1 block">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-muted absolute left-3 top-2.5" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    Personal Email (Gmail / Yahoo / Outlook) <span className="text-red-500">*</span>
+                  </label>
                   <input
-                    type="password"
+                    type="email"
                     required
-                    minLength={10}
-                    placeholder="••••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
+                    value={personalEmail}
+                    onChange={(e) => setPersonalEmail(e.target.value)}
+                    placeholder="personal.email@gmail.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
-                </div>
-                <p className="mt-1 text-[10px] text-muted">
-                  Minimum 10 characters with uppercase, lowercase, and numbers.
-                </p>
-              </div>
-
-              {/* Role Selection */}
-              <div>
-                <label className="block text-xs font-semibold text-text mb-1.5">
-                  Registering As:
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRole("faculty")}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      role === "faculty"
-                        ? "border-accent bg-accent/10 text-accent shadow-sm"
-                        : "border-border bg-surface text-muted hover:text-text"
-                    }`}
-                  >
-                    <span>🎓 Faculty</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRole("student")}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                      role === "student"
-                        ? "border-accent bg-accent/10 text-accent shadow-sm"
-                        : "border-border bg-surface text-muted hover:text-text"
-                    }`}
-                  >
-                    <span>📚 Student</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* DPDP Act 2023 Consent Checkbox & Plain Disclosure */}
-              <div className="pt-2 p-3 rounded-xl border border-border bg-surface-raised space-y-2 text-muted">
-                <label className="flex items-start gap-2.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    required
-                    checked={dpdpConsent}
-                    onChange={(e) => setDpdpConsent(e.target.checked)}
-                    className="mt-0.5 rounded text-accent focus:ring-accent w-4 h-4 shrink-0"
-                  />
-                  <span className="text-[11px] leading-relaxed text-text font-medium">
-                    I give explicit statutory consent under the{" "}
-                    <strong>Digital Personal Data Protection (DPDP) Act 2023</strong>{" "}
-                    for {COLLEGE_NAME_WITH_SHORT} to collect and process my personal data for academic case evaluations.
+                  <span className="text-[11px] text-text-muted mt-0.5 block">
+                    Used for password recovery and alumni communications.
                   </span>
-                </label>
+                </div>
 
-                <div className="text-[10px] leading-relaxed text-muted border-t border-border/60 pt-2 space-y-1">
-                  <p>
-                    <strong className="text-text">Data collected:</strong> Name, institutional email, chosen role, submitted case answers, analytical grades, and Dean&apos;s certificates.
-                  </p>
-                  <p>
-                    <strong className="text-text">Purpose & Access:</strong> Used exclusively for business case simulations, academic grading, and accreditation tracking. Accessible only by authorized faculty and college administrators.
-                  </p>
-                  <p>
-                    <strong className="text-text">Retention & Your Rights:</strong> Retained for active academic cycles or until account deletion. You retain the statutory right to access, export, or withdraw consent and request permanent erasure anytime via the{" "}
-                    <Link href="/privacy" target="_blank" className="underline text-accent font-semibold">
-                      Privacy Policy & DPDP Portal
-                    </Link>.
-                  </p>
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    Indian Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading || !dpdpConsent || isDisposable}
-                className="w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <span>{loading ? "Creating Account..." : "Create Account & Send Code"}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
-          )}
-
-          {/* STEP 2: OTP Verification Form */}
-          {step === "otp" && (
-            <form onSubmit={handleVerifyOtp} className="space-y-4 text-xs">
+              {/* Enrollment / Employee ID */}
               <div>
-                <label className="font-semibold text-text mb-1 block">
-                  6-Digit Verification Code
+                <label className="block text-xs font-semibold text-text mb-1">
+                  {userType === "student" ? "Institutional Enrollment Number" : "Faculty Employee ID"}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <KeyRound className="w-4 h-4 text-muted absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    required
-                    maxLength={6}
-                    placeholder="123456"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-surface text-text tracking-widest font-mono text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-accent"
-                  />
-                </div>
+                <input
+                  type="text"
+                  required
+                  value={enrollmentNo}
+                  onChange={(e) => setEnrollmentNo(e.target.value)}
+                  placeholder={userType === "student" ? "e.g. SBS-BCA-2024-001" : "e.g. EMP-FIN-104"}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
 
-                {debugOtp && (
-                  <div className="mt-2 p-2 rounded-lg bg-surface border border-border text-[11px] text-muted flex items-center justify-between">
-                    <span>Dev/Test Code: <strong className="font-mono text-text">{debugOtp}</strong></span>
+              {/* Student-Only Fields */}
+              {userType === "student" && (
+                <div className="p-4 rounded-2xl bg-surface-hover/40 border border-border space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-text mb-1">
+                        Academic Course / Program <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={courseId}
+                        onChange={(e) => setCourseId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      >
+                        {courses.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} ({c.code})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-text mb-1">
+                        Academic Batch <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={batchId}
+                        onChange={(e) => setBatchId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      >
+                        {batches.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            Batch {b.label} (Access through {b.end_year + 1})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-text mb-1">
+                      Class Roll Number <span className="text-text-muted font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={rollNo}
+                      onChange={(e) => setRollNo(e.target.value)}
+                      placeholder="e.g. 24BCA01"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Faculty-Only Fields */}
+              {userType === "faculty" && (
+                <div className="p-4 rounded-2xl bg-surface-hover/40 border border-border space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-text mb-1">
+                      Academic Department ("What do you teach?") <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={departmentId}
+                      onChange={(e) => setDepartmentId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    >
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} ({d.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-text mb-1">
+                        Primary Course <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={courseId}
+                        onChange={(e) => setCourseId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      >
+                        {courses.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-text mb-1">
+                        Faculty Appointment Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={facultyTypeId}
+                        onChange={(e) => setFacultyTypeId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      >
+                        {facultyTypes.map((ft) => (
+                          <option key={ft.id} value={ft.id}>
+                            {ft.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    Password (10+ characters) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••••"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600 pr-10"
+                    />
                     <button
                       type="button"
-                      onClick={() => setOtpCode(debugOtp)}
-                      className="underline text-accent text-[10px] font-bold"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-text-muted hover:text-text"
                     >
-                      Insert Code
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-text mb-1">
+                    Confirm Password <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
               </div>
 
+              {/* DPDP Consent Checkbox - Default Unchecked */}
+              <div className="p-4 rounded-2xl bg-surface-hover/30 border border-border">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={dpdpConsent}
+                    onChange={(e) => setDpdpConsent(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-600 shrink-0"
+                  />
+                  <div className="text-xs text-text-muted leading-relaxed">
+                    <span className="font-semibold text-text">
+                      Statutory Consent under Digital Personal Data Protection (DPDP) Act 2023:
+                    </span>{" "}
+                    I consent to Shanti Business School collecting my institutional email, personal email, Indian mobile number, and enrollment / employee identification. This data is processed strictly for case study authoring, blind peer reviews, academic accreditation, and alumni access. Information is accessible solely to me and the institutional administrator, and consent may be withdrawn at any time in accordance with Section 11 of the DPDP Act.
+                  </div>
+                </label>
+              </div>
+
+              {/* Submit Button */}
               <button
                 type="submit"
-                disabled={verifyingOtp || otpCode.length !== 6}
-                className="w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                disabled={loading || !dpdpConsent}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{verifyingOtp ? "Verifying Code..." : "Verify & Continue"}</span>
+                <span>{loading ? "Submitting Registration..." : "Complete Registration"}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-
-              <div className="flex items-center justify-between pt-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setStep("form")}
-                  className="text-muted hover:text-text transition-colors"
-                >
-                  ← Edit registration details
-                </button>
-                <button
-                  type="button"
-                  disabled={resendingOtp}
-                  onClick={handleResendOtp}
-                  className="text-accent font-semibold hover:underline flex items-center gap-1 disabled:opacity-50"
-                >
-                  <RefreshCw className={`w-3 h-3 ${resendingOtp ? "animate-spin" : ""}`} />
-                  <span>{resendingOtp ? "Sending..." : "Resend code"}</span>
-                </button>
-              </div>
             </form>
-          )}
 
-          {/* STEP 3: Pending Admin Approval State */}
-          {step === "pending_approval" && (
-            <div className="space-y-4 text-center py-4">
-              <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-600 dark:text-amber-400">
-                <ShieldAlert className="w-6 h-6" />
-              </div>
-              <div className="space-y-1.5">
-                <h3 className="font-serif font-bold text-base text-text">
-                  Registration Submitted for Admin Approval
-                </h3>
-                <p className="text-xs text-muted leading-relaxed max-w-sm mx-auto">
-                  Your registration is submitted for admin approval. Since transactional email delivery is not configured in this environment, an administrator must approve your account before you can sign in.
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center justify-center w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-md transition-all"
-                >
-                  <span>Return to Login</span>
-                </Link>
-              </div>
+            <div className="mt-6 text-center text-xs text-text-muted">
+              Already have an institutional account?{" "}
+              <Link href="/login" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+                Sign In
+              </Link>
             </div>
-          )}
-
-          <div className="text-center text-xs text-muted border-t border-border pt-4">
-            Already have an authorized account?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-accent hover:underline"
-            >
-              Sign In
-            </Link>
           </div>
-        </div>
+        )}
       </div>
 
-      <div className="text-center text-xs text-muted">
-        {COLLEGE_NAME_WITH_SHORT} • {APP_NAME} Platform
-      </div>
+      {/* Footer */}
+      <footer className="text-center py-4 text-xs text-text-muted border-t border-border">
+        {COLLEGE_NAME_WITH_SHORT} • Institutional Case Repository Portal
+      </footer>
     </div>
   );
 }
 
 export default function SignUpPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <SignUpForm />
     </Suspense>
   );

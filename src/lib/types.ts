@@ -603,6 +603,10 @@ export type AuditAction =
   | "data_erasure"
   | "casepack_feedback_submitted"
   | "gold_reference_status_updated"
+  | "academic_list_modified"
+  | "access_expired"
+  | "expiry_reminder_7d"
+  | "expiry_reminder_30d"
   | "admin_action";
 
 export interface AuditLog {
@@ -612,7 +616,7 @@ export interface AuditLog {
   actor_name?: string;
   action: AuditAction;
   target_id: string;
-  target_type: "user" | "case" | "grade" | "subscription" | "data_subject" | "platform_settings";
+  target_type: "user" | "case" | "grade" | "subscription" | "data_subject" | "platform_settings" | "academic_list";
   details?: string;
   metadata?: Record<string, any>;
   ip_address?: string;

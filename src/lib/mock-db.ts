@@ -1448,21 +1448,83 @@ class MockStore {
   private repository_items: RepositoryItem[] = [];
   private download_logs: DownloadLog[] = [];
 
-  // LOOKUP TABLES
+  // LOOKUP TABLES & ACADEMIC LISTS
   getBatches(): AcademicBatch[] {
     return [...this.batches];
+  }
+
+  addBatch(batch: Omit<AcademicBatch, "id">): AcademicBatch {
+    const newBatch: AcademicBatch = {
+      id: `batch-${Date.now()}`,
+      ...batch,
+    };
+    this.batches.push(newBatch);
+    return newBatch;
+  }
+
+  updateBatch(id: string, updates: Partial<AcademicBatch>): AcademicBatch | null {
+    const b = this.batches.find((x) => x.id === id);
+    if (!b) return null;
+    Object.assign(b, updates);
+    return b;
   }
 
   getFacultyTypes(): FacultyType[] {
     return [...this.faculty_types];
   }
 
+  addFacultyType(ft: Omit<FacultyType, "id">): FacultyType {
+    const newFt: FacultyType = {
+      id: `ft-${Date.now()}`,
+      ...ft,
+    };
+    this.faculty_types.push(newFt);
+    return newFt;
+  }
+
+  updateFacultyType(id: string, updates: Partial<FacultyType>): FacultyType | null {
+    const ft = this.faculty_types.find((x) => x.id === id);
+    if (!ft) return null;
+    Object.assign(ft, updates);
+    return ft;
+  }
+
   getCaseCategories(): CaseCategory[] {
     return [...this.case_categories];
   }
 
+  addCaseCategory(cat: Omit<CaseCategory, "id">): CaseCategory {
+    const newCat: CaseCategory = {
+      id: `cat-${Date.now()}`,
+      ...cat,
+    };
+    this.case_categories.push(newCat);
+    return newCat;
+  }
+
+  updateCaseCategory(id: string, updates: Partial<CaseCategory>): CaseCategory | null {
+    const cat = this.case_categories.find((x) => x.id === id);
+    if (!cat) return null;
+    Object.assign(cat, updates);
+    return cat;
+  }
+
   getCaseTypes(): CaseTypeItem[] {
     return [...this.case_types];
+  }
+
+  updateDepartment(id: string, updates: Partial<Department>): Department | null {
+    const d = this.departments.find((x) => x.id === id);
+    if (!d) return null;
+    Object.assign(d, updates);
+    return d;
+  }
+
+  updateCourse(id: string, updates: Partial<Course>): Course | null {
+    const c = this.courses.find((x) => x.id === id);
+    if (!c) return null;
+    Object.assign(c, updates);
+    return c;
   }
 
   // REVIEW ROUNDS & COMMENTS
@@ -1669,6 +1731,7 @@ class MockStore {
       (item) =>
         item.id === id ||
         item.email.toLowerCase() === clean ||
+        (item.personal_email && item.personal_email.toLowerCase() === clean) ||
         ((clean === "admin" || clean === "admin01" || clean === "admin@shantibschool.edu.in" || clean === "neha.sharma@shantibschool.edu.in") && item.id === "usr-admin-1") ||
         ((clean === "faculty" || clean === "faculty01" || clean === "faculty@shantibschool.edu.in" || clean === "reena.paswan@shantibschool.edu.in") && item.id === "usr-faculty-1") ||
         ((clean === "student" || clean === "student01" || clean === "student@shantibschool.edu.in" || clean === "prachi.z24bca@shantibschool.edu.in") && item.id === "usr-student-1")
@@ -3770,14 +3833,30 @@ class MockStore {
     };
   }
 
-  getPendingRegistrations(): (Profile & { department_name?: string })[] {
+  getPendingRegistrations(): (Profile & {
+    department_name?: string;
+    course_name?: string;
+    batch_label?: string;
+    faculty_type_name?: string;
+  })[] {
     return this.profiles
-      .filter((p) => !p.is_approved)
+      .filter(
+        (p) =>
+          !p.is_approved ||
+          p.access_status === "pending" ||
+          p.approval_status === "pending_admin_approval"
+      )
       .map((p) => {
         const dept = this.departments.find((d) => d.id === p.department_id);
+        const course = this.courses.find((c) => c.id === p.course_id);
+        const batch = this.batches.find((b) => b.id === p.batch_id);
+        const facultyType = this.faculty_types.find((f) => f.id === p.faculty_type_id);
         return {
           ...p,
           department_name: dept?.name || "General Management",
+          course_name: course?.name,
+          batch_label: batch?.label,
+          faculty_type_name: facultyType?.name,
         };
       });
   }
@@ -3785,8 +3864,33 @@ class MockStore {
   approveRegistration(userId: string, adminId: string = "usr-admin-1"): Profile | null {
     const profile = this.profiles.find((p) => p.id === userId);
     if (!profile) return null;
+
+    const nowIso = new Date().toISOString();
     profile.is_approved = true;
-    profile.updated_at = new Date().toISOString();
+    profile.approval_status = "approved";
+    profile.access_status = "active";
+    profile.access_start = nowIso;
+    profile.approved_by = adminId;
+    profile.approved_at = nowIso;
+
+    if (profile.role === "student") {
+      const batch = this.batches.find((b) => b.id === profile.batch_id);
+      if (batch && batch.end_date) {
+        // Student access_end = batch end date + 1 year (free while studying and 1 year after)
+        const batchEnd = new Date(batch.end_date);
+        batchEnd.setFullYear(batchEnd.getFullYear() + 1);
+        profile.access_end = batchEnd.toISOString();
+      } else {
+        const threeYears = new Date();
+        threeYears.setFullYear(threeYears.getFullYear() + 3);
+        profile.access_end = threeYears.toISOString();
+      }
+    } else {
+      // Faculty and Admin have no end date unless admin sets one
+      profile.access_end = null;
+    }
+
+    profile.updated_at = nowIso;
 
     const admin = this.profiles.find((p) => p.id === adminId);
     this.logAudit(
@@ -3795,15 +3899,26 @@ class MockStore {
       "registration_approved",
       profile.id,
       "user",
-      { name: profile.name, email: profile.email, role: profile.role }
+      {
+        name: profile.name,
+        email: profile.email,
+        role: profile.role,
+        access_start: profile.access_start,
+        access_end: profile.access_end,
+      }
     );
     return profile;
   }
 
-  rejectRegistration(userId: string, adminId: string = "usr-admin-1"): boolean {
-    const idx = this.profiles.findIndex((p) => p.id === userId);
-    if (idx === -1) return false;
-    const profile = this.profiles[idx];
+  rejectRegistration(userId: string, adminId: string = "usr-admin-1", reason?: string): boolean {
+    const profile = this.profiles.find((p) => p.id === userId);
+    if (!profile) return false;
+
+    profile.is_approved = false;
+    profile.approval_status = "rejected";
+    profile.access_status = "inactive";
+    profile.updated_at = new Date().toISOString();
+
     const admin = this.profiles.find((p) => p.id === adminId);
     this.logAudit(
       adminId,
@@ -3811,10 +3926,23 @@ class MockStore {
       "registration_rejected",
       profile.id,
       "user",
-      { name: profile.name, email: profile.email, role: profile.role }
+      {
+        name: profile.name,
+        email: profile.email,
+        role: profile.role,
+        reason: reason || "Administrative discretion",
+      }
     );
-    this.profiles.splice(idx, 1);
     return true;
+  }
+
+  bulkApproveRegistrations(userIds: string[], adminId: string = "usr-admin-1"): Profile[] {
+    const approved: Profile[] = [];
+    for (const id of userIds) {
+      const p = this.approveRegistration(id, adminId);
+      if (p) approved.push(p);
+    }
+    return approved;
   }
 
   getRecentActivityFeed(limit: number = 8): RecentActivityItem[] {

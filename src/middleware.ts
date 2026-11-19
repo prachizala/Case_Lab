@@ -6,6 +6,7 @@ import {
   verifySessionToken,
 } from "@/lib/session";
 import { mockStore } from "@/lib/mock-db";
+import { checkAccess } from "@/lib/access-control";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -29,6 +30,7 @@ export async function middleware(request: NextRequest) {
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname === "/privacy" ||
+    pathname === "/expired" ||
     // Public shareable portfolio links (e.g. /portfolio/usr-student-1)
     (pathname.startsWith("/portfolio/") && pathname.split("/").length > 2)
   ) {
@@ -45,6 +47,31 @@ export async function middleware(request: NextRequest) {
       const user = mockStore.getProfile(payload.userId);
       if (user) {
         userRole = user.role;
+        const access = checkAccess(user);
+
+        // Pending registrations redirected to login status page
+        if (access.status === "pending") {
+          const redirectUrl = new URL("/login", request.url);
+          redirectUrl.searchParams.set("status", "pending");
+          return NextResponse.redirect(redirectUrl);
+        }
+
+        // Inactive accounts redirected to login
+        if (access.status === "inactive") {
+          const redirectUrl = new URL("/login", request.url);
+          redirectUrl.searchParams.set("status", "inactive");
+          return NextResponse.redirect(redirectUrl);
+        }
+
+        // Expired accounts: allowed into /expired, /my-answers, /portfolio; blocked from create, curate, upload
+        if (access.status === "expired") {
+          const allowedExpiredRoutes = ["/expired", "/my-answers", "/portfolio", "/privacy"];
+          const isAllowed = allowedExpiredRoutes.some((route) => pathname.startsWith(route));
+          if (!isAllowed) {
+            const redirectUrl = new URL("/expired", request.url);
+            return NextResponse.redirect(redirectUrl);
+          }
+        }
       }
     }
   } else {
@@ -67,30 +94,18 @@ export async function middleware(request: NextRequest) {
   }
 
   // 1. Student Route Protection
-  // Students cannot access admin center or review queue
-  // Students cannot access case generation unless STUDENT_CASE_GENERATION is enabled
+  // Students and Faculty can both create cases (Default Decision 1)
+  // Students cannot access faculty curation, admin center, or review queue
   if (userRole === "student") {
-    const studentGenerationAllowed = process.env.STUDENT_CASE_GENERATION === "true";
-
-    if (pathname.startsWith("/create") && !studentGenerationAllowed) {
-      const redirectUrl = new URL("/dashboard", request.url);
-      redirectUrl.searchParams.set(
-        "error",
-        "Students are restricted from accessing Case Generation."
-      );
-      return NextResponse.redirect(redirectUrl);
-    }
-
     if (
       pathname.startsWith("/faculty") ||
       pathname.startsWith("/admin") ||
-      pathname.startsWith("/review-queue") ||
-      pathname.startsWith("/analytics")
+      pathname.startsWith("/review-queue")
     ) {
       const redirectUrl = new URL("/dashboard", request.url);
       redirectUrl.searchParams.set(
         "error",
-        "Students are restricted from accessing Faculty Review Queue, Analytics, or Admin Center."
+        "Students are restricted from accessing Faculty Review Queue or Admin Center."
       );
       return NextResponse.redirect(redirectUrl);
     }

@@ -30,16 +30,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { userId, action, reason } = body;
+    const { userId, userIds, action, reason } = body;
 
-    if (!userId || !action) {
+    if (!action) {
       return NextResponse.json(
-        { error: "Missing required fields: userId and action ('approve' | 'reject')." },
+        { error: "Missing required field: action ('approve' | 'reject' | 'bulk_approve')." },
         { status: 400 }
       );
     }
 
     if (action === "approve") {
+      if (!userId) {
+        return NextResponse.json({ error: "userId is required for single approval." }, { status: 400 });
+      }
       const profile = mockStore.approveRegistration(userId, auth.user.id);
       if (!profile) {
         return NextResponse.json({ error: "User not found." }, { status: 404 });
@@ -52,7 +55,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "reject") {
-      const ok = mockStore.rejectRegistration(userId, auth.user.id);
+      if (!userId) {
+        return NextResponse.json({ error: "userId is required for rejection." }, { status: 400 });
+      }
+      const ok = mockStore.rejectRegistration(userId, auth.user.id, reason);
       if (!ok) {
         return NextResponse.json({ error: "User not found." }, { status: 404 });
       }
@@ -62,8 +68,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (action === "bulk_approve") {
+      if (!Array.isArray(userIds) || userIds.length === 0) {
+        return NextResponse.json(
+          { error: "userIds array is required for bulk approval." },
+          { status: 400 }
+        );
+      }
+      const approvedProfiles = mockStore.bulkApproveRegistrations(userIds, auth.user.id);
+      return NextResponse.json({
+        success: true,
+        message: `Successfully approved ${approvedProfiles.length} registration(s).`,
+        count: approvedProfiles.length,
+        profiles: approvedProfiles,
+      });
+    }
+
     return NextResponse.json(
-      { error: "Invalid action. Must be 'approve' or 'reject'." },
+      { error: "Invalid action. Must be 'approve', 'reject', or 'bulk_approve'." },
       { status: 400 }
     );
   } catch (err) {

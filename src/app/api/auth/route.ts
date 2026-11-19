@@ -22,6 +22,8 @@ import {
   resetLoginFailures,
 } from "@/lib/auth-security";
 import { isEmailProviderConfigured, sendOtpEmail } from "@/lib/email/send";
+import { validatePersonalEmail, normalizeIndianMobile } from "@/lib/auth-validation";
+import { checkAccess } from "@/lib/access-control";
 
 export async function GET(req: NextRequest) {
   const sessionCookie = req.cookies.get(AUTH_COOKIE_NAME)?.value;
@@ -98,7 +100,87 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Check if user already exists
+      // Admin role cannot be registered via sign-up
+      if (
+        body.role === "admin" ||
+        body.user_type === "admin" ||
+        (email && email.toLowerCase().trim() === `admin@${ALLOWED_EMAIL_DOMAIN}`)
+      ) {
+        return NextResponse.json(
+          { error: "Admin role cannot be registered via sign-up. The institutional administrator account is managed exclusively by the case centre." },
+          { status: 400 }
+        );
+      }
+
+      const userType = body.user_type || body.role;
+      if (userType !== "student" && userType !== "faculty") {
+        return NextResponse.json(
+          { error: "Registration role must be either 'student' or 'faculty'." },
+          { status: 400 }
+        );
+      }
+
+      // Personal email validation
+      let validatedPersonalEmail: string | null = null;
+      if (body.personal_email) {
+        const pCheck = validatePersonalEmail(body.personal_email, email);
+        if (!pCheck.valid) {
+          return NextResponse.json({ error: pCheck.error }, { status: 400 });
+        }
+        const existingPersonal = mockStore.getProfiles().find(
+          (p) => p.personal_email && p.personal_email.toLowerCase() === body.personal_email.toLowerCase().trim()
+        );
+        if (existingPersonal) {
+          return NextResponse.json(
+            { error: "An account with this personal email address already exists. Please sign in instead." },
+            { status: 409 }
+          );
+        }
+        validatedPersonalEmail = body.personal_email.toLowerCase().trim();
+      }
+
+      // Indian mobile validation
+      let normalizedMobile: string | null = null;
+      if (body.mobile) {
+        const mCheck = normalizeIndianMobile(body.mobile);
+        if (!mCheck.valid) {
+          return NextResponse.json({ error: mCheck.error }, { status: 400 });
+        }
+        normalizedMobile = mCheck.normalized || null;
+      }
+
+      // Enrollment number / Employee ID uniqueness
+      const enrollmentNo = (body.enrollment_no || "").trim();
+      if (enrollmentNo) {
+        const existingEnrollment = mockStore.getProfiles().find(
+          (p) => p.enrollment_no && p.enrollment_no.toLowerCase() === enrollmentNo.toLowerCase()
+        );
+        if (existingEnrollment) {
+          return NextResponse.json(
+            { error: "This Enrollment Number / Employee ID is already registered." },
+            { status: 409 }
+          );
+        }
+      }
+
+      // Reject cross-type fields
+      if (userType === "student") {
+        if (body.faculty_type_id) {
+          return NextResponse.json(
+            { error: "Students cannot be assigned a faculty appointment type." },
+            { status: 400 }
+          );
+        }
+      } else if (userType === "faculty") {
+        if (body.batch_id) {
+          return NextResponse.json(
+            { error: "Faculty members cannot be assigned to an academic student batch." },
+            { status: 400 }
+          );
+        }
+      }
+
+      // Check if user with this SBS email already exists
       const existing = mockStore.getProfile(email.toLowerCase().trim());
       if (existing) {
         return NextResponse.json(
@@ -107,35 +189,38 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const isCollegeAdmin = email.toLowerCase().trim() === `admin@${ALLOWED_EMAIL_DOMAIN}`;
-      const requestedRole: UserRole = (body.role === "faculty" || body.role === "student") ? body.role : "faculty";
-      const newRole: UserRole = isCollegeAdmin ? "admin" : requestedRole;
-      const isProd = isProductionEnv();
       const hasEmailProvider = isEmailProviderConfigured();
+      const newRole: UserRole = userType as UserRole;
 
-      // If no email provider is configured in production, create as pending_admin_approval
-      const isPendingAdminApproval = isProd && !hasEmailProvider && !isCollegeAdmin;
-      const isApproved = !isPendingAdminApproval;
-      const approvalStatus = isPendingAdminApproval ? "pending_admin_approval" : "approved";
-
-      const userType: UserType = validation.userType;
       const newProfile: Profile = {
         id: `usr-${Date.now()}`,
         email: email.toLowerCase().trim(),
         name: name.trim(),
         role: newRole,
-        user_type: userType,
-        email_verified_at: null, // Require email verification
+        user_type: "sbs_member",
+        personal_email: validatedPersonalEmail,
+        mobile: normalizedMobile,
+        enrollment_no: enrollmentNo || null,
+        roll_no: body.roll_no?.trim() || null,
+        course_id: body.course_id || null,
+        batch_id: userType === "student" ? (body.batch_id || null) : null,
+        department_id: userType === "faculty" ? (body.department_id || null) : null,
+        faculty_type_id: userType === "faculty" ? (body.faculty_type_id || null) : null,
+        is_reviewer: false,
+        access_status: "pending",
+        is_approved: false,
+        approval_status: "pending_admin_approval",
+        access_start: null,
+        access_end: null,
+        registered_at: new Date().toISOString(),
+        email_verified_at: null,
         verification_otp: null,
         otp_expires_at: null,
         free_cases_used_this_month: 0,
         free_cases_reset_at: getNextMonthResetKolkata(),
-        department_id: null,
         plan: "standard",
-        is_approved: isApproved,
-        approval_status: approvalStatus,
-        sbs_eligible: userType === "sbs_member",
-        dpdp_consent: body.dpdp_consent ?? false,
+        sbs_eligible: true,
+        dpdp_consent: true,
         dpdp_consent_at: new Date().toISOString(),
         consent_version: "2023.1",
         policy_version: "v1.2",
@@ -146,26 +231,23 @@ export async function POST(req: NextRequest) {
       mockStore.addProfile(newProfile);
       mockStore.setUserPassword(newProfile.id, password);
 
-      // Flow 1: Pending Admin Approval (Production without email provider)
-      if (isPendingAdminApproval) {
-        mockStore.logAudit(
-          newProfile.id,
-          newProfile.email,
-          "registration_pending",
-          newProfile.id,
-          "user",
-          { role: newProfile.role, reason: "No transactional email provider configured" }
-        );
+      // Log registration and notify admin
+      mockStore.logAudit(
+        newProfile.id,
+        newProfile.email,
+        "registration_pending",
+        newProfile.id,
+        "user",
+        {
+          name: newProfile.name,
+          role: newProfile.role,
+          personal_email: newProfile.personal_email,
+          mobile: newProfile.mobile,
+          enrollment_no: newProfile.enrollment_no,
+        }
+      );
 
-        return NextResponse.json({
-          success: true,
-          pending_approval: true,
-          message: "Your registration is submitted for admin approval",
-          user: newProfile,
-        });
-      }
-
-      // Flow 2: Live or Dev OTP Verification
+      // Flow 1: Default Institutional Approval Flow
       const generatedOtp = generateSecureOtp();
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes
       mockStore.setUserOtp(newProfile.id, generatedOtp, otpExpiresAt);
@@ -178,22 +260,15 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Safe debug OTP output: ONLY when explicitly configured in non-production environments
       const showOtp = canShowOtpOnScreen();
 
-      const response = NextResponse.json({
+      return NextResponse.json({
         success: true,
-        message: "Account created successfully. Please enter the 6-digit verification code sent to your email.",
+        pending_approval: true,
+        message: "Your registration has been submitted and is awaiting institutional approval by Dean Academics.",
         user: newProfile,
-        user_type: userType,
-        requires_verification: true,
         ...(showOtp ? { debug_otp: generatedOtp } : {}),
       });
-
-      // Set signed, tamper-proof session cookie
-      await setSessionCookie(response, newProfile.id);
-
-      return response;
     }
 
     if (action === "request-otp") {
@@ -323,9 +398,26 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      if (!profile.is_approved || profile.approval_status === "pending_admin_approval") {
+      // Access status checks via checkAccess helper
+      const access = checkAccess(profile);
+      if (access.status === "pending") {
         return NextResponse.json(
-          { error: "Your account registration is pending institutional administrator approval. You cannot sign in until approved." },
+          {
+            error: "Your account registration is pending institutional administrator approval. You cannot sign in until approved.",
+            access_status: "pending",
+            registered_at: profile.registered_at,
+            admin_contact: "admin@shantibschool.edu.in",
+          },
+          { status: 403 }
+        );
+      }
+
+      if (access.status === "inactive") {
+        return NextResponse.json(
+          {
+            error: "Your account is currently inactive. Please contact administration.",
+            access_status: "inactive",
+          },
           { status: 403 }
         );
       }
@@ -336,6 +428,8 @@ export async function POST(req: NextRequest) {
       const response = NextResponse.json({
         success: true,
         user: profile,
+        access_status: access.status,
+        access_end: profile.access_end,
       });
 
       // Set signed, tamper-proof session cookie

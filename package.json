@@ -19,6 +19,7 @@
     "test:password": "tsx scripts/test-password-security.ts",
     "test:smoke": "tsx scripts/smoke-test.ts",
     "test:repository-rls": "tsx scripts/test-repository-rls.ts",
+    "test:auth": "tsx scripts/test-auth-lifecycle.ts",
     "test:secret-scan": "tsx scripts/secret-scan.ts"
   },
   "dependencies": {
