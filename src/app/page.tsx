@@ -66,11 +66,11 @@ export default function HomePage() {
       {/* Hero Section */}
       <main className="max-w-5xl mx-auto px-6 py-16 text-center space-y-8">
         <h1 className="font-serif text-4xl sm:text-6xl font-extrabold text-text leading-tight tracking-tight max-w-4xl mx-auto">
-          Authoritative Business Case Studies, Generated in Real Time.
+          Authentic Business Cases. Intelligent Insights. Real-Time Generation.
         </h1>
 
         <p className="text-base sm:text-lg text-muted max-w-2xl mx-auto leading-relaxed font-sans">
-          {APP_NAME} equips {COLLEGE_NAME_WITH_SHORT} faculty and students with Claude-powered case generation, interactive quantitative exhibits, fact-verified signals, and multi-lingual pedagogy across English, Hindi, and Gujarati.
+          An intelligent academic platform combining business research, AI-powered case development, decision analysis, and experiential learning.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
