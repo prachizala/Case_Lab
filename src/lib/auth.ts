@@ -47,12 +47,21 @@ export function validateEmailDomain(
   }
 
   const isMatch = isSbsDomain(normalized, dynamicAllowedDomains);
+  if (!isMatch) {
+    return {
+      isValid: false,
+      domain: domainPart,
+      isSbsDomain: false,
+      userType: "external",
+      errorMessage: `Registration is restricted to official @${ALLOWED_DOMAIN} email addresses.`,
+    };
+  }
 
   return {
     isValid: true,
     domain: domainPart,
-    isSbsDomain: isMatch,
-    userType: isMatch ? "sbs_member" : "external",
+    isSbsDomain: true,
+    userType: "sbs_member",
   };
 }
 

@@ -1,0 +1,194 @@
+{
+  "id": "gold-mkt-nourishroots-001",
+  "status": "pending_approval",
+  "notes": "Draft Marketing Gold Standard (Original Content, Fictional Enterprise). Follows the CE Case Pack schema strictly. Marked pending_approval until an administrator approves it within the platform for use as a few-shot generation example.",
+  "meta": {
+    "department": "marketing",
+    "subject": "Strategic Marketing & Brand Management",
+    "topic": [
+      "Segmentation, Targeting & Positioning (STP)",
+      "Marketing Mix & Pricing Strategy",
+      "Omnichannel Distribution & Channel Conflict",
+      "Brand Equity & Consumer Behavior"
+    ],
+    "concepts": [
+      "Positioning Statement Template",
+      "Price Skimming vs Penetration",
+      "Quick Commerce vs Modern Trade",
+      "4Ps Marketing Mix",
+      "Customer Acquisition Cost (CAC) vs LTV"
+    ],
+    "course_code": "MKT-501",
+    "ce_no": "CE-3",
+    "set": "A",
+    "level": "MBA / PGDM",
+    "language": "en",
+    "industry": "Organic Food & FMCG",
+    "geography": "Ahmedabad, Gujarat, India",
+    "length": "standard",
+    "max_marks": 40
+  },
+  "case": {
+    "title": "Repositioning and Omnichannel Scaling at NourishRoots Organics",
+    "word_count": 1220,
+    "sections": [
+      {
+        "heading": "Background of the Company",
+        "paragraphs": [
+          "NourishRoots Organics Pvt. Ltd. is a premium health-food enterprise established in 2019 in Ahmedabad, Gujarat, by food technologists Ananya Desai and Pradeep Patel. The company manufactures certified organic cold-pressed edible oils (mustard, groundnut, and sesame), heritage millet flours, and unrefined palm jaggery, sourcing directly from a network of 1,200 smallholder farmer cooperatives across Saurashtra.",
+          "Capitalizing on post-pandemic wellness tailwinds, NourishRoots expanded rapidly through its direct-to-consumer (D2C) website and high-end specialty gourmet grocery outlets across Ahmedabad, Vadodara, and Surat. By FY 2022-2023, the brand achieved an annual turnover of ₹18.5 crore with healthy 46% gross margins. However, as the company sought to scale beyond regional borders into Mumbai and Pune, revenue growth plateaued while digital customer acquisition costs (CAC) jumped by 62% due to soaring digital ad auction rates."
+        ]
+      },
+      {
+        "heading": "The Competitive Squeeze and Market Segmentation Dilemma",
+        "paragraphs": [
+          "NourishRoots found itself trapped in a dual competitive squeeze. On one side, multinational FMCG conglomerates launched mass-market 'pure and natural' product extensions priced 35% lower than NourishRoots. On the other side, venture-funded ultra-niche organic direct-to-consumer startups aggressively outspent NourishRoots on influencer endorsements and performance marketing.",
+          "Co-founder Ananya Desai conducted an extensive consumer segmentation study across urban Western India, identifying three distinct customer clusters: 'Wellness Purists' (high-income households prioritizing single-origin traceability), 'Aspirational Pragmatists' (dual-income parents seeking chemical-free staples at moderate price premiums), and 'Price-Conscious Traditionalists' (who default to standard commercial oils and flours).",
+          "A fierce internal debate erupted. Sales Director Pradeep Patel urged an immediate price-cutting penetration strategy to pursue the mass Aspirational Pragmatist segment. Conversely, Desai insisted that slashing prices would erode hard-won brand equity, advocating instead for a premium brand repositioning anchored in single-origin cold-press authenticity."
+        ]
+      },
+      {
+        "heading": "Channel Conflict: Quick Commerce vs. Premium Modern Trade",
+        "paragraphs": [
+          "Distribution strategy emerged as a second major friction point. In early 2023, NourishRoots onboarded onto prominent 10-minute quick-commerce platforms (Blinkit, Zepto, and Instamart) in Mumbai and Ahmedabad. Quick-commerce sales surged exponentially, accounting for 38% of total volume within six months.",
+          "However, rapid quick-commerce expansion triggered immediate revolt from NourishRoots' foundational retail partners—140 premium independent supermarket stockists and organic boutique grocers. Quick-commerce platforms systematically undercut physical retail prices through algorithmic flash discounts, offering 15% promotional markdowns subsidized by platform credits.",
+          "Brick-and-mortar grocers, who invested capital to stock and display the products, threatened to delist NourishRoots unless the company enforced strict maximum retail price (MRP) parity and compensated them with higher trade margins (demanding an increase from 18% to 25%)."
+        ]
+      },
+      {
+        "heading": "Strategic Marketing Realignment and Product Line Extension",
+        "paragraphs": [
+          "To resolve the channel standoff without forfeiting quick-commerce velocity, Desai executed a dual-SKU product differentiation strategy. The flagship brand, 'NourishRoots Reserve' (packaged in heritage glass bottles with QR-code farm traceability), was reserved exclusively for premium modern trade, organic gourmet boutiques, and the D2C flagship website at a premium price point of ₹480 per liter.",
+          "Simultaneously, a new sub-brand, 'NourishRoots Daily' (packaged in recyclable food-grade pouches with standardized retail specifications), was engineered specifically for quick-commerce platforms and mass grocery at ₹360 per liter. This protected the margin expectations of physical retailers while capturing high-velocity impulse purchases on digital apps.",
+          "By early 2024, the strategic realignment restored channel harmony. Annual turnover rebounded to ₹29.4 crore, quick-commerce growth stabilized at 32% of total revenue without dealer backlash, and overall brand recall increased significantly across target metropolitan households."
+        ]
+      }
+    ],
+    "data_tables": [
+      {
+        "title": "Exhibit 1: NourishRoots Organics - Market Share, Channel Economics & Pricing Analysis (FY 2023-2024)",
+        "columns": [
+          "Channel / Segment Metric",
+          "D2C Webstore",
+          "Specialty Modern Trade",
+          "Quick Commerce (Blinkit/Zepto)",
+          "Mass FMCG Competitors"
+        ],
+        "rows": [
+          ["Share of Total Revenue (%)", "18%", "44%", "38%", "-"],
+          ["Average Selling Price (₹ / Liter Cold-Pressed Groundnut Oil)", "₹520", "₹480", "₹360", "₹240"],
+          ["Channel Trade Margin (%)", "0% (D2C Direct)", "20%", "28%", "14%"],
+          ["Customer Acquisition Cost (CAC)", "₹420 per buyer", "₹65 per walk-in", "₹95 per app conversion", "₹35 per mass buyer"],
+          ["Customer Lifetime Value (LTV: 12-Month)", "₹2,800", "₹3,400", "₹1,950", "₹900"],
+          ["Repeat Order Frequency (Days)", "45 Days", "30 Days", "18 Days", "35 Days"]
+        ]
+      }
+    ]
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "bloom_verb": "Formulate & Justify",
+      "text": "Formulate a comprehensive Segmentation, Targeting, and Positioning (STP) strategy for NourishRoots Organics. Author an authoritative brand positioning statement strictly adhering to the institutional template: 'For [target segment], [brand] offers [value proposition] because [reason to believe]'.",
+      "concepts": ["STP Analysis", "Positioning Statement Template", "Targeting Strategy", "Brand Differentiation"],
+      "marks": 20,
+      "co": "CO1",
+      "k_level": "K5"
+    },
+    {
+      "id": "Q2",
+      "bloom_verb": "Evaluate & Recommend",
+      "text": "Evaluate the marketing mix (4Ps) and channel conflict dilemmas confronting NourishRoots Organics across Quick Commerce versus Premium Modern Trade. In your opinion, was management's dual-SKU and price discrimination strategy appropriate? Justify your answer with reference to channel economics and brand equity.",
+      "concepts": ["4Ps Marketing Mix", "Channel Conflict", "Dual-SKU Strategy", "Price Discrimination", "Omnichannel Economics"],
+      "marks": 20,
+      "co": "CO2",
+      "k_level": "K5"
+    }
+  ],
+  "answers": [
+    {
+      "question_id": "Q1",
+      "word_count": 510,
+      "introduction": "NourishRoots Organics operated in an increasingly polarized FMCG edible oils and staples landscape. Squeezed between cheap mass-market competitors and digital venture-backed direct-to-consumer brands, the company needed a clear, defensible Segmentation, Targeting, and Positioning (STP) strategy to escape margin erosion and sustain customer loyalty.",
+      "sections": [
+        {
+          "heading": "1. Segmentation and Target Market Selection",
+          "points": [
+            "Segmentation: The market divides into three clusters: Wellness Purists (uncompromising focus on farm source and processing purity; high willingness to pay), Aspirational Pragmatists (health-conscious urban families seeking healthier choices but price-sensitive), and Price-Conscious Traditionalists (default to mass refined oils).",
+            "Targeting Strategy: NourishRoots must adopt a differentiated multi-segment targeting approach. It targets Wellness Purists with its flagship 'Reserve' range, while addressing the upper echelon of Aspirational Pragmatists with its standardized 'Daily' line, completely bypassing price-driven traditionalists."
+          ]
+        },
+        {
+          "heading": "2. Institutional Brand Positioning Statement",
+          "points": [
+            "Formal Positioning Statement (Canonical Institutional Template):",
+            "\"For health-conscious urban households and wellness purists seeking authentic dietary vitality, NourishRoots Organics offers certified cold-pressed heritage kitchen staples with uncompromising nutritional integrity, because every batch is sourced directly from verified farmer cooperatives and crafted using traditional wooden extraction methods with QR-verifiable single-origin farm traceability.\""
+          ]
+        }
+      ],
+      "conclusion": "This STP foundation effectively shields NourishRoots from commoditization. By anchoring its positioning on verifiable single-origin purity rather than generic health buzzwords, NourishRoots creates a sustainable moat that justifies its premium price point against industrial FMCG conglomerates."
+    },
+    {
+      "question_id": "Q2",
+      "word_count": 575,
+      "introduction": "Rapid scaling via 10-minute quick-commerce platforms delivered substantial volume growth for NourishRoots but created severe channel cannibalization and retail rebellion among physical gourmet stockists. Management responded with a tailored marketing mix (4Ps) anchored in a dual-SKU channel architecture.",
+      "sections": [
+        {
+          "heading": "1. Marketing Mix (4Ps) Alignment and Channel Conflict Analysis",
+          "points": [],
+          "evaluation": [
+            "Product Strategy: Separated portfolio into 'NourishRoots Reserve' (glass bottle, single-origin estate, premium labeling) for physical stores and 'NourishRoots Daily' (food-grade pouch, standardized batch) for quick commerce. This physical divergence eliminated direct side-by-side barcode comparison by consumers.",
+            "Price Strategy: Price discrimination was successfully deployed. Reserve held at ₹480/L with zero discounting, protecting specialty retailer margins. Daily priced at ₹360/L, absorbing quick commerce's 28% channel take-rate while remaining competitive.",
+            "Place (Distribution): Segregated channels by buying occasion—Reserve for deliberate, experiential grocery replenishment; Daily for high-frequency, spontaneous 10-minute pantry top-ups.",
+            "Promotion Strategy: Leveraged instore tasting and masterclass activations in brick-and-mortar stores, while employing sponsored search banners and bundle promotions on quick-commerce apps."
+          ],
+          "limitation": "Managing separate packaging, inventory stock-keeping units (SKUs), and distinct manufacturing runs elevates supply chain complexity and working capital requirements."
+        }
+      ],
+      "comparison_table": {
+        "columns": ["Marketing Element", "NourishRoots Reserve (Modern Trade)", "NourishRoots Daily (Quick Commerce)"],
+        "rows": [
+          ["Target Consumer", "Wellness Purists & Gourmet Chefs", "Convenience-focused urban parents"],
+          ["Packaging & SKU", "500ml & 1L Embossed Glass Bottles", "500ml & 1L Recyclable Spout Pouches"],
+          ["Price Point (1L)", "₹480 (Full Margin, Strict MRP parity)", "₹360 (Volume-optimized promotional pricing)"],
+          ["Channel Margin", "20% fixed retailer trade discount", "28% quick commerce fulfillment take-rate"],
+          ["Consumer Buying Intent", "Planned experiential grocery shopping", "Immediate impulse or emergency pantry replenishment"]
+        ]
+      },
+      "overall_assessment": "Management's dual-SKU strategy was exceptionally effective and appropriate. Directly offering identical SKUs at different prices across quick commerce and physical retail is the primary cause of channel breakdown in modern FMCG. By re-engineering product packaging and price points per channel, NourishRoots respected retailer margins while riding the quick-commerce wave.",
+      "conclusion": "In conclusion, NourishRoots demonstrated exemplary omnichannel governance. The dual-SKU architecture turned a potentially fatal distributor revolt into a market-widening triumph, enabling the company to expand annual sales to ₹29.4 crore while keeping gross margins robust at over 40%."
+    }
+  ],
+  "teaching_notes": {
+    "synopsis": "Analyzes an Indian organic food startup caught in channel conflict between physical gourmet grocers and 10-minute quick-commerce platforms (Blinkit/Zepto). Management navigates STP, the 4Ps, and price discrimination through a dual-SKU strategy.",
+    "objectives": [
+      "Formulate a defensible STP strategy and canonical positioning statement.",
+      "Evaluate trade channel conflict between quick commerce and traditional modern trade.",
+      "Design a dual-SKU product and pricing architecture to maintain margin parity across retail partners."
+    ],
+    "teaching_approach": "Ask students whether quick commerce destroys luxury and premium brands. Contrast the customer experience of browsing an artisanal olive oil in a store vs ordering cold-pressed mustard oil in 10 minutes on Blinkit.",
+    "frameworks": ["STP Framework", "The 4Ps of Marketing", "Channel Conflict Resolution", "Positioning Statement"],
+    "common_mistakes": [
+      "Failing to adapt product packaging when entering quick commerce, leading to instant channel revolt.",
+      "Writing a generic positioning statement that lacks a concrete reason to believe (RTB)."
+    ],
+    "marking_scheme": [
+      {"criterion": "Rigorous segmentation and targeting differentiation", "marks": 8},
+      {"criterion": "Positioning statement adheres to canonical template", "marks": 12},
+      {"criterion": "Critical 4Ps evaluation and channel conflict diagnosis", "marks": 12},
+      {"criterion": "Commercial synthesis of dual-SKU resolution", "marks": 8}
+    ]
+  },
+  "quality": {
+    "facts_to_verify": [
+      "Prevailing channel margins demanded by Indian quick commerce dark stores",
+      "Organic certification standards under FSSAI Jaivik Bharat"
+    ],
+    "illustrative_figures": [
+      "₹18.5 Cr initial revenue scaling to ₹29.4 Cr",
+      "₹480/L Reserve vs ₹360/L Daily groundnut oil price",
+      "28% quick commerce take-rate vs 20% modern trade margin",
+      "62% surge in digital performance marketing CAC"
+    ]
+  }
+}

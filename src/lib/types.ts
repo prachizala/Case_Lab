@@ -15,6 +15,7 @@ export interface Department {
   code: string;
   name: string;
   description?: string;
+  is_active?: boolean;
   created_at?: string;
 }
 
@@ -25,8 +26,45 @@ export interface Course {
   code: string;
   name: string;
   semester: string;
+  is_active?: boolean;
   created_at?: string;
 }
+
+export interface AcademicBatch {
+  id: string;
+  label: string; // e.g. '2024-27'
+  start_year: number;
+  end_year: number;
+  end_date: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface FacultyType {
+  id: string;
+  name: string; // 'Full-time' | 'Visiting' | 'Guest' | 'Adjunct'
+  description?: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface CaseCategory {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface CaseTypeItem {
+  id: string;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export type AccessStatus = "pending" | "active" | "expired" | "inactive";
 
 export interface Profile {
   id: string;
@@ -34,6 +72,13 @@ export interface Profile {
   name: string;
   role: UserRole;
   user_type?: UserType;
+  personal_email?: string | null;
+  mobile?: string | null;
+  enrollment_no?: string | null;
+  roll_no?: string | null;
+  course_id?: string | null;
+  batch_id?: string | null;
+  faculty_type_id?: string | null;
   email_verified_at?: string | null;
   free_cases_used_this_month?: number;
   free_cases_reset_at?: string;
@@ -46,6 +91,13 @@ export interface Profile {
   is_approved: boolean;
   approval_status?: "approved" | "pending_admin_approval" | "rejected";
   is_reviewer?: boolean; // Faculty marked as reviewer by admin
+  reviewer_since?: string | null;
+  access_start?: string | null;
+  access_end?: string | null;
+  access_status?: AccessStatus;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  registered_at?: string | null;
   portfolio_public?: boolean; // Student public portfolio toggle
   watch_industries?: string[]; // Faculty watch industries (up to 8)
   subscription_status?: "active" | "expired" | "none"; // For alumni continuing education
@@ -64,7 +116,16 @@ export interface Profile {
 
 export type CaseType = "short" | "full" | "research" | "flash" | "ce_pack";
 export type CaseFormat = "hypothetical" | "real_signal";
-export type CaseStatus = "draft" | "in_review" | "approved" | "published" | "archived" | "changes_requested";
+export type CaseStatus =
+  | "draft"
+  | "submitted"
+  | "in_review"
+  | "changes_requested"
+  | "approved"
+  | "uploaded"
+  | "rejected"
+  | "published"
+  | "archived";
 export type CaseVisibility = "private" | "sbs_only" | "public";
 export type CaseLanguage = "en" | "hi" | "gu";
 
@@ -164,8 +225,10 @@ export interface CaseStudy {
   id: string;
   author_id: string;
   author_name?: string;
+  author_role?: "faculty" | "student" | "admin";
   title: string;
   status: CaseStatus;
+  review_status?: CaseStatus;
   visibility?: CaseVisibility;
   type: CaseType;
   format: CaseFormat;
@@ -182,6 +245,7 @@ export interface CaseStudy {
   learning_objectives?: string[];
   tone?: CaseTone;
   blooms_level?: string;
+  case_category_id?: string | null;
   course_id?: string | null;
   course_name?: string | null;
   department_id?: string | null; // For department student visibility
@@ -189,6 +253,8 @@ export interface CaseStudy {
   language: CaseLanguage;
   complexity: number; // 1 - 10
   tags?: string[]; // Pedagogy tags & keywords
+  keywords?: string[];
+  page_target?: 5 | 10;
   student_practice?: boolean; // Student practice case flag
   content: CaseContent;
   source_notes?: string;
@@ -197,6 +263,79 @@ export interface CaseStudy {
   reviewer_comment?: string | null;
   created_at: string;
   updated_at?: string;
+}
+
+// ==========================================
+// PEER REVIEW & CASE REPOSITORY
+// ==========================================
+export type ReviewDecision = "approved" | "changes_requested" | "rejected" | "pending";
+
+export interface ReviewRound {
+  id: string;
+  case_id: string;
+  round_no: number;
+  reviewer_id: string;
+  reviewer_name?: string;
+  assigned_at: string;
+  due_at?: string;
+  decision: ReviewDecision;
+  comments?: string | null;
+  decided_at?: string | null;
+  created_at?: string;
+}
+
+export interface ReviewComment {
+  id: string;
+  round_id: string;
+  section: string; // e.g. 'abstract', 'exhibits', 'questions', 'general'
+  text: string;
+  author_id: string;
+  author_name?: string;
+  created_at: string;
+}
+
+export interface ReviewerRotation {
+  scope_key: string; // e.g. 'dept:dept-1'
+  last_reviewer_id?: string | null;
+  updated_at: string;
+}
+
+export interface RepositoryItem {
+  id: string;
+  case_id: string;
+  approved_version_id?: string | null;
+  author_id: string;
+  author_name?: string;
+  reviewer_id: string;
+  reviewer_name?: string;
+  department_id?: string | null;
+  course_id?: string | null;
+  category_id?: string | null;
+  keywords: string[];
+  approval_status: string;
+  submitted_at?: string | null;
+  approved_at?: string | null;
+  uploaded_at: string;
+  file_docx_path: string;
+  file_pdf_path: string;
+  is_published: boolean;
+  author_consent_at?: string | null;
+  author_consent_version?: string;
+  similarity_score?: number;
+  ai_assisted: boolean;
+  price_inr?: number | null;
+  creator_share_pct?: number | null;
+  created_at: string;
+}
+
+export type DownloadLogKind = "pdf" | "docx" | "student_handout" | "full_pack";
+
+export interface DownloadLog {
+  id: string;
+  item_id: string;
+  user_id: string;
+  at: string;
+  kind: DownloadLogKind;
 }
 
 export interface UsageLog {

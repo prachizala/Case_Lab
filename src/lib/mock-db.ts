@@ -36,6 +36,18 @@ import {
   DepartmentBudgetUsage,
   DashboardTelemetry,
   RecentActivityItem,
+  AcademicBatch,
+  FacultyType,
+  CaseCategory,
+  CaseTypeItem,
+  AccessStatus,
+  ReviewRound,
+  ReviewComment,
+  ReviewDecision,
+  ReviewerRotation,
+  RepositoryItem,
+  DownloadLog,
+  DownloadLogKind,
 } from "./types";
 
 export interface MockDatabase {
@@ -138,50 +150,148 @@ export const initialCourses: Course[] = [
   },
 ];
 
+export const initialBatches: AcademicBatch[] = [
+  {
+    id: "batch-2023-26",
+    label: "2023-26",
+    start_year: 2023,
+    end_year: 2026,
+    end_date: "2026-06-30T23:59:59+05:30",
+    is_active: true,
+  },
+  {
+    id: "batch-2024-27",
+    label: "2024-27",
+    start_year: 2024,
+    end_year: 2027,
+    end_date: "2027-06-30T23:59:59+05:30",
+    is_active: true,
+  },
+  {
+    id: "batch-2025-28",
+    label: "2025-28",
+    start_year: 2025,
+    end_year: 2028,
+    end_date: "2028-06-30T23:59:59+05:30",
+    is_active: true,
+  },
+];
+
+export const initialFacultyTypes: FacultyType[] = [
+  { id: "ft-fulltime", name: "Full-time", description: "Regular institutional faculty", is_active: true },
+  { id: "ft-visiting", name: "Visiting", description: "Visiting scholar", is_active: true },
+  { id: "ft-guest", name: "Guest", description: "Industry practitioner", is_active: true },
+  { id: "ft-adjunct", name: "Adjunct", description: "Affiliated adjunct faculty", is_active: true },
+];
+
+export const initialCaseCategories: CaseCategory[] = [
+  { id: "cat-strat", name: "Strategic Transformation", description: "Corporate strategy, pivot models", is_active: true },
+  { id: "cat-fin", name: "Financial Restructuring", description: "Capital allocation, debt restructuring, valuation", is_active: true },
+  { id: "cat-mktg", name: "Marketing & Brand Strategy", description: "Customer acquisition, omnichannel retail", is_active: true },
+  { id: "cat-hr", name: "Organizational Behavior & HR", description: "Workforce transformation, change management", is_active: true },
+  { id: "cat-ops", name: "Supply Chain & Operations", description: "Logistics density, manufacturing", is_active: true },
+  { id: "cat-tech", name: "Digital Governance & AI", description: "Technology disruption, enterprise AI", is_active: true },
+];
+
+export const initialCaseTypes: CaseTypeItem[] = [
+  { id: "type-ce-pack", name: "CE Case Pack", description: "Structured teaching case with Bloom questions and solution key", is_active: true },
+  { id: "type-full", name: "Full Case Study", description: "Comprehensive Harvard/Ivey standard institutional case", is_active: true },
+  { id: "type-short", name: "Short Case", description: "Rapid boardroom crisis drill", is_active: true },
+  { id: "type-flash", name: "Flash Case", description: "Single decision-point operational problem", is_active: true },
+];
+
 export const initialProfiles: Profile[] = [
-  // 1. Admin
+  // 1. Admin (Dr. Neha Sharma, Dean Academics)
   {
     id: "usr-admin-1",
     email: "admin@shantibschool.edu.in",
-    name: "Admin",
+    name: "Dr. Neha Sharma",
     role: "admin",
     department_id: "dept-1",
+    faculty_type_id: "ft-fulltime",
     plan: "institutional",
     monthly_generation_limit: 100,
     monthly_generations_used: 14,
     sbs_eligible: true,
     is_approved: true,
+    access_status: "active",
+    access_start: "2024-01-01T00:00:00Z",
+    access_end: null, // Admin has no end date
     watch_industries: ["Fintech & Banking", "Renewable Energy & CleanTech", "Supply Chain & Manufacturing", "Consumer & Retail"],
     avatar_url: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
-  // 2. Faculty
+  // 2. Faculty Reviewer (Ms. Reena Paswan, Assistant Professor, Finance)
   {
     id: "usr-faculty-1",
     email: "faculty@shantibschool.edu.in",
-    name: "Faculty",
+    personal_email: "reena.paswan.acad@gmail.com",
+    mobile: "+919876543210",
+    name: "Ms. Reena Paswan",
     role: "faculty",
-    department_id: "dept-2",
+    department_id: "dept-1",
+    course_id: "course-1",
+    faculty_type_id: "ft-fulltime",
+    is_reviewer: true,
+    reviewer_since: "2024-01-01T00:00:00Z",
     plan: "institutional",
     monthly_generation_limit: 50,
     monthly_generations_used: 8,
     sbs_eligible: true,
     is_approved: true,
+    access_status: "active",
+    access_start: "2024-01-01T00:00:00Z",
+    access_end: null,
     watch_industries: ["Fintech & Banking", "Renewable Energy & CleanTech", "Supply Chain & Manufacturing", "Consumer & Retail"],
     avatar_url: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
-  // 3. Student
+  // 2b. Faculty Reviewer 2 (Dr. Vikram Mehta)
+  {
+    id: "usr-faculty-2",
+    email: "vikram.mehta@shantibschool.edu.in",
+    personal_email: "vikram.mktg.prof@gmail.com",
+    mobile: "+919876543211",
+    name: "Dr. Vikram Mehta",
+    role: "faculty",
+    department_id: "dept-2",
+    course_id: "course-3",
+    faculty_type_id: "ft-fulltime",
+    is_reviewer: true,
+    reviewer_since: "2024-01-01T00:00:00Z",
+    plan: "institutional",
+    monthly_generation_limit: 50,
+    monthly_generations_used: 4,
+    sbs_eligible: true,
+    is_approved: true,
+    access_status: "active",
+    access_start: "2024-01-01T00:00:00Z",
+    access_end: null,
+    watch_industries: ["Marketing", "Retail", "Digital Consumer"],
+    avatar_url: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // 3. Student (Zala Prachi, BCA 2024-27)
   {
     id: "usr-student-1",
     email: "student@shantibschool.edu.in",
-    name: "Student",
+    personal_email: "prachi.zala.personal@gmail.com",
+    mobile: "+919876543212",
+    enrollment_no: "SBS-BCA-2024-001",
+    roll_no: "24BCA01",
+    name: "Zala Prachi",
     role: "student",
     department_id: "dept-3",
+    course_id: "course-5",
+    batch_id: "batch-2024-27",
     plan: "standard",
     is_approved: true,
+    access_status: "active",
+    access_start: "2024-07-01T00:00:00Z",
+    access_end: "2028-06-30T23:59:59Z", // Batch end + 1 year
     portfolio_public: true,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -258,6 +368,57 @@ export const initialProfiles: Profile[] = [
     created_at: new Date(Date.now() - 3600000 * 35).toISOString(),
     updated_at: new Date(Date.now() - 3600000 * 35).toISOString(),
   },
+  // 4. Alumni (for alumni gating test 33)
+  {
+    id: "usr-alumni-2",
+    email: "alumni2@shantibschool.edu.in",
+    name: "Vikram Sarabhai",
+    role: "student",
+    department_id: "dept-1",
+    plan: "standard",
+    is_approved: true,
+    subscription_status: "expired",
+    access_status: "expired",
+    created_at: new Date(Date.now() - 3600000 * 24 * 400).toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // 5. Additional Students (for DPDP data principal export & delete tests)
+  {
+    id: "usr-student-3",
+    email: "student3@shantibschool.edu.in",
+    name: "Aarav Sharma",
+    role: "student",
+    department_id: "dept-2",
+    plan: "standard",
+    is_approved: true,
+    access_status: "active",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "usr-student-4",
+    email: "student4@shantibschool.edu.in",
+    name: "Diya Patel",
+    role: "student",
+    department_id: "dept-3",
+    plan: "standard",
+    is_approved: true,
+    access_status: "active",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "usr-student-5",
+    email: "student5@shantibschool.edu.in",
+    name: "Karan Johar",
+    role: "student",
+    department_id: "dept-1",
+    plan: "standard",
+    is_approved: true,
+    access_status: "active",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 ];
 
 export const initialCases: CaseStudy[] = [
@@ -266,7 +427,7 @@ export const initialCases: CaseStudy[] = [
     author_id: "usr-faculty-1",
     author_name: "Faculty",
     title: "FinTech Disruption at Gujarat Cooperative Bank: The Micro-Lending Dilemma",
-    status: "published",
+    status: "approved",
     visibility: "sbs_only",
     type: "full",
     format: "real_signal",
@@ -565,7 +726,7 @@ export const initialCases: CaseStudy[] = [
     author_id: "usr-faculty-1",
     author_name: "Faculty",
     title: "भारतीय स्टार्टअप्स में प्रतिभा प्रतिधारण: हाइब्रिड कार्यबल चुनौती",
-    status: "published",
+    status: "approved",
     visibility: "sbs_only",
     type: "short",
     format: "real_signal",
@@ -622,7 +783,7 @@ export const initialCases: CaseStudy[] = [
     author_id: "usr-faculty-1",
     author_name: "Faculty",
     title: "સુરતના હીરા ઉદ્યોગમાં લેબ-ગ્રોન ડાયમંડ કટોકટી",
-    status: "published",
+    status: "approved",
     visibility: "public",
     type: "research",
     format: "real_signal",
@@ -737,6 +898,19 @@ export const initialRubrics: Rubric[] = [
 ];
 
 export const initialAnswers: StudentAnswer[] = [
+  {
+    id: "ans-alumni-2-case-001",
+    case_id: "case-001",
+    student_id: "usr-alumni-2",
+    student_name: "Vikram Sarabhai",
+    student_email: "alumni2@shantibschool.edu.in",
+    text: "Historical strategic appraisal of cooperative rural credit expansion and recovery syndication.",
+    status: "submitted",
+    word_count: 12,
+    submitted_at: new Date(Date.now() - 3600000 * 24 * 365).toISOString(),
+    created_at: new Date(Date.now() - 3600000 * 24 * 370).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 24 * 365).toISOString(),
+  },
   {
     id: "ans-student-1-case-001",
     case_id: "case-001",
@@ -1264,6 +1438,180 @@ class MockStore {
   private audit_logs: AuditLog[] = [...initialAuditLogs];
   private usage_logs: UsageLog[] = [...initialUsageLogs];
   private institutional_monthly_token_budget: number = 500000;
+  private batches: AcademicBatch[] = [...initialBatches];
+  private faculty_types: FacultyType[] = [...initialFacultyTypes];
+  private case_categories: CaseCategory[] = [...initialCaseCategories];
+  private case_types: CaseTypeItem[] = [...initialCaseTypes];
+  private review_rounds: ReviewRound[] = [];
+  private review_comments: ReviewComment[] = [];
+  private reviewer_rotations: Record<string, string> = {};
+  private repository_items: RepositoryItem[] = [];
+  private download_logs: DownloadLog[] = [];
+
+  // LOOKUP TABLES
+  getBatches(): AcademicBatch[] {
+    return [...this.batches];
+  }
+
+  getFacultyTypes(): FacultyType[] {
+    return [...this.faculty_types];
+  }
+
+  getCaseCategories(): CaseCategory[] {
+    return [...this.case_categories];
+  }
+
+  getCaseTypes(): CaseTypeItem[] {
+    return [...this.case_types];
+  }
+
+  // REVIEW ROUNDS & COMMENTS
+  getReviewRounds(caseId?: string): ReviewRound[] {
+    if (caseId) return this.review_rounds.filter((r) => r.case_id === caseId);
+    return [...this.review_rounds];
+  }
+
+  getReviewComments(roundId?: string): ReviewComment[] {
+    if (roundId) return this.review_comments.filter((c) => c.round_id === roundId);
+    return [...this.review_comments];
+  }
+
+  assignReviewer(caseId: string): ReviewRound {
+    const c = this.cases.find((x) => x.id === caseId);
+    if (!c) throw new Error(`Case ${caseId} not found`);
+    const deptId = c.department_id || "general";
+    const scopeKey = `dept:${deptId}`;
+
+    const facultyReviewers = this.profiles.filter(
+      (p) =>
+        p.role === "faculty" &&
+        p.is_reviewer &&
+        p.access_status !== "inactive" &&
+        p.access_status !== "expired" &&
+        p.id !== c.author_id
+    );
+
+    if (facultyReviewers.length === 0) {
+      throw new Error("No eligible faculty reviewers available for assignment.");
+    }
+
+    let pool = facultyReviewers.filter((p) => p.department_id === c.department_id);
+    if (pool.length === 0) pool = facultyReviewers;
+
+    pool.sort((a, b) => a.id.localeCompare(b.id));
+    const lastReviewerId = this.reviewer_rotations[scopeKey];
+    let nextIdx = 0;
+    if (lastReviewerId) {
+      const lastIdx = pool.findIndex((p) => p.id === lastReviewerId);
+      if (lastIdx !== -1) {
+        nextIdx = (lastIdx + 1) % pool.length;
+      }
+    }
+
+    const assignedReviewer = pool[nextIdx];
+    this.reviewer_rotations[scopeKey] = assignedReviewer.id;
+
+    const existingRounds = this.review_rounds.filter((r) => r.case_id === caseId);
+    const roundNo = existingRounds.length + 1;
+
+    const round: ReviewRound = {
+      id: `round-${caseId}-${roundNo}-${Date.now()}`,
+      case_id: caseId,
+      round_no: roundNo,
+      reviewer_id: assignedReviewer.id,
+      reviewer_name: assignedReviewer.name,
+      assigned_at: new Date().toISOString(),
+      due_at: new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString(),
+      decision: "pending",
+      comments: null,
+      decided_at: null,
+      created_at: new Date().toISOString(),
+    };
+
+    this.review_rounds.push(round);
+    c.status = "in_review";
+    c.review_status = "in_review";
+    c.reviewer_id = assignedReviewer.id;
+    c.updated_at = new Date().toISOString();
+    return round;
+  }
+
+  submitReviewDecision(roundId: string, decision: ReviewDecision, comments?: string): ReviewRound {
+    const round = this.review_rounds.find((r) => r.id === roundId);
+    if (!round) throw new Error(`Review round ${roundId} not found`);
+    round.decision = decision;
+    round.comments = comments || null;
+    round.decided_at = new Date().toISOString();
+
+    const c = this.cases.find((x) => x.id === round.case_id);
+    if (c) {
+      if (decision === "approved") {
+        c.status = "approved";
+        c.review_status = "approved";
+      } else if (decision === "changes_requested") {
+        c.status = "changes_requested";
+        c.review_status = "changes_requested";
+      } else if (decision === "rejected") {
+        c.status = "rejected";
+        c.review_status = "rejected";
+      }
+      c.reviewer_comment = comments || null;
+      c.updated_at = new Date().toISOString();
+    }
+    return round;
+  }
+
+  addReviewComment(roundId: string, section: string, text: string, authorId: string): ReviewComment {
+    const author = this.profiles.find((p) => p.id === authorId);
+    const comment: ReviewComment = {
+      id: `rev-comm-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      round_id: roundId,
+      section,
+      text,
+      author_id: authorId,
+      author_name: author?.name || "Reviewer",
+      created_at: new Date().toISOString(),
+    };
+    this.review_comments.push(comment);
+    return comment;
+  }
+
+  // REPOSITORY ITEMS & DOWNLOADS
+  getRepositoryItems(filter?: { is_published?: boolean; department_id?: string; category_id?: string }): RepositoryItem[] {
+    let items = [...this.repository_items];
+    if (filter?.is_published !== undefined) items = items.filter((i) => i.is_published === filter.is_published);
+    if (filter?.department_id) items = items.filter((i) => i.department_id === filter.department_id);
+    if (filter?.category_id) items = items.filter((i) => i.category_id === filter.category_id);
+    return items;
+  }
+
+  uploadToRepository(item: Omit<RepositoryItem, "id" | "uploaded_at" | "created_at">): RepositoryItem {
+    const fullItem: RepositoryItem = {
+      ...item,
+      id: `repo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      uploaded_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    };
+    this.repository_items.push(fullItem);
+    const c = this.cases.find((x) => x.id === item.case_id);
+    if (c) {
+      c.status = "uploaded";
+      c.review_status = "uploaded";
+    }
+    return fullItem;
+  }
+
+  logDownload(itemId: string, userId: string, kind: DownloadLogKind): DownloadLog {
+    const log: DownloadLog = {
+      id: `dl-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      item_id: itemId,
+      user_id: userId,
+      at: new Date().toISOString(),
+      kind,
+    };
+    this.download_logs.push(log);
+    return log;
+  }
 
   // DEPARTMENTS
   getDepartments(): Department[] {
@@ -1755,6 +2103,10 @@ class MockStore {
   getCasesForUser(userId: string, role: string, userDeptId?: string | null): CaseStudy[] {
     const user = this.getProfile(userId);
     const isReviewer = user?.is_reviewer || role === "admin";
+
+    if (role === "alumni" || (user && (user.access_status === "expired" || user.subscription_status === "expired"))) {
+      return [];
+    }
 
     if (role === "admin") {
       return [...this.cases];
@@ -3279,6 +3631,14 @@ class MockStore {
   canUserAccessLibrary(userId: string): { allowed: boolean; reason?: string } {
     const user = this.getProfile(userId);
     if (!user) return { allowed: false, reason: "User not found" };
+
+    if (
+      user.subscription_status === "expired" ||
+      user.access_status === "expired" ||
+      (user.role as string) === "alumni"
+    ) {
+      return { allowed: false, reason: "Subscription or student access period expired. Renew subscription for library access." };
+    }
 
     if (user.role === "admin" || user.role === "faculty" || user.role === "student") {
       return { allowed: true };

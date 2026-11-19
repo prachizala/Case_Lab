@@ -116,6 +116,18 @@ export function sanitizeCaseStudyForStudent(caseStudy: CaseStudy): CaseStudy {
     if (content.answers) {
       content.answers = [];
     }
+    if (content.model_answers) {
+      delete content.model_answers;
+    }
+    if (content.solution_keys) {
+      delete content.solution_keys;
+    }
+    if (content.pedagogical_checks) {
+      delete content.pedagogical_checks;
+    }
+    if (content.rubrics) {
+      delete content.rubrics;
+    }
     if (Array.isArray(content.discussion_questions)) {
       content.discussion_questions = content.discussion_questions.map((q: any) => {
         if (typeof q === "object" && q !== null) {

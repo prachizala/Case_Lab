@@ -415,6 +415,65 @@ Simply use the **Persona Switcher** pinned to the lower portion of the sidebar o
 
 ---
 
+## 🚀 Deployment Guide: Vercel + Supabase
+
+### Step 1: Supabase Database Setup
+1. Create a new project in the [Supabase Dashboard](https://supabase.com/dashboard).
+2. Retrieve your **Project URL**, **Anon Public Key**, and **Service Role Key** under **Project Settings $\rightarrow$ API**.
+3. Push all migration files sequentially using Supabase CLI or SQL Editor:
+   ```bash
+   supabase link --project-ref your-project-id
+   supabase db push
+   ```
+
+### Step 2: Vercel Project Deployment
+1. Import your GitHub repository to [Vercel](https://vercel.com).
+2. Framework Preset: **Next.js**
+3. Root Directory: `./`
+4. Build Command: `npm run build`
+5. Output Directory: `.next`
+
+### Step 3: Configure Environment Variables in Vercel
+Add the following production environment variables under **Project Settings $\rightarrow$ Environment Variables**:
+- `NEXT_PUBLIC_APP_NAME`: `SBS CaseLab`
+- `NEXT_PUBLIC_COLLEGE_NAME`: `Shanti Business School`
+- `NEXT_PUBLIC_COLLEGE_SHORT`: `SBS`
+- `NEXT_PUBLIC_COLLEGE_EMAIL_DOMAIN`: `shantibschool.edu.in`
+- `NEXT_PUBLIC_SUPABASE_URL`: `https://<your-project>.supabase.co`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase Public Anonymous API Key
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase Service Role Secret Key
+
+### Step 4: Configure Razorpay Webhooks
+1. Open the [Razorpay Dashboard](https://dashboard.razorpay.com/) $\rightarrow$ **Settings $\rightarrow$ Webhooks**.
+2. Add Webhook URL: `https://your-domain.vercel.app/api/webhooks/razorpay`.
+3. Secret: Enter the same secret configured in `RAZORPAY_WEBHOOK_SECRET`.
+4. Active Events: Select `payment.captured`, `order.paid`, `subscription.charged`.
+
+### Step 5: Execute Initial Production Seed
+Populate the production database with accredited departments, courses, and administrator accounts:
+```bash
+npm run seed
+```
+
+---
+
+## 📋 Production Readiness Checklist
+
+- [x] **Security & Domain Isolation**: Only verified institutional emails ending with `@shantibschool.edu.in` are allowed registration.
+- [x] **Zero API Key Exposure**: Claude and Supabase Service Role keys are strictly kept server-side in `.env.local` / Vercel Environment Variables.
+- [x] **HTTP Hardening**: Mandatory security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, CSP) enforced on all routes.
+- [x] **Rate Limiting**: Per-user sliding hourly rate limit (10 generations/hr) protects API keys from exhaustion.
+- [x] **PostgreSQL Row Level Security (RLS)**: Cryptographically prevents cross-student answer reading and restricts unapproved cases.
+- [x] **Audit Logging Ledger**: Immutable audit entries logged for role modifications, approvals, grade overrides, and data subject actions.
+- [x] **Cryptographic Payment Verification**: HMAC-SHA256 signature verification active on order completion and webhook endpoints; invalid signatures rejected with HTTP 400.
+- [x] **Alumni Perpetual Work Access**: Graduated students permanently keep free download access to their portfolio, answers, and certificates regardless of subscription status.
+- [x] **DPDP Act 2023 Compliance**: Mandatory registration consent checkbox, machine-readable JSON data export (`/api/user/data-export`), and permanent account erasure (`/api/user/data-delete`).
+- [x] **Institutional Token Budget Alerts**: Real-time quota calculation with automatic 80% warning banner across faculty workspaces.
+- [x] **Document Extraction & Audio Synthesizer**: Native server-side parsing for PDF/DOCX and client-side speech synthesis audio briefing ("CasePod").
+- [x] **Multilingual Pedagogical Fidelity**: Tested and verified support for English, Hindi (Devanagari), and Gujarati scripts.
+
+---
+
 ## 🏛️ Institutional Attribution
 
 Developed for **Shanti Business School (SBS)**  

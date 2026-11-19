@@ -1,0 +1,207 @@
+{
+  "id": "gold-hr-auratek-001",
+  "status": "pending_approval",
+  "notes": "Draft HR Gold Standard (Original Content, Fictional Enterprise). Follows the CE Case Pack schema strictly. Marked pending_approval until an administrator approves it within the platform for use as a few-shot generation example.",
+  "meta": {
+    "department": "hr",
+    "subject": "Human Resource Management & Organizational Behavior",
+    "topic": [
+      "Talent Retention & Attrition",
+      "Performance Appraisal Systems",
+      "Total Rewards & Compensation",
+      "Employee Engagement & Culture"
+    ],
+    "concepts": [
+      "360-Degree Appraisal",
+      "Behaviorally Anchored Rating Scales (BARS)",
+      "Herzberg Motivation-Hygiene Theory",
+      "McGregor Theory X/Y",
+      "Employee Life Cycle"
+    ],
+    "course_code": "HRM-502",
+    "ce_no": "CE-3",
+    "set": "A",
+    "level": "MBA / PGDM",
+    "language": "en",
+    "industry": "Retail Technology & Fulfillment",
+    "geography": "Bengaluru & Hyderabad, India",
+    "length": "standard",
+    "max_marks": 40
+  },
+  "case": {
+    "title": "Talent Friction and Performance Overhaul at AuraTek Retail Solutions",
+    "word_count": 1180,
+    "sections": [
+      {
+        "heading": "Background of the Company",
+        "paragraphs": [
+          "AuraTek Retail Solutions Pvt. Ltd., headquartered in Bengaluru, India, is a technology-enabled omnichannel retail fulfillment enterprise. Founded in 2018 by retail software engineer Vikramaditya Rao, the company provides cloud-based store inventory synchronization and automated express warehouse dispatch services to mid-market apparel and FMCG retail chains across Southern and Western India.",
+          "Over five years, AuraTek scaled rapidly from an initial cohort of 40 developers to 820 full-time personnel distributed across its Bengaluru engineering center, Hyderabad customer support hub, and five regional fulfillment facilities. However, rapid commercial acceleration outpaced the company's human resource infrastructure. By mid-2023, leadership faced alarming voluntary attrition, severe inter-departmental friction between software developers and regional store operations managers, and a collapsing employee net promoter score (eNPS)."
+        ]
+      },
+      {
+        "heading": "The Retention Crisis and Appraisal Friction",
+        "paragraphs": [
+          "During the 2022-2023 fiscal cycle, AuraTek experienced a sharp rise in voluntary attrition, which surged to 34% among core cloud software engineers and 28% among warehouse operations leads. An internal diagnostic conducted by newly appointed Vice President of People and Culture, Meenakshi Sundaram, revealed widespread employee disillusionment stemming from a hastily executed annual bell-curve performance appraisal system.",
+          "Under the legacy appraisal system, store managers and software engineers were forced into arbitrary distribution buckets regardless of objective delivery milestones. Store operations leads lamented that their year-end ratings hinged on subjective favoritism, while engineering teams complained that high-impact codebase refactoring was penalized because it lacked immediate customer-facing metrics. The resulting discontent prompted critical senior leads to defect to competing logistics startups."
+        ]
+      },
+      {
+        "heading": "Evaluating Appraisal Mechanisms: 360-Degree Feedback vs. BARS",
+        "paragraphs": [
+          "To eliminate supervisory subjectivity, Meenakshi Sundaram evaluated two modern appraisal architectures: an enterprise-wide 360-Degree Feedback mechanism and Behaviorally Anchored Rating Scales (BARS).",
+          "Founder Vikramaditya Rao initially advocated for 360-degree appraisals, arguing that gathering multi-source feedback from subordinates, peers, and client-facing product managers would democratize performance management. However, a 3-month pilot in the Hyderabad fulfillment division triggered unexpected political maneuvering: peer cohorts colluded to artificially inflate each other's ratings, while cross-functional rivals submitted anonymous, retaliatory reviews.",
+          "Recognizing these behavioral distortions, Sundaram pivoted to Behaviorally Anchored Rating Scales (BARS) for operations teams. BARS combined qualitative behavioral critical incidents with structured numerical grading benchmarks. For warehouse supervisors, clear anchors defined expected behaviors across inventory accuracy, shift turnaround, and safety protocols, replacing ambiguous traits with observable performance standards."
+        ]
+      },
+      {
+        "heading": "Total Rewards Restructuring and Incentive Realignment",
+        "paragraphs": [
+          "Beyond performance appraisal, compensation design emerged as a major flashpoint. The national retail operations head, Rohit Verma, managed field teams whose compensation packages were heavily weighted toward volatile quarterly target incentives (40% variable pay), creating persistent financial anxiety during seasonal retail downturns.",
+          "Sundaram restructured total rewards across the organization. For fulfillment leads, variable pay was compressed to a stable 15%, while base salaries were calibrated to the 65th percentile of industry benchmarks. Simultaneously, to align high-performing software engineers with enterprise enterprise value, the company introduced performance-linked Employee Stock Option Plans (ESOPs) structured across a 4-year vesting schedule with a 1-year cliff."
+        ]
+      },
+      {
+        "heading": "Continuous Feedback and Cultural Re-engineering",
+        "paragraphs": [
+          "To dismantle the climate of anxiety surrounding annual reviews, AuraTek instituted 'Continuous Growth Cadences'—bi-weekly one-on-one check-ins between line managers and team members focusing on developmental coaching rather than retrospective compensation evaluation.",
+          "By early 2024, early indicators signaled meaningful cultural stabilization. Engineering attrition normalized to 14%, cost per hire declined by 22% due to employee referral resurgence, and internal engagement scores recovered from -18 to +24. Nevertheless, leadership recognized that embedding psychological safety and managerial accountability required continuous vigilance."
+        ]
+      }
+    ],
+    "data_tables": [
+      {
+        "title": "Exhibit 1: AuraTek Retail Solutions - Workforce Performance & Attrition Indicators (2022-2024)",
+        "columns": [
+          "Key Workforce Metric",
+          "FY 2022 (Legacy Model)",
+          "FY 2023 (Crisis Peak)",
+          "FY 2024 (Post-Overhaul)",
+          "Industry Benchmark"
+        ],
+        "rows": [
+          ["Total Full-Time Headcount", "410", "680", "820", "-"],
+          ["Software Engineering Attrition (%)", "18.5%", "34.2%", "14.1%", "16.0%"],
+          ["Store Operations Attrition (%)", "21.0%", "28.4%", "16.5%", "22.0%"],
+          ["Average Cost per Lateral Hire (₹)", "₹1,45,000", "₹2,10,000", "₹1,64,000", "₹1,75,000"],
+          ["Employee Net Promoter Score (eNPS)", "+12", "-18", "+24", "+15"],
+          ["Average Employee Tenure (Months)", "26 Months", "15 Months", "22 Months", "24 Months"]
+        ]
+      }
+    ]
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "bloom_verb": "Diagnose & Compare",
+      "text": "Diagnose the underlying organizational and behavioral root causes driving employee attrition at AuraTek Retail Solutions. Compare the operational viability of 360-Degree Feedback versus Behaviorally Anchored Rating Scales (BARS) in mitigating appraisal bias across retail operations.",
+      "concepts": ["Attrition Diagnosis", "360-Degree Feedback", "BARS", "Appraisal Bias"],
+      "marks": 20,
+      "co": "CO1",
+      "k_level": "K4"
+    },
+    {
+      "id": "Q2",
+      "bloom_verb": "Evaluate & Justify",
+      "text": "Evaluate the human resource interventions executed by Meenakshi Sundaram regarding total rewards restructuring and continuous feedback cadences. In your opinion, were these strategies appropriate for restoring organizational morale and talent retention? Justify your position using Herzberg's Motivation-Hygiene Theory and McGregor's Theory X and Theory Y.",
+      "concepts": ["Total Rewards", "Continuous Feedback", "Herzberg Motivation-Hygiene", "McGregor Theory X/Y"],
+      "marks": 20,
+      "co": "CO2",
+      "k_level": "K5"
+    }
+  ],
+  "answers": [
+    {
+      "question_id": "Q1",
+      "word_count": 485,
+      "introduction": "AuraTek Retail Solutions experienced severe organizational turbulence characterized by a spike in voluntary engineering attrition (34.2%) and negative employee net promoter scores (-18). This crisis was primarily catalyzed by an ill-suited forced-distribution bell curve, lack of transparent appraisal benchmarks, and uncalibrated variable pay structures. To restore appraisal integrity, HR leadership evaluated 360-Degree Feedback against Behaviorally Anchored Rating Scales (BARS).",
+      "sections": [
+        {
+          "heading": "1. Diagnosis of Core Organizational Deficits",
+          "points": [
+            "Structural Inequity: The legacy forced bell-curve compelled managers to arbitrarily grade top contributors down, creating toxic internal competition and demoralizing high performers.",
+            "Functional Misalignment: Operations and engineering worked under disconnected silos with conflicting success criteria, breeding resentment during annual compensation reviews.",
+            "Psychological Insecurity: Unpredictable appraisal ratings directly jeopardized basic financial stability, triggering talent flight to competitors offering transparent growth trajectories."
+          ]
+        },
+        {
+          "heading": "2. Comparative Analysis: 360-Degree Feedback vs. BARS",
+          "points": [
+            "360-Degree Feedback solicited assessments from supervisors, peers, and direct reports. While conceptually holistic, in AuraTek's low-trust environment it fostered peer collusion and anonymous retaliatory scoring.",
+            "BARS grounded performance in explicit, observable behavioral incidents (e.g., specific protocol adherence during dispatch delays), systematically removing subjective supervisory bias."
+          ]
+        }
+      ],
+      "comparison_table": {
+        "columns": ["Basis of Comparison", "360-Degree Appraisal Feedback", "Behaviorally Anchored Rating Scales (BARS)"],
+        "rows": [
+          ["Primary Evaluators", "Multi-source: Peers, subordinates, managers, external clients", "Immediate reporting supervisor evaluating observable behaviors"],
+          ["Assessment Focus", "Interpersonal skills, collaboration, leadership behaviors", "Specific, job-related critical incidents and performance standards"],
+          ["Vulnerability to Bias", "High: Susceptible to popularity contests and retaliation", "Low: Anchored to pre-defined behavioral benchmarks"],
+          ["Primary Application", "Leadership coaching, executive development, self-awareness", "Objective administrative grading, operational promotions, merit pay"],
+          ["Operational Complexity", "Heavy administrative overhead and survey distribution fatigue", "Extensive upfront job analysis required; easy annual execution"]
+        ]
+      },
+      "conclusion": "In AuraTek's operational environment, BARS represented the superior administrative mechanism. While 360-degree appraisals provide developmental value for senior leaders, BARS provided retail fulfillment teams with objective, transparent benchmarks that eliminated perceived supervisory favoritism and rebuilt workforce trust."
+    },
+    {
+      "question_id": "Q2",
+      "word_count": 540,
+      "introduction": "The strategic HR interventions designed by Meenakshi Sundaram addressed root causes across compensation stability, developmental coaching, and leadership assumptions. Evaluating these choices through Herzberg's Two-Factor Motivation-Hygiene Model and McGregor's Theory X/Y reveals how leadership shifted AuraTek from punitive oversight to empowering organizational governance.",
+      "sections": [
+        {
+          "heading": "1. Application of Herzberg's Motivation-Hygiene Theory",
+          "points": [],
+          "evaluation": [
+            "Hygiene Factors Stabilized: Increasing base pay from 60% to 85% of total CTC for field operations resolved severe salary dissatisfaction and financial anxiety. Under Herzberg's theory, hygiene factors (salary, job security, working conditions) do not actively motivate, but their inadequacy causes severe dissatisfaction and turnover. Fixing this arrested the attrition hemorrhage.",
+            "Motivator Factors Activated: Introducing long-term ESOPs for engineers, continuous learning cadences, and developmental one-on-ones addressed intrinsic motivators: recognition, advancement, and meaningful achievement. This successfully elevated eNPS from -18 to +24."
+          ],
+          "limitation": "Higher fixed payroll overhead for the company during macroeconomic retail slowdowns."
+        },
+        {
+          "heading": "2. Application of McGregor's Theory X and Theory Y",
+          "points": [],
+          "evaluation": [
+            "Dismantling Theory X Assumptions: The legacy forced bell curve and 40% variable pay reflected Theory X assumptions—presuming employees are naturally disinclined to work and require coercion, surveillance, and economic pressure to perform.",
+            "Transition to Theory Y Governance: Bi-weekly coaching check-ins and BARS behavioral self-audits embrace Theory Y—assuming employees seek autonomy, take pride in craftsmanship, and flourish under supportive coaching."
+          ],
+          "limitation": "Requires extensive training of line managers who may unconsciously revert to authoritarian Theory X supervision under pressure."
+        }
+      ],
+      "overall_assessment": "The interventions were exceptionally well-sequenced and strategically sound. Sundaram first neutralized dissatisfaction by addressing hygiene deficits (base salary stability and appraisal transparency), then activated intrinsic commitment through Theory Y coaching cadences and equity ownership.",
+      "conclusion": "In conclusion, the HR restructuring at AuraTek was appropriate, culturally transformative, and commercially justified. By aligning total rewards and managerial appraisals with sound psychological frameworks, AuraTek cut voluntary turnover in half and created a resilient foundation for long-term omnichannel scaling."
+    }
+  ],
+  "teaching_notes": {
+    "synopsis": "Examines an Indian retail-tech scale-up struggling with 34% voluntary engineer attrition following an ill-conceived forced bell curve. The case details the evaluation of 360-degree feedback vs. BARS and total rewards restructuring through Herzberg and McGregor frameworks.",
+    "objectives": [
+      "Diagnose human resource bottlenecks using quantitative workforce turnover indicators.",
+      "Critique the limitations of 360-degree appraisals in low-trust environments.",
+      "Apply Herzberg's Two-Factor Theory and Theory X/Y to compensation and performance management design."
+    ],
+    "teaching_approach": "Begin by asking students why high variable pay backfired in the retail fulfillment division. Use this to differentiate between hygiene factors and intrinsic motivators on the blackboard.",
+    "frameworks": ["Herzberg Motivation-Hygiene", "McGregor Theory X/Y", "BARS", "Employee Life Cycle"],
+    "common_mistakes": [
+      "Treating salary increases as an intrinsic motivator rather than a hygiene maintenance factor.",
+      "Assuming 360-degree feedback is universally superior without accounting for peer gaming and political retaliation."
+    ],
+    "marking_scheme": [
+      {"criterion": "Accurate diagnosis of organizational attrition drivers", "marks": 8},
+      {"criterion": "Comparative analysis of 360 vs BARS across 5 dimensions", "marks": 12},
+      {"criterion": "Theoretical rigor using Herzberg and McGregor models", "marks": 12},
+      {"criterion": "Pragmatic change management justification and synthesis", "marks": 8}
+    ]
+  },
+  "quality": {
+    "facts_to_verify": [
+      "Prevailing retail software engineering attrition benchmarks in Bengaluru",
+      "Vesting regulations for startup ESOP schemes under the Indian Companies Act 2013"
+    ],
+    "illustrative_figures": [
+      "820 total headcount",
+      "34.2% peak software engineering attrition",
+      "₹2,10,000 peak lateral replacement cost per hire",
+      "eNPS turnaround from -18 to +24"
+    ]
+  }
+}

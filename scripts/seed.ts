@@ -45,37 +45,97 @@ export const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "SBS_Demo2026!Sec
 export interface DemoUserSeed {
   id: string;
   email: string;
+  personal_email?: string;
+  mobile?: string;
+  enrollment_no?: string;
+  roll_no?: string;
   name: string;
   role: "admin" | "faculty" | "student";
   program?: string;
   semester?: number;
   department_code?: string;
+  course_code?: string;
+  batch_id?: string;
+  faculty_type_id?: string;
+  is_reviewer?: boolean;
+  access_status?: "active" | "pending" | "expired" | "inactive";
+  access_start?: string;
+  access_end?: string | null;
 }
 
 export const DEMO_USERS: DemoUserSeed[] = [
   {
     id: "00000000-0000-0000-0000-000000000001",
-    email: "neha.sharma@shantibschool.edu.in",
+    email: "admin@shantibschool.edu.in",
     name: "Dr. Neha Sharma",
     role: "admin",
     department_code: "STRAT",
+    access_status: "active",
+    access_start: "2024-01-01T00:00:00+05:30",
+    access_end: null, // Admin has no access end date
   },
   {
     id: "00000000-0000-0000-0000-000000000002",
     email: "reena.paswan@shantibschool.edu.in",
+    personal_email: "reena.paswan.acad@gmail.com",
+    mobile: "+919876543210",
     name: "Ms. Reena Paswan",
     role: "faculty",
-    department_code: "MKTG",
+    department_code: "FIN", // Assistant Professor, Finance
+    course_code: "FIN-504",
+    faculty_type_id: "ft-fulltime",
+    is_reviewer: true,
+    access_status: "active",
+    access_start: "2024-01-01T00:00:00+05:30",
+    access_end: null,
   },
   {
     id: "00000000-0000-0000-0000-000000000003",
-    email: "prachi.z24bca@shantibschool.edu.in",
+    email: "student@shantibschool.edu.in",
+    personal_email: "prachi.zala.personal@gmail.com",
+    mobile: "+919876543212",
+    enrollment_no: "SBS-BCA-2024-001",
+    roll_no: "24BCA01",
     name: "Zala Prachi",
     role: "student",
     program: "BCA",
     semester: 5,
     department_code: "TECH",
+    course_code: "BCA-501",
+    batch_id: "batch-2024-27",
+    access_status: "active",
+    access_start: "2024-07-01T00:00:00+05:30",
+    access_end: "2028-06-30T23:59:59+05:30", // Batch end + 1 year
   },
+];
+
+export const BATCHES = [
+  { id: "batch-2023-26", label: "2023-26", start_year: 2023, end_year: 2026, end_date: "2026-06-30 23:59:59+05:30", is_active: true },
+  { id: "batch-2024-27", label: "2024-27", start_year: 2024, end_year: 2027, end_date: "2027-06-30 23:59:59+05:30", is_active: true },
+  { id: "batch-2025-28", label: "2025-28", start_year: 2025, end_year: 2028, end_date: "2028-06-30 23:59:59+05:30", is_active: true },
+];
+
+export const FACULTY_TYPES = [
+  { id: "ft-fulltime", name: "Full-time", description: "Regular institutional faculty", is_active: true },
+  { id: "ft-visiting", name: "Visiting", description: "Visiting scholar", is_active: true },
+  { id: "ft-guest", name: "Guest", description: "Industry practitioner", is_active: true },
+  { id: "ft-adjunct", name: "Adjunct", description: "Affiliated adjunct faculty", is_active: true },
+];
+
+export const CASE_CATEGORIES = [
+  { id: "cat-strat", name: "Strategic Transformation", description: "Corporate strategy, pivot models", is_active: true },
+  { id: "cat-fin", name: "Financial Restructuring", description: "Capital allocation, debt restructuring, valuation", is_active: true },
+  { id: "cat-mktg", name: "Marketing & Brand Strategy", description: "Customer acquisition, omnichannel retail", is_active: true },
+  { id: "cat-hr", name: "Organizational Behavior & HR", description: "Workforce transformation, change management", is_active: true },
+  { id: "cat-ops", name: "Supply Chain & Operations", description: "Logistics density, manufacturing", is_active: true },
+  { id: "cat-tech", name: "Digital Governance & AI", description: "Technology disruption, enterprise AI", is_active: true },
+];
+
+export const CASE_TYPES = [
+  { id: "type-ce-pack", name: "CE Case Pack", description: "Structured teaching case with Bloom questions and solution key", is_active: true },
+  { id: "type-full", name: "Full Case Study", description: "Comprehensive Harvard/Ivey standard institutional case", is_active: true },
+  { id: "type-short", name: "Short Case", description: "Rapid boardroom crisis drill", is_active: true },
+  { id: "type-flash", name: "Flash Case", description: "Single decision-point operational problem", is_active: true },
 ];
 
 export const DEPARTMENTS = [
@@ -361,7 +421,94 @@ export const OUTCOMES = [
   { id: "00000000-0000-0000-0000-000000000404", code: "PO3", name: "Critical Communication & Defensibility", description: "Defend strategic business choices with evidence-backed executive narratives.", type: "program" },
 ];
 
+export function generateSeedSql(): string {
+  const lines: string[] = [];
+  lines.push("-- ==============================================================================");
+  lines.push("-- SBS CaseLab: Seed SQL for Academic Case Study Repository");
+  lines.push("-- Target: Shanti Business School (SBS)");
+  lines.push("-- ==============================================================================\n");
+
+  lines.push("-- 1. Batches");
+  BATCHES.forEach((b) => {
+    lines.push(`INSERT INTO public.batches (id, label, start_year, end_year, end_date, is_active) VALUES ('${b.id}', '${b.label}', ${b.start_year}, ${b.end_year}, '${b.end_date}', ${b.is_active}) ON CONFLICT (id) DO UPDATE SET label = EXCLUDED.label, end_date = EXCLUDED.end_date, is_active = EXCLUDED.is_active;`);
+  });
+
+  lines.push("\n-- 2. Faculty Types");
+  FACULTY_TYPES.forEach((f) => {
+    lines.push(`INSERT INTO public.faculty_types (id, name, description, is_active) VALUES ('${f.id}', '${f.name}', '${f.description}', ${f.is_active}) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description;`);
+  });
+
+  lines.push("\n-- 3. Case Categories");
+  CASE_CATEGORIES.forEach((c) => {
+    lines.push(`INSERT INTO public.case_categories (id, name, description, is_active) VALUES ('${c.id}', '${c.name.replace(/'/g, "''")}', '${c.description.replace(/'/g, "''")}', ${c.is_active}) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description;`);
+  });
+
+  lines.push("\n-- 4. Case Types");
+  CASE_TYPES.forEach((t) => {
+    lines.push(`INSERT INTO public.case_types (id, name, description, is_active) VALUES ('${t.id}', '${t.name.replace(/'/g, "''")}', '${t.description.replace(/'/g, "''")}', ${t.is_active}) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description;`);
+  });
+
+  lines.push("\n-- 5. Departments");
+  DEPARTMENTS.forEach((d) => {
+    lines.push(`INSERT INTO public.departments (id, code, name, description, is_active) VALUES ('${d.id}', '${d.code}', '${d.name.replace(/'/g, "''")}', '${d.description.replace(/'/g, "''")}', true) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description;`);
+  });
+
+  lines.push("\n-- 6. Courses");
+  COURSES.forEach((c) => {
+    lines.push(`INSERT INTO public.courses (id, department_id, dept, code, name, semester, is_active) VALUES ('${c.id}', '${c.department_id}', '${c.dept}', '${c.code}', '${c.name.replace(/'/g, "''")}', '${c.semester}', true) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, code = EXCLUDED.code, dept = EXCLUDED.dept;`);
+  });
+
+  lines.push("\n-- 7. Demo Users (Admin Dr. Neha Sharma, Faculty Reviewer Ms. Reena Paswan, Student Zala Prachi)");
+  DEMO_USERS.forEach((u) => {
+    const dept = DEPARTMENTS.find((d) => d.code === u.department_code);
+    const crs = COURSES.find((c) => c.code === u.course_code);
+    const personalEmail = u.personal_email ? `'${u.personal_email}'` : "NULL";
+    const mobile = u.mobile ? `'${u.mobile}'` : "NULL";
+    const enrollment = u.enrollment_no ? `'${u.enrollment_no}'` : "NULL";
+    const roll = u.roll_no ? `'${u.roll_no}'` : "NULL";
+    const deptId = dept ? `'${dept.id}'` : "NULL";
+    const courseId = crs ? `'${crs.id}'` : "NULL";
+    const batchId = u.batch_id ? `'${u.batch_id}'` : "NULL";
+    const facultyTypeId = u.faculty_type_id ? `'${u.faculty_type_id}'` : "NULL";
+    const accessStart = u.access_start ? `'${u.access_start}'` : "NOW()";
+    const accessEnd = u.access_end ? `'${u.access_end}'` : "NULL";
+
+    lines.push(`INSERT INTO public.profiles (
+  id, email, personal_email, mobile, enrollment_no, roll_no, name, role,
+  department_id, course_id, batch_id, faculty_type_id, is_reviewer,
+  access_status, access_start, access_end, is_approved, plan, created_at, updated_at
+) VALUES (
+  '${u.id}', '${u.email}', ${personalEmail}, ${mobile}, ${enrollment}, ${roll}, '${u.name}', '${u.role}',
+  ${deptId}, ${courseId}, ${batchId}, ${facultyTypeId}, ${u.is_reviewer || false},
+  '${u.access_status || "active"}', ${accessStart}, ${accessEnd}, true, 'institutional', NOW(), NOW()
+) ON CONFLICT (id) DO UPDATE SET
+  email = EXCLUDED.email,
+  personal_email = EXCLUDED.personal_email,
+  mobile = EXCLUDED.mobile,
+  enrollment_no = EXCLUDED.enrollment_no,
+  roll_no = EXCLUDED.roll_no,
+  name = EXCLUDED.name,
+  role = EXCLUDED.role,
+  department_id = EXCLUDED.department_id,
+  course_id = EXCLUDED.course_id,
+  batch_id = EXCLUDED.batch_id,
+  faculty_type_id = EXCLUDED.faculty_type_id,
+  is_reviewer = EXCLUDED.is_reviewer,
+  access_status = EXCLUDED.access_status,
+  access_start = EXCLUDED.access_start,
+  access_end = EXCLUDED.access_end,
+  updated_at = NOW();`);
+  });
+
+  return lines.join("\n");
+}
+
 export async function runSeed() {
+  if (process.argv.includes("--sql")) {
+    console.log(generateSeedSql());
+    return;
+  }
+
   const isProduction =
     process.env.NODE_ENV === "production" ||
     process.env.VERCEL_ENV === "production";
@@ -462,13 +609,25 @@ export async function runSeed() {
 
     // Upsert into public.profiles
     const dept = DEPARTMENTS.find((d) => d.code === user.department_code);
+    const crs = COURSES.find((c) => c.code === user.course_code);
     const { error: profErr } = await supabase.from("profiles").upsert(
       {
         id: user.id,
         email: user.email,
+        personal_email: user.personal_email || null,
+        mobile: user.mobile || null,
+        enrollment_no: user.enrollment_no || null,
+        roll_no: user.roll_no || null,
         name: user.name,
         role: user.role,
         department_id: dept?.id || null,
+        course_id: crs?.id || null,
+        batch_id: user.batch_id || null,
+        faculty_type_id: user.faculty_type_id || null,
+        is_reviewer: user.is_reviewer || false,
+        access_status: user.access_status || "active",
+        access_start: user.access_start || null,
+        access_end: user.access_end || null,
         program: user.program || "PGDM",
         semester: user.semester || 1,
         is_approved: true,
@@ -480,6 +639,26 @@ export async function runSeed() {
     if (profErr) console.warn(`  ⚠️ Profile upsert warning (${user.email}):`, profErr.message);
     else console.log(`  ✓ Profile synchronized: [${user.role.toUpperCase()}] ${user.name}`);
   }
+
+  // 1b. Lookup Tables (Batches, Faculty Types, Categories, Types)
+  console.log("\n📦 Seeding Repository Lookup Tables...");
+  for (const b of BATCHES) {
+    const { error } = await supabase.from("batches").upsert(b, { onConflict: "id" });
+    if (error) console.warn(`  Batch (${b.label}):`, error.message);
+  }
+  for (const ft of FACULTY_TYPES) {
+    const { error } = await supabase.from("faculty_types").upsert(ft, { onConflict: "id" });
+    if (error) console.warn(`  Faculty Type (${ft.name}):`, error.message);
+  }
+  for (const cat of CASE_CATEGORIES) {
+    const { error } = await supabase.from("case_categories").upsert(cat, { onConflict: "id" });
+    if (error) console.warn(`  Category (${cat.name}):`, error.message);
+  }
+  for (const ct of CASE_TYPES) {
+    const { error } = await supabase.from("case_types").upsert(ct, { onConflict: "id" });
+    if (error) console.warn(`  Case Type (${ct.name}):`, error.message);
+  }
+  console.log("  ✓ Batches, Faculty Types, Categories, Case Types seeded.");
 
   // 2. Departments
   console.log("\n📁 Seeding Academic Departments...");

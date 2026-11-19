@@ -1,0 +1,250 @@
+{
+  "id": "gold-fin-shakti-001",
+  "status": "approved",
+  "notes": "Approved Finance Gold Standard. Converted from original faculty files (Financing_Growth_at_Shakti_Engineering_Ltd.docx and FSM_CE_3_C_40.pdf). Fixed defects: 1) Corrected truncated text in Q1 and Q2 where crucial words were omitted in the source DOCX. 2) Standardized spelling to 'forfaiting' and 'forfaiter' across all text, removing erratic 'forfeiting/forfeiter' variants in the PDF. 3) Added a structured financial metrics data table consolidating the case figures (₹25 Cr receivables, $3M Kenya export, ₹12 Cr CNC machinery, ₹1.5 Cr vehicles, CRISIL BBB+). 4) Aligned answer key formatting to the institutional rubrics.",
+  "meta": {
+    "department": "finance",
+    "subject": "Financial Services & Management",
+    "topic": [
+      "Factoring",
+      "Forfaiting",
+      "Leasing",
+      "Hire Purchase",
+      "Credit Rating"
+    ],
+    "concepts": [
+      "Recourse Factoring",
+      "Non-Recourse Forfaiting",
+      "Financial Lease",
+      "Hire Purchase",
+      "Credit Rating Agencies"
+    ],
+    "course_code": "FIN-501",
+    "ce_no": "CE-3",
+    "set": "A",
+    "level": "MBA / PGDM",
+    "language": "en",
+    "industry": "Industrial Machinery & Manufacturing",
+    "geography": "Pune, Maharashtra, India",
+    "length": "standard",
+    "max_marks": 40
+  },
+  "case": {
+    "title": "Financing Growth at Shakti Engineering Ltd.",
+    "word_count": 1150,
+    "sections": [
+      {
+        "heading": "Background of the Company",
+        "paragraphs": [
+          "Shakti Engineering Ltd. is a medium-sized manufacturing company located in Pune, India. Founded in 2010 by mechanical engineer Rajesh Kulkarni, the company specializes in manufacturing industrial pumps and precision machinery components utilized in agricultural irrigation systems and small-scale manufacturing units. Over the past decade, the company has expanded steadily due to burgeoning demand across domestic and international agricultural corridors.",
+          "By 2022, Shakti Engineering had established robust distribution relationships across Maharashtra, Gujarat, and Karnataka. Furthermore, the firm commenced exporting high-specification pumps to key developing markets in Southeast Asia and East Africa. However, this commercial expansion introduced acute financial management challenges concerning working capital adequacy, capital expenditure funding, and cross-border payment risk management. Rajesh Kulkarni and his finance team embarked on evaluating structured financial services—including factoring, forfaiting, leasing, hire purchase, and credit rating—to support the enterprise's next phase of growth."
+        ]
+      },
+      {
+        "heading": "The Working Capital Challenge & Domestic Factoring",
+        "paragraphs": [
+          "To aggressively capture domestic market share against entrenched competitors, Shakti Engineering offered extended credit terms of 60 to 120 days to its network of 140 agricultural machinery distributors. While this credit policy boosted annual sales to ₹85 crore, it resulted in a severe liquidity trap with nearly ₹25 crore permanently tied up in trade receivables by early 2023.",
+          "This working capital strain compromised supplier payables, jeopardizing critical raw material procurement and factory operating schedules. Finance Manager Priya Sharma proposed factoring to convert illiquid receivables into immediate cash.",
+          "After comparing multiple proposals, Shakti Engineering executed a recourse factoring facility with a leading non-banking financial company (NBFC). Under this arrangement, the factor advanced 80% of invoice value immediately upon proof of delivery, assumed client ledger administration and collections, and charged a service fee of 1.5% alongside discounting interest pegged to prime lending rates. Crucially, under recourse terms, Shakti Engineering retained ultimate credit risk in the event of distributor default."
+        ],
+        "bullets": [
+          "Immediate cash flow injection equivalent to 80% of submitted eligible invoices.",
+          "Outsourcing of ledger maintenance, buyer payment tracking, and systematic collections.",
+          "Access to the factor's institutional credit evaluation database, weeding out chronically delinquent dealers.",
+          "Residual credit risk retained by Shakti Engineering in the event of customer non-payment."
+        ]
+      },
+      {
+        "heading": "Export Expansion & Cross-Border Forfaiting",
+        "paragraphs": [
+          "Encouraged by domestic recovery, Shakti Engineering secured a landmark export order worth USD 3.0 million (approximately ₹24.6 crore) to supply municipal water irrigation pumps for a government-backed infrastructure project in Kenya. However, the Kenyan purchasing authority demanded deferred payment terms spanning three years, structured in semi-annual promissory notes.",
+          "Domestic commercial banks flatly declined to finance these medium-term trade receivables under standard working capital lines, which are capped at 180 days. Priya Sharma consequently structured a forfaiting arrangement.",
+          "The Kenyan buyer furnished an unconditional irrevocable bank guarantee (aval) from a premier African multilateral development bank. Shakti Engineering then sold the guaranteed promissory notes at a pre-agreed discount to a European forfaiting institution without recourse. This converted a 3-year overseas credit exposure into immediate, non-recourse cash, completely insulating Shakti Engineering from Kenyan country risk, foreign currency volatility, and interest rate spikes without consuming its local bank borrowing limits."
+        ]
+      },
+      {
+        "heading": "Capital Expenditure: Leasing Advanced CNC Equipment",
+        "paragraphs": [
+          "Simultaneously, surging production quotas necessitated the acquisition of 5-axis computer numerical control (CNC) machining centers worth ₹12 crore. Outright capital purchase would have depleted cash reserves, while commercial term loans required restrictive collateral covenants.",
+          "The finance committee evaluated bank borrowing, financial leasing, and hire purchase. Management negotiated a 5-year financial lease with an infrastructure equipment lessor. The lessor procured the CNC machinery directly from the machine tool builder, while Shakti Engineering committed to monthly lease rentals. This structure shielded working capital, transferred obsolescence monitoring, and delivered operational tax deductibility on rental expenses."
+        ]
+      },
+      {
+        "heading": "Logistics Modernization via Hire Purchase",
+        "paragraphs": [
+          "To ensure dependable regional pump deliveries across Western India, Shakti Engineering required a fleet of 10 customized heavy commercial transport vehicles valued at ₹1.8 crore. In contrast to the machinery, management insisted on ultimate vehicle ownership to retain asset equity for future borrowing collateral.",
+          "The company entered into a hire purchase contract with an automotive finance institution. Shakti paid an initial 20% down payment (₹36 lakh), taking immediate operational delivery, with the remaining principal and interest amortized across 36 monthly instalments. Legal title will transfer to Shakti Engineering upon payment of the final token instalment."
+        ]
+      },
+      {
+        "heading": "Credit Rating & Strategic Capital Synthesis",
+        "paragraphs": [
+          "By mid-2024, to refinance higher-cost short-term debt and fund foundry modernization, Shakti Engineering initiated plans to issue ₹30 crore in corporate debentures. Institutional bond investors mandated an external independent credit appraisal.",
+          "The company engaged CRISIL Limited. Following rigorous forensic reviews of governance, debt service coverage ratios (DSCR), customer diversification, and financial policies, CRISIL assigned a rating of 'CRISIL BBB+' (Moderate Safety, Moderate Credit Risk). The rating established institutional credibility, lowered coupon expectations by 90 basis points, and positioned the company for sustained capital market access."
+        ]
+      }
+    ],
+    "data_tables": [
+      {
+        "title": "Exhibit 1: Shakti Engineering Ltd. - Key Financial & Financing Transaction Metrics (2023-2024)",
+        "columns": [
+          "Transaction / Instrument",
+          "Underlying Asset / Dilemma",
+          "Nominal Value (₹ / USD)",
+          "Financing Structure",
+          "Recourse & Risk Allocation"
+        ],
+        "rows": [
+          [
+            "Domestic Factoring",
+            "Dealer Receivables (60-120 days)",
+            "₹25.0 Crore",
+            "80% Immediate Cash Advance; 1.5% Fee",
+            "With Recourse (Shakti bears default risk)"
+          ],
+          [
+            "Export Forfaiting",
+            "Kenya Municipal Water Project",
+            "USD 3.0 Million (~₹24.6 Cr)",
+            "3-Year Semi-Annual Promissory Notes",
+            "Without Recourse (Forfaiter assumes 100% risk)"
+          ],
+          [
+            "Equipment Lease",
+            "Advanced 5-Axis CNC Machines",
+            "₹12.0 Crore",
+            "5-Year Financial Lease Agreement",
+            "Lessor owns asset; Shakti pays rentals"
+          ],
+          [
+            "Hire Purchase",
+            "Heavy Transport Delivery Fleet",
+            "₹1.8 Crore",
+            "20% Down Payment + 36 Month EMIs",
+            "Title passes to Shakti upon final EMI"
+          ],
+          [
+            "Credit Rating",
+            "Proposed Corporate Bond Issuance",
+            "₹30.0 Crore",
+            "CRISIL Rating: 'BBB+'",
+            "Public benchmark of default probability"
+          ]
+        ]
+      }
+    ]
+  },
+  "questions": [
+    {
+      "id": "Q1",
+      "bloom_verb": "Analyze & Compare",
+      "text": "Analyze how factoring and forfaiting helped Shakti Engineering Ltd. manage its domestic and international receivables. Compare the two financing methods across structural, operational, and risk dimensions.",
+      "concepts": ["Factoring", "Forfaiting", "Receivables Management", "Recourse vs Non-Recourse"],
+      "marks": 20,
+      "co": "CO1",
+      "k_level": "K4"
+    },
+    {
+      "id": "Q2",
+      "bloom_verb": "Evaluate & Justify",
+      "text": "Evaluate the financial decisions made by Shakti Engineering Ltd. regarding factoring, forfaiting, leasing, hire purchase, and credit rating. In your opinion, were these appropriate strategies for supporting the company's growth? Justify your answer with reference to case facts.",
+      "concepts": ["Leasing", "Hire Purchase", "Credit Rating", "Capital Structure", "Trade Finance"],
+      "marks": 20,
+      "co": "CO2",
+      "k_level": "K5"
+    }
+  ],
+  "answers": [
+    {
+      "question_id": "Q1",
+      "word_count": 490,
+      "introduction": "As Shakti Engineering Ltd. expanded its domestic distribution network and international export operations, the company encountered working capital bottlenecks and extended receivables cycles. To mitigate these liquidity constraints, management adopted factoring for domestic distributor accounts and forfaiting for international project receivables. These complementary trade financing techniques converted illiquid trade debts into immediate operating cash flows while strategically reallocating counterparty risks.",
+      "sections": [
+        {
+          "heading": "1. Role of Factoring in Domestic Receivables Management",
+          "points": [
+            "Shakti Engineering offered 60–120 days credit to 140 dealers across Western India, which locked ₹25 crore into accounts receivable and hindered manufacturing operations.",
+            "Recourse factoring provided an immediate 80% cash advance upon invoice presentation, unlocking liquidity to procure raw materials and honor vendor commitments.",
+            "The factor took over systematic sales ledger maintenance and credit evaluation of buyers, reducing Shakti's internal administrative overhead.",
+            "However, because the facility was structured with recourse, Shakti Engineering continued to shoulder the ultimate credit loss risk if distributors defaulted."
+          ],
+          "limitation": "Retention of customer credit risk under recourse terms, combined with continuous factoring service charges and discount fees."
+        },
+        {
+          "heading": "2. Role of Forfaiting in International Trade Expansion",
+          "points": [
+            "The USD 3.0 million Kenyan infrastructure contract required medium-term financing across 3 years, which commercial banks refused to back under short-term working capital limits.",
+            "The buyer provided promissory notes avalized by a reputable African multilateral bank, which were sold at a discount to a European forfaiting house.",
+            "The transaction delivered 100% upfront liquidity (net of discount) without encumbering existing bank borrowing facilities.",
+            "Crucially, forfaiting is strictly non-recourse: all sovereign, political, foreign exchange, and buyer default risks were transferred permanently to the forfaiter."
+          ],
+          "limitation": "Higher upfront discounting margins reflecting the forfaiter's assumption of 100% medium-term emerging market risk."
+        }
+      ],
+      "comparison_table": {
+        "columns": ["Basis of Comparison", "Factoring (Domestic)", "Forfaiting (International)"],
+        "rows": [
+          ["Underlying Purpose", "Financing ongoing short-term domestic trade receivables", "Financing capital goods and project export contracts"],
+          ["Credit Period", "Short-term (30 to 180 days; Shakti: 60-120 days)", "Medium to long-term (1 to 5 years; Shakti: 3 years)"],
+          ["Recourse Nature", "Generally with recourse (Shakti bore default risk)", "Strictly without recourse to the exporter"],
+          ["Negotiable Instrument", "Based on open account invoices and assignments", "Based on avalized promissory notes or bills of exchange"],
+          ["Scope of Services", "Includes credit assessment, ledger maintenance, collections", "Purely a financing and complete risk-transfer mechanism"],
+          ["Impact on Balance Sheet", "Accelerates working capital cycle and liquidity", "Monetizes multi-year international debts off-balance sheet"]
+        ]
+      },
+      "conclusion": "Factoring and forfaiting served distinct yet harmonious roles in Shakti Engineering's financial architecture. Factoring stabilized short-term domestic liquidity necessary for daily manufacturing continuity, while forfaiting empowered the enterprise to aggressively bid for multi-million-dollar export contracts without exposing its balance sheet to emerging-market sovereign risk."
+    },
+    {
+      "question_id": "Q2",
+      "word_count": 560,
+      "introduction": "Shakti Engineering's managerial leadership deployed five distinct financing instruments—factoring, forfaiting, financial leasing, hire purchase, and external credit rating—to navigate multi-dimensional expansion challenges. Rather than relying solely on conventional commercial bank debt, the executive team matched each specific asset and operating requirement to an optimal financing mechanism.",
+      "sections": [
+        {
+          "heading": "Evaluation of Financial Strategy by Instrument",
+          "points": [],
+          "evaluation": [
+            "Factoring (Working Capital): Converted ₹25 crore of trapped distributor receivables into immediate 80% liquid cash. Appropriate because it prevented shop-floor shutdowns without adding long-term debt liabilities.",
+            "Forfaiting (Export Growth): Monetized a USD 3M Kenyan project over 3 years without recourse. Highly appropriate because commercial banks rejected the tenor, and the structure insulated Shakti from foreign sovereign risk.",
+            "Financial Leasing (Machinery): Acquired ₹12 crore of precision CNC equipment with zero upfront capital outlay. Appropriate because it protected liquidity and permitted rental tax deductions during high-growth scaling.",
+            "Hire Purchase (Transport Vehicles): Financed ₹1.8 crore delivery fleet via 20% down payment and 36 monthly EMIs. Appropriate because Shakti sought eventual unencumbered asset ownership to use as borrowing collateral.",
+            "Credit Rating (Capital Market Access): Engaged CRISIL to obtain an investment-grade BBB+ rating prior to a ₹30 crore bond issue. Appropriate because it built institutional investor trust and compressed borrowing spreads."
+          ]
+        }
+      ],
+      "overall_assessment": "The strategic mosaic executed by Shakti Engineering was well-balanced, prudent, and highly appropriate for its growth phase. By aligning short-term trade debts with factoring, multi-year sovereign exports with forfaiting, specialized machinery with leasing, vehicles with hire purchase, and bond issues with credit rating, management strictly adhered to asset-liability matching principles. Each instrument resolved a bottleneck that conventional bank loans could not address.",
+      "conclusion": "In conclusion, Shakti Engineering's financial decisions were strategically sound and directly catalyzed its transition from a regional pump fabricator into a diversified exporter. While management must remain vigilant regarding ongoing fees and potential credit rating migrations, the chosen strategies successfully protected working capital, mitigated credit risks, and established institutional access to broader capital markets."
+    }
+  ],
+  "teaching_notes": {
+    "synopsis": "This case explores the trade finance and capital allocation decisions of an expanding Indian machinery manufacturer. Facing a ₹25 Cr working capital freeze and a $3M 3-year Kenyan export contract, the protagonist deploys factoring, forfaiting, leasing, hire purchase, and credit rating.",
+    "objectives": [
+      "Distinguish between recourse factoring and non-recourse forfaiting in trade finance.",
+      "Analyze lease vs. hire purchase decisions based on asset ownership intent.",
+      "Evaluate the strategic role of credit rating agencies in lowering debt capital costs."
+    ],
+    "teaching_approach": "Begin by charting Shakti's cash conversion cycle on the board. Contrast domestic distributor credit against the Kenyan export contract to reveal why standard bank lines failed.",
+    "frameworks": ["Asset-Liability Matching", "Working Capital Cycle", "Credit Risk Allocation", "Lease vs Buy"],
+    "common_mistakes": [
+      "Confusing factoring (open invoice, usually recourse, short-term) with forfaiting (avalized negotiable instrument, non-recourse, medium-term).",
+      "Assuming hire purchase and financial leasing have identical asset ownership outcomes upon contract maturity."
+    ],
+    "marking_scheme": [
+      {"criterion": "Distinction and analysis of Factoring vs Forfaiting", "marks": 10},
+      {"criterion": "Comparative table accuracy across at least 4 dimensions", "marks": 10},
+      {"criterion": "Critical evaluation of all 5 instruments with limitations", "marks": 12},
+      {"criterion": "Overall strategic synthesis and justification", "marks": 8}
+    ]
+  },
+  "quality": {
+    "facts_to_verify": [
+      "CRISIL credit rating methodology for mid-corporate engineering firms",
+      "Stamp duty implications of hire purchase contracts in Maharashtra"
+    ],
+    "illustrative_figures": [
+      "₹25 crore domestic trade receivables",
+      "USD 3.0 million Kenya export contract",
+      "₹12 crore CNC machinery valuation",
+      "₹1.8 crore commercial delivery vehicle fleet"
+    ]
+  }
+}
