@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockStore } from "@/lib/mock-db";
 import { authenticateUser } from "@/lib/session";
-import { checkAccess } from "@/lib/access-control";
+import { checkAccess, canDownload } from "@/lib/access-control";
 import { DownloadLogKind } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +50,22 @@ export async function GET(req: NextRequest) {
       if (!foundCase) {
         return NextResponse.json({ error: "Repository item not found." }, { status: 404 });
       }
+    }
+
+    // Pre-flight Commercial & Access Download Gate
+    const downloadCheck = canDownload(
+      user,
+      repoItem || { author_id: caseId ? mockStore.getCase(caseId)?.author_id : undefined }
+    );
+    if (!downloadCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: downloadCheck.reason || "Download unauthorized.",
+          isPaidRequired: downloadCheck.isPaidRequired,
+          priceInr: downloadCheck.priceInr,
+        },
+        { status: 403 }
+      );
     }
 
     const targetCaseId = repoItem ? repoItem.case_id : caseId!;

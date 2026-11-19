@@ -37,6 +37,27 @@ export const ENABLE_DEMO_PERSONA_SWITCHER =
 export const ALLOWED_EMAIL_SUFFIX = `@${ALLOWED_EMAIL_DOMAIN}`;
 
 /**
+ * Allowed External College Partner Domains (Multi-Institutional Repository Extension)
+ * Reserved placeholder for future institutional subscriptions and cross-college federation.
+ */
+export const ALLOWED_EXTERNAL_COLLEGE_DOMAINS: string[] = (
+  process.env.NEXT_PUBLIC_EXTERNAL_COLLEGE_DOMAINS ||
+  process.env.EXTERNAL_COLLEGE_DOMAINS ||
+  ""
+)
+  .split(",")
+  .map((d) => d.trim().toLowerCase())
+  .filter((d) => d.length > 0);
+
+export function isExternalCollegeDomain(email: string): boolean {
+  if (!email || typeof email !== "string") return false;
+  const parts = email.trim().toLowerCase().split("@");
+  if (parts.length !== 2) return false;
+  const domain = parts[1].toLowerCase();
+  return ALLOWED_EXTERNAL_COLLEGE_DOMAINS.includes(domain);
+}
+
+/**
  * Validates whether an email strictly belongs to the official college domain(s).
  * - Trims and lowercases the input.
  * - Enforces exact domain match after "@", case-insensitively.
