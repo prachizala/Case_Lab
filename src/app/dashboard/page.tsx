@@ -7,7 +7,6 @@ import { getCachedUser } from "@/lib/auth-client";
 import { StateLoading } from "@/components/StateLoading";
 import { Profile, CaseStudy, CaseSignal, TokenBudgetInfo, DashboardTelemetry, RecentActivityItem } from "@/lib/types";
 import { COLLEGE_NAME, COLLEGE_NAME_WITH_SHORT, COLLEGE_SHORT, AI_ENGINE_LABEL } from "@/config/college";
-import { TokenBudgetBanner } from "@/components/TokenBudgetBanner";
 import {
   Sparkles,
   BookOpen,
@@ -303,9 +302,6 @@ export default function DashboardPage({
           </div>
         )}
 
-        {/* INSTITUTIONAL TOKEN BUDGET WARNING BANNER */}
-        <TokenBudgetBanner />
-
         {/* 1. HERO GREETING BANNER WITH NON-CROPPED WATERMARK & "TODAY AT THE CASE CENTRE" */}
         <div className="p-6 md:p-8 rounded-3xl hero-banner text-white shadow-xl relative overflow-hidden folder-card">
           {/* Subtle gold signature detail */}
@@ -336,9 +332,19 @@ export default function DashboardPage({
                 <span className="px-2.5 py-1 rounded-full bg-white/12 border border-white/20 text-[11px] font-medium text-white shadow-2xs backdrop-blur-xs">
                   <strong className="text-white font-bold">{cases.filter((c) => c.status === "in_review").length}</strong> In Review
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-white/12 border border-white/20 text-[11px] font-medium text-white shadow-2xs backdrop-blur-xs">
-                  <strong className="text-white font-bold">{budget ? `${100 - budget.usage_percentage}%` : "100%"}</strong> Quota Intact
-                </span>
+                {(() => {
+                  const used = user?.free_cases_used_this_month ?? user?.monthly_generations_used ?? 0;
+                  const limit = user?.monthly_generation_limit ?? (user?.user_type === "sbs_member" ? 30 : role === "admin" ? 100 : 50);
+                  const remaining = Math.max(0, limit - used);
+                  return (
+                    <span className="px-2.5 py-1 rounded-full bg-white/12 border border-white/20 text-[11px] font-medium text-white shadow-2xs backdrop-blur-xs flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                      <span>
+                        <strong className="text-white font-bold">{remaining}</strong> Cases Remaining This Month
+                      </span>
+                    </span>
+                  );
+                })()}
               </div>
             </div>
 
@@ -420,9 +426,21 @@ export default function DashboardPage({
           <div className="p-6 md:p-8 rounded-3xl border border-accent/25 bg-surface shadow-sm space-y-6 folder-card card-hover-lift">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2 max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-accent text-accent-text text-[10px] font-mono font-bold uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3" />
-                  <span>{AI_ENGINE_LABEL} Workflow</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-accent text-accent-text text-[10px] font-mono font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3" />
+                    <span>{AI_ENGINE_LABEL} Workflow</span>
+                  </div>
+                  {(() => {
+                    const used = user?.free_cases_used_this_month ?? user?.monthly_generations_used ?? 0;
+                    const limit = user?.monthly_generation_limit ?? (user?.user_type === "sbs_member" ? 30 : role === "admin" ? 100 : 50);
+                    const remaining = Math.max(0, limit - used);
+                    return (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-accent/15 border border-accent/25 text-accent text-[11px] font-bold">
+                        <span>{remaining} cases available to generate this month</span>
+                      </span>
+                    );
+                  })()}
                 </div>
                 <h2 className="font-serif text-2xl md:text-3xl font-extrabold text-text tracking-tight">
                   Generate a New Teaching Case Study

@@ -9,7 +9,6 @@ import { FileSourceImporter } from "@/components/FileSourceImporter";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { CaseNarrativeView } from "@/components/CaseNarrativeView";
 import { CECasePackView } from "@/components/casepack/CECasePackView";
-import { TokenBudgetBanner } from "@/components/TokenBudgetBanner";
 import { CECasePack } from "@/lib/casepack/schema";
 import { CasePackValidationReport, validateCasePackComplete } from "@/lib/casepack/validate";
 import { getDepartmentProfile, getAllDepartmentProfiles } from "@/config/casepack/departments";
@@ -1136,29 +1135,36 @@ function CreateCaseContent() {
           </div>
 
           <div className="flex items-center flex-wrap gap-2.5 shrink-0">
-            {currentUser && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface border border-border text-xs shadow-2xs">
-                <span className="text-muted">This Month:</span>
-                <span className="font-mono font-bold text-text">
-                  {currentUser.free_cases_used_this_month ?? currentUser.monthly_generations_used ?? 0}
-                  {" / "}
-                  {currentUser.monthly_generation_limit ?? (currentUser.user_type === "sbs_member" ? 30 : 3)}
-                </span>
-                <span className="text-[11px] text-muted hidden sm:inline">
-                  (Resets 1st)
-                </span>
-                {!currentUser.email_verified_at && (
-                  <button
-                    type="button"
-                    onClick={() => setOtpModalOpen(true)}
-                    className="ml-1 text-warning hover:underline font-semibold text-[11px] flex items-center gap-1"
-                  >
-                    <ShieldAlert className="w-3 h-3 text-warning" />
-                    <span>Verify</span>
-                  </button>
-                )}
-              </div>
-            )}
+            {currentUser && (() => {
+              const used = currentUser.free_cases_used_this_month ?? currentUser.monthly_generations_used ?? 0;
+              const limit = currentUser.monthly_generation_limit ?? (currentUser.user_type === "sbs_member" ? 30 : currentUser.role === "admin" ? 100 : 50);
+              const remaining = Math.max(0, limit - used);
+              return (
+                <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-surface border border-border text-xs shadow-2xs">
+                  <Sparkles className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-muted">Aapke Paas:</span>
+                  <span className="font-semibold text-text">
+                    <strong className="text-accent font-bold text-sm">{remaining}</strong> cases remaining
+                  </span>
+                  <span className="text-[11px] text-muted hidden sm:inline font-mono">
+                    ({used} / {limit} used)
+                  </span>
+                  <span className="text-[10px] text-muted hidden md:inline">
+                    • Resets 1st
+                  </span>
+                  {!currentUser.email_verified_at && (
+                    <button
+                      type="button"
+                      onClick={() => setOtpModalOpen(true)}
+                      className="ml-1 text-warning hover:underline font-semibold text-[11px] flex items-center gap-1"
+                    >
+                      <ShieldAlert className="w-3 h-3 text-warning" />
+                      <span>Verify</span>
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Preset Dev Testing Quick Switch (Guarded by Demo Persona Switcher) */}
             {ENABLE_DEMO_PERSONA_SWITCHER && (
@@ -1205,9 +1211,6 @@ function CreateCaseContent() {
             </button>
           </div>
         )}
-
-        {/* TOKEN BUDGET ALERT BANNER */}
-        <TokenBudgetBanner />
 
         {/* 2-Column Responsive Layout: 8 cols Form / 4 cols Strategic Profile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
@@ -2207,7 +2210,7 @@ function CreateCaseContent() {
                     Estimated Pre-Generation Specs
                   </span>
                   <span className="text-[11px] text-muted">
-                    ~{resourceEstimates.tokens.toLocaleString()} tokens • ~{resourceEstimates.seconds}s generation • {AI_ENGINE_LABEL}
+                    1 Case Study Generation • ~{resourceEstimates.seconds}s generation • {AI_ENGINE_LABEL}
                   </span>
                 </div>
               </div>
