@@ -193,9 +193,14 @@ function SignUpForm() {
       return;
     }
 
-    // 5. Mobile Check
-    if (!mobile || mobile.replace(/\D/g, "").length < 10) {
+    // 5. Mobile Check (Strictly 10 digits starting with 6-9)
+    const cleanMobile = mobile.replace(/\D/g, "");
+    if (!cleanMobile || cleanMobile.length !== 10) {
       setError("Please provide a valid 10-digit Indian mobile number.");
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(cleanMobile)) {
+      setError("Indian mobile number must start with 6, 7, 8, or 9 and contain exactly 10 digits.");
       return;
     }
 
@@ -209,7 +214,7 @@ function SignUpForm() {
         name: name.trim(),
         email: trimmedEmail,
         personal_email: personalEmail.trim().toLowerCase(),
-        mobile: mobile.trim(),
+        mobile: cleanMobile,
         enrollment_no: enrollmentNo.trim() || null,
         password,
         confirm_password: confirmPassword,
@@ -442,14 +447,40 @@ function SignUpForm() {
                   <label className="block text-xs font-semibold text-text mb-1">
                     Indian Mobile Number <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    required
-                    value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  />
+                  <div className="flex rounded-xl bg-surface border border-border focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent overflow-hidden">
+                    <span className="inline-flex items-center px-3.5 bg-surface-hover/50 border-r border-border text-xs font-semibold text-text-muted select-none">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]{10}"
+                      maxLength={10}
+                      required
+                      value={mobile}
+                      onChange={(e) => {
+                        const clean = e.target.value.replace(/\D/g, "");
+                        const digits = (clean.length === 12 && clean.startsWith("91"))
+                          ? clean.slice(2, 12)
+                          : (clean.length === 11 && clean.startsWith("0"))
+                            ? clean.slice(1, 11)
+                            : clean.slice(0, 10);
+                        setMobile(digits);
+                      }}
+                      onKeyDown={(e) => {
+                        if (
+                          !/^\d$/.test(e.key) &&
+                          !["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter"].includes(e.key) &&
+                          !e.ctrlKey &&
+                          !e.metaKey
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                      placeholder="9876543210"
+                      className="w-full px-3.5 py-2.5 bg-transparent text-sm text-text focus:outline-none font-mono"
+                    />
+                  </div>
                 </div>
               </div>
 
