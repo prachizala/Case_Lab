@@ -243,7 +243,7 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* 2. STICKY TOP NAVIGATION BAR (HEIGHT: 64-68PX, 3 ZONES) */}
       <header className="sticky top-[2px] z-40 w-full bg-primary/95 dark:bg-[#07131F]/95 backdrop-blur-md border-b border-border/20 text-white shadow-xs">
-        <PageContainer className="flex items-center justify-between h-16 md:h-[68px] gap-2 sm:gap-4">
+        <div className="w-full max-w-[1440px] 2xl:max-w-[1536px] mx-auto px-3 sm:px-4 lg:px-6 2xl:px-8 flex items-center justify-between h-16 md:h-[68px] gap-2 sm:gap-3 xl:gap-4">
           
           {/* ZONE 1 (LEFT): SBS EMBLEM & FULL INSTITUTIONAL IDENTITY */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
@@ -264,14 +264,15 @@ export function AppShell({ children }: AppShellProps) {
                 />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-serif font-bold text-base sm:text-lg tracking-tight text-white leading-none">
+                <span className="font-serif font-bold text-base sm:text-lg tracking-tight text-white leading-none whitespace-nowrap">
                   {APP_NAME}
                 </span>
                 <span
-                  className="text-[10px] sm:text-[11px] font-medium text-on-primary-muted leading-tight mt-1 max-w-[140px] sm:max-w-[200px] md:max-w-[260px] lg:max-w-[280px] xl:max-w-none truncate xl:whitespace-nowrap"
+                  className="text-[10px] sm:text-[11px] font-medium text-on-primary-muted leading-tight mt-0.5 truncate hidden sm:block max-w-[120px] 2xl:max-w-none"
                   title={COLLEGE_NAME}
                 >
-                  {COLLEGE_NAME}
+                  <span className="hidden 2xl:inline">{COLLEGE_NAME}</span>
+                  <span className="inline 2xl:hidden">{COLLEGE_SHORT}</span>
                 </span>
               </div>
             </Link>
@@ -279,7 +280,7 @@ export function AppShell({ children }: AppShellProps) {
 
           {/* ZONE 2 (CENTRE): PRIMARY NAVIGATION (MIN-W-0 FLEX-1 JUSTIFY-CENTER) */}
           <nav
-            className="hidden lg:flex items-center justify-center flex-1 min-w-0 px-2 xl:px-4 gap-1 xl:gap-1.5"
+            className="hidden lg:flex items-center justify-center flex-1 min-w-0 px-1 xl:px-2 2xl:px-4 gap-0.5 xl:gap-1 2xl:gap-1.5"
             aria-label="Primary Navigation"
           >
             {primaryNavItems.map((item) => {
@@ -295,7 +296,7 @@ export function AppShell({ children }: AppShellProps) {
                   href={item.href}
                   prefetch={true}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative flex items-center gap-1.5 px-2.5 xl:px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent ${
+                  className={`relative flex items-center gap-1.5 px-2 xl:px-2.5 2xl:px-3 py-1.5 xl:py-2 rounded-xl text-xs font-medium transition-all duration-150 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent shrink-0 ${
                     isActive
                       ? "bg-white/15 text-white font-semibold shadow-2xs"
                       : "text-on-primary-muted hover:text-white hover:bg-white/10"
@@ -306,15 +307,17 @@ export function AppShell({ children }: AppShellProps) {
                       isActive ? "text-accent" : "text-on-primary-muted group-hover:text-white"
                     }`}
                   />
-                  {/* Full label on xl (>=1280px); on 1024-1279px, show clean condensed label */}
-                  <span className="whitespace-nowrap hidden xl:inline">{item.label}</span>
-                  <span className="whitespace-nowrap inline xl:hidden">
+                  {/* Full label on 2xl (>=1536px); on 1024-1535px, show clean condensed label */}
+                  <span className="whitespace-nowrap hidden 2xl:inline">{item.label}</span>
+                  <span className="whitespace-nowrap inline 2xl:hidden">
                     {item.label === "Generate Case"
                       ? "Generate"
                       : item.label === "Review Queue"
                       ? "Reviews"
                       : item.label === "Case Library"
                       ? "Library"
+                      : item.label === "Admin Center"
+                      ? "Admin"
                       : item.label === "Trending Cases"
                       ? "Trending"
                       : item.label}
@@ -324,7 +327,7 @@ export function AppShell({ children }: AppShellProps) {
                   {isActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute bottom-0 left-2.5 right-2.5 h-[2.5px] bg-accent rounded-full animate-fadeIn"
+                      className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-accent rounded-full animate-fadeIn"
                     />
                   )}
                 </Link>
@@ -339,7 +342,7 @@ export function AppShell({ children }: AppShellProps) {
                   onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
                   aria-expanded={moreDropdownOpen}
                   aria-haspopup="true"
-                  className={`relative flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent ${
+                  className={`relative flex items-center gap-1 px-2 xl:px-2.5 2xl:px-3 py-1.5 xl:py-2 rounded-xl text-xs font-medium transition-all duration-150 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent ${
                     isSecondaryActive
                       ? "bg-white/15 text-white font-semibold shadow-2xs"
                       : "text-on-primary-muted hover:text-white hover:bg-white/10"
@@ -354,7 +357,7 @@ export function AppShell({ children }: AppShellProps) {
                   {isSecondaryActive && (
                     <span
                       aria-hidden="true"
-                      className="absolute bottom-0 left-2.5 right-2.5 h-[2.5px] bg-accent rounded-full animate-fadeIn"
+                      className="absolute bottom-0 left-2 right-2 h-[2.5px] bg-accent rounded-full animate-fadeIn"
                     />
                   )}
                 </button>
@@ -396,16 +399,16 @@ export function AppShell({ children }: AppShellProps) {
           {/* ZONE 3 (RIGHT): QUICK JUMP, NOTIFICATIONS, THEME, ROLE BADGE, AVATAR (ALL 40PX HEIGHT) */}
           <div className="flex items-center gap-2 sm:gap-2.5 xl:gap-3 shrink-0">
             
-            {/* Quick Jump Command Palette Trigger Button (Ctrl/Cmd+K) - icon only < 1280px, label >= 1280px */}
+            {/* Quick Jump Command Palette Trigger Button (Ctrl/Cmd+K) - icon only < 1280px, icon+kbd 1280-1535px, full label >= 1536px */}
             <button
               type="button"
               onClick={() => setCommandPaletteOpen(true)}
-              className="hidden md:inline-flex items-center justify-center h-10 px-2.5 xl:px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-on-primary-muted hover:text-white transition-all shadow-2xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent shrink-0 gap-2"
+              className="hidden md:inline-flex items-center justify-center h-10 px-2.5 2xl:px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs text-on-primary-muted hover:text-white transition-all shadow-2xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent shrink-0 gap-1.5"
               title="Search pages and quick actions (Ctrl/Cmd+K)"
             >
               <Search className="w-4 h-4 text-on-primary-muted" />
-              <span className="hidden xl:inline text-[11px]">Quick Jump</span>
-              <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/15 text-[10px] font-mono text-white/90">
+              <span className="hidden 2xl:inline text-[11px]">Quick Jump</span>
+              <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/15 text-[10px] font-mono text-white/90">
                 <CommandIcon className="w-2.5 h-2.5" /> K
               </kbd>
             </button>
@@ -569,7 +572,7 @@ export function AppShell({ children }: AppShellProps) {
             </button>
 
           </div>
-        </PageContainer>
+        </div>
 
         {/* MOBILE SLIDE-DOWN DRAWER MENU */}
         {mobileMenuOpen && (
