@@ -138,7 +138,7 @@ The platform reflects the institutional legacy and academic prestige of **Shanti
 ```mermaid
 graph TD
     Client["Client Browser (Next.js 15 App Router + React 19)"]
-    MW["Middleware (RBAC & Domain Gatekeeper)"]
+    MW["Middleware (RBAC and Domain Gatekeeper)"]
     API["Next.js Route Handlers (/api/*)"]
     Store{"Data Layer Mode"}
     Mock["In-Memory Mock Store (mock-db.ts)"]
@@ -149,8 +149,8 @@ graph TD
     Client --> MW
     MW --> API
     API --> Store
-    Store -- Dev / Zero-Config -- --> Mock
-    Store -- Production Cloud -- --> Supa
+    Store -- Dev / Zero-Config --> Mock
+    Store -- Production Cloud --> Supa
     API --> AI
     API --> Pay
 ```
