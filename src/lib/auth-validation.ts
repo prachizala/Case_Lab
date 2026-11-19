@@ -67,12 +67,12 @@ export function validatePersonalEmail(personalEmail: string, sbsEmail?: string):
 // Password strength schema
 export const passwordSchema = z
   .string()
-  .min(10, "Password must be at least 10 characters long.")
+  .min(8, "Password must be at least 8 characters long.")
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter.")
   .regex(/[a-z]/, "Password must contain at least one lowercase letter.")
   .regex(/[0-9]/, "Password must contain at least one digit.")
   .refine(
-    (pwd) => !/^(password|1234567890|qwertyuiop|admin12345)/i.test(pwd),
+    (pwd) => !/^(password|12345678|qwertyui|admin123)/i.test(pwd),
     "Password cannot be a common or easily guessable sequence."
   );
 

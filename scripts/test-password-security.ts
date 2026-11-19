@@ -44,11 +44,11 @@ async function runPasswordSecurityTests() {
   // --------------------------------------------------------------------------
   console.log("TEST 1: Password Complexity Policy Enforcement");
 
-  // 1a. Too short (< 10 chars)
+  // 1a. Too short (< 8 chars)
   const shortCheck = validatePasswordStrength("Short1!");
-  assert(!shortCheck.valid, `Rejects password < 10 characters ("Short1!")`);
+  assert(!shortCheck.valid, `Rejects password < 8 characters ("Short1!")`);
   assert(
-    shortCheck.errors.some((e) => e.includes("at least 10 characters")),
+    shortCheck.errors.some((e) => e.includes("at least 8 characters")),
     `Contains minimum length error notice`
   );
 

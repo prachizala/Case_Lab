@@ -259,7 +259,7 @@ const COMMON_DISALLOWED_PASSWORDS = [
 
 /**
  * Validates password against enterprise complexity policy:
- * - Minimum 10 characters
+ * - Minimum 8 characters
  * - At least 1 uppercase letter
  * - At least 1 lowercase letter
  * - At least 1 numeric digit
@@ -272,8 +272,8 @@ export function validatePasswordStrength(password: string): PasswordValidationRe
     return { valid: false, errors: ["Password is required."] };
   }
 
-  if (password.length < 10) {
-    errors.push("Password must be at least 10 characters long.");
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters long.");
   }
   if (!/[A-Z]/.test(password)) {
     errors.push("Password must include at least one uppercase letter (A-Z).");

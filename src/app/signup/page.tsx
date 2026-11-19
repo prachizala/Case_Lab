@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -53,6 +53,7 @@ function SignUpForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Student specific fields
   const [courseId, setCourseId] = useState("");
@@ -75,6 +76,58 @@ function SignUpForm() {
   const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
 
+  // Filter student courses strictly to PGDM, BBA, BCA (fallback to all courses if none match)
+  const studentCourses = useMemo(() => {
+    const targetCodes = ["PGDM", "BBA", "BCA"];
+    const filtered = courses.filter((c) =>
+      targetCodes.includes(c.code?.toUpperCase()) || targetCodes.includes(c.name?.toUpperCase())
+    );
+    return filtered.length > 0 ? filtered : courses;
+  }, [courses]);
+
+  // Determine current selected course code
+  const selectedCourseCode = useMemo(() => {
+    const found = studentCourses.find((c) => c.id === courseId) || courses.find((c) => c.id === courseId);
+    return (found?.code || found?.name || "").toUpperCase();
+  }, [studentCourses, courses, courseId]);
+
+  // Dynamically filter batches based on chosen course:
+  // PGDM -> 25-26, 26-27 (2025-26, 2026-27)
+  // BBA  -> 24-27, 25-28, 26-29 (2024-27, 2025-28, 2026-29)
+  // BCA  -> 24-27, 25-28, 26-29 (2024-27, 2025-28, 2026-29)
+  const availableBatches = useMemo(() => {
+    if (selectedCourseCode.includes("PGDM")) {
+      return batches.filter(
+        (b) =>
+          b.label === "2025-26" ||
+          b.label === "2026-27" ||
+          b.label === "25-26" ||
+          b.label === "26-27"
+      );
+    }
+    if (selectedCourseCode.includes("BBA") || selectedCourseCode.includes("BCA")) {
+      return batches.filter(
+        (b) =>
+          b.label === "2024-27" ||
+          b.label === "2025-28" ||
+          b.label === "2026-29" ||
+          b.label === "24-27" ||
+          b.label === "25-28" ||
+          b.label === "26-29"
+      );
+    }
+    return batches;
+  }, [selectedCourseCode, batches]);
+
+  // Ensure batchId is kept valid when availableBatches changes
+  useEffect(() => {
+    if (availableBatches.length > 0) {
+      if (!availableBatches.some((b) => b.id === batchId)) {
+        setBatchId(availableBatches[0].id);
+      }
+    }
+  }, [availableBatches, batchId]);
+
   useEffect(() => {
     async function loadLookupData() {
       try {
@@ -86,8 +139,13 @@ function SignUpForm() {
             setCourses(json.data.courses || []);
             setBatches(json.data.batches || []);
             setFacultyTypes(json.data.facultyTypes || []);
-            if (json.data.batches?.length > 0) setBatchId(json.data.batches[0].id);
-            if (json.data.courses?.length > 0) setCourseId(json.data.courses[0].id);
+            
+            // Default course to PGDM (or first course)
+            const targetCourse = (json.data.courses || []).find((c: any) =>
+              ["PGDM", "BBA", "BCA"].includes((c.code || c.name || "").toUpperCase())
+            ) || json.data.courses?.[0];
+            if (targetCourse) setCourseId(targetCourse.id);
+
             if (json.data.departments?.length > 0) setDepartmentId(json.data.departments[0].id);
             if (json.data.facultyTypes?.length > 0) setFacultyTypeId(json.data.facultyTypes[0].id);
           }
@@ -422,9 +480,9 @@ function SignUpForm() {
                         onChange={(e) => setCourseId(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
                       >
-                        {courses.map((c) => (
+                        {studentCourses.map((c) => (
                           <option key={c.id} value={c.id}>
-                            {c.name} ({c.code})
+                            {c.name}
                           </option>
                         ))}
                       </select>
@@ -439,26 +497,13 @@ function SignUpForm() {
                         onChange={(e) => setBatchId(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
                       >
-                        {batches.map((b) => (
+                        {availableBatches.map((b) => (
                           <option key={b.id} value={b.id}>
                             Batch {b.label} (Access through {b.end_year + 1})
                           </option>
                         ))}
                       </select>
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-text mb-1">
-                      Class Roll Number <span className="text-text-muted font-normal">(Optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={rollNo}
-                      onChange={(e) => setRollNo(e.target.value)}
-                      placeholder="e.g. 24BCA01"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    />
                   </div>
                 </div>
               )}
@@ -525,7 +570,7 @@ function SignUpForm() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-text mb-1">
-                    Password (10+ characters) <span className="text-red-500">*</span>
+                    Password (8+ characters) <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -533,13 +578,14 @@ function SignUpForm() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••"
+                      placeholder="••••••••"
                       className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600 pr-10"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-3 text-text-muted hover:text-text"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -550,14 +596,24 @@ function SignUpForm() {
                   <label className="block text-xs font-semibold text-text mb-1">
                     Confirm Password <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-3 text-text-muted hover:text-text"
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
