@@ -199,12 +199,6 @@ function SignUpForm() {
       return;
     }
 
-    // 6. Enrollment / Employee ID Check
-    if (!enrollmentNo.trim()) {
-      setError(userType === "student" ? "Enrollment Number is required." : "Employee ID is required.");
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -216,7 +210,7 @@ function SignUpForm() {
         email: trimmedEmail,
         personal_email: personalEmail.trim().toLowerCase(),
         mobile: mobile.trim(),
-        enrollment_no: enrollmentNo.trim(),
+        enrollment_no: enrollmentNo.trim() || null,
         password,
         confirm_password: confirmPassword,
         dpdp_consent: true,
@@ -272,7 +266,15 @@ function SignUpForm() {
             <span className="text-xs text-text-muted">Academic Case Study Repository</span>
           </div>
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/login"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-text-muted hover:text-text transition-colors"
+          >
+            Sign In
+          </Link>
+        </div>
       </div>
 
       {/* Main Container */}
@@ -451,22 +453,6 @@ function SignUpForm() {
                 </div>
               </div>
 
-              {/* Enrollment / Employee ID */}
-              <div>
-                <label className="block text-xs font-semibold text-text mb-1">
-                  {userType === "student" ? "Institutional Enrollment Number" : "Faculty Employee ID"}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={enrollmentNo}
-                  onChange={(e) => setEnrollmentNo(e.target.value)}
-                  placeholder={userType === "student" ? "e.g. SBS-BCA-2024-001" : "e.g. EMP-FIN-104"}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
-                />
-              </div>
-
               {/* Student-Only Fields */}
               {userType === "student" && (
                 <div className="p-4 rounded-2xl bg-surface-hover/40 border border-border space-y-4">
@@ -630,7 +616,7 @@ function SignUpForm() {
                     <span className="font-semibold text-text">
                       Statutory Consent under Digital Personal Data Protection (DPDP) Act 2023:
                     </span>{" "}
-                    I consent to Shanti Business School collecting my institutional email, personal email, Indian mobile number, and enrollment / employee identification. This data is processed strictly for case study authoring, blind peer reviews, academic accreditation, and alumni access. Information is accessible solely to me and the institutional administrator, and consent may be withdrawn at any time in accordance with Section 11 of the DPDP Act.
+                    I consent to Shanti Business School collecting my institutional email, personal email, and Indian mobile number. This data is processed strictly for case study authoring, blind peer reviews, academic accreditation, and alumni access. Information is accessible solely to me and the institutional administrator, and consent may be withdrawn at any time in accordance with Section 11 of the DPDP Act.
                   </div>
                 </label>
               </div>

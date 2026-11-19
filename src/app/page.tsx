@@ -57,7 +57,7 @@ export default function HomePage() {
               href="/signup"
               className="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-sm hover:shadow transition-all"
             >
-              Register (@{ALLOWED_EMAIL_DOMAIN})
+              Register
             </Link>
           </div>
         </div>

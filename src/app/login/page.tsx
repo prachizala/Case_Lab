@@ -108,7 +108,15 @@ export default function LoginPage() {
             </span>
           </div>
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <Link
+            href="/signup"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-accent hover:underline transition-colors"
+          >
+            Register
+          </Link>
+        </div>
       </div>
 
       {/* Main Login Card */}
@@ -180,7 +188,7 @@ export default function LoginPage() {
                 <input
                   type="text"
                   required
-                  placeholder="admin@shantibschool.edu.in, ADMIN01, or name@shantibschool.edu.in"
+                  placeholder="e.g. name@shantibschool.edu.in or personal email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-surface text-text focus:outline-none focus:ring-1 focus:ring-accent font-mono"
@@ -238,18 +246,18 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              <span>{loading ? "Authenticating..." : "Sign In to Portal"}</span>
+              <span>{loading ? "Signing In..." : "Sign In"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           <div className="text-center text-xs text-muted border-t border-border pt-4">
-            Need an authorized account?{" "}
+            Don&apos;t have an account yet?{" "}
             <Link
               href="/signup"
               className="font-semibold text-accent hover:underline"
             >
-              Register with @{ALLOWED_EMAIL_DOMAIN}
+              Register here
             </Link>
           </div>
         </div>
