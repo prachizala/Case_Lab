@@ -58,6 +58,7 @@ import {
   Lock,
   PenTool,
   ClipboardCheck,
+  Upload,
   BarChart2,
   CheckCircle,
   Users,
@@ -122,6 +123,11 @@ export default function CaseDetailPage({
   const [confirmOriginality, setConfirmOriginality] = useState(false);
   const [confirmFigures, setConfirmFigures] = useState(false);
   const [submissionNote, setSubmissionNote] = useState("");
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [confirmConsent, setConfirmConsent] = useState(false);
+  const [similarityScore, setSimilarityScore] = useState<number>(8);
+  const [creatorSharePct, setCreatorSharePct] = useState<number>(70);
+  const [priceInr, setPriceInr] = useState<number>(0);
 
   // Version history modal state
   const [versionModalOpen, setVersionModalOpen] = useState(false);
@@ -374,6 +380,42 @@ export default function CaseDetailPage({
     } catch (err) {
       console.error("Submit approval error:", err);
       alert("Workflow request failed.");
+    } finally {
+      setIsWorkflowLoading(false);
+    }
+  };
+
+  // Workflow: Upload to Repository (Upload Gate)
+  const handleUploadToRepository = async () => {
+    if (!caseStudy) return;
+    if (!confirmConsent) {
+      alert("Author distribution consent affirmation is mandatory prior to institutional repository upload.");
+      return;
+    }
+    setIsWorkflowLoading(true);
+    try {
+      const res = await fetch(`/api/cases/${caseId}/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          confirm_consent: true,
+          similarity_score: similarityScore,
+          creator_share_pct: creatorSharePct,
+          price_inr: priceInr,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.caseStudy) {
+        setCaseStudy(data.caseStudy);
+        setUploadModalOpen(false);
+        setWorkflowMessage("Case successfully published and archived in the Institutional Repository!");
+        setTimeout(() => setWorkflowMessage(null), 4000);
+      } else {
+        alert(data.error || "Failed to complete upload.");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Upload gate request failed.");
     } finally {
       setIsWorkflowLoading(false);
     }
@@ -1238,6 +1280,14 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                     <span>{isSaving ? "Saving..." : isApproved ? "Save New Version" : "Save Changes"}</span>
                   </button>
                 </div>
+              ) : caseStudy.status === "uploaded" ? (
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold text-muted bg-primary-soft/40 cursor-default"
+                  title="This case study is permanently archived in the institutional repository and is immutable."
+                >
+                  <Lock className="w-3.5 h-3.5 text-muted" />
+                  <span>Archived (Immutable)</span>
+                </span>
               ) : (
                 <button
                   type="button"
@@ -1257,6 +1307,17 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
           <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
+                {caseStudy.status === "uploaded" && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-success" />
+                    <span className="font-serif font-bold text-sm text-text">
+                      Repository Status: Permanently Uploaded & Archived
+                    </span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-success/15 text-success font-bold">
+                      Immutable
+                    </span>
+                  </div>
+                )}
                 {isApproved && (
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-success" />
@@ -1310,6 +1371,24 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Submit for Institutional Review</span>
+                  </button>
+                )}
+
+                {caseStudy.status === "approved" && (isAuthor || currentUser?.role === "admin") && (
+                  <button
+                    type="button"
+                    disabled={isWorkflowLoading}
+                    onClick={() => {
+                      setConfirmConsent(false);
+                      setSimilarityScore(8);
+                      setCreatorSharePct(70);
+                      setPriceInr(0);
+                      setUploadModalOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs hover:shadow-md transition-all"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Upload to Institutional Repository</span>
                   </button>
                 )}
 
@@ -3108,6 +3187,115 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: UPLOAD GATE TO INSTITUTIONAL REPOSITORY */}
+        {uploadModalOpen && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-lg rounded-2xl bg-surface border border-border shadow-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div className="flex items-center gap-2 text-accent">
+                  <Upload className="w-5 h-5" />
+                  <h3 className="font-serif font-bold text-base text-text">
+                    Upload to Institutional Repository
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setUploadModalOpen(false)}
+                  className="text-muted hover:text-text"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-xs text-muted leading-relaxed">
+                Accredited cases uploaded to the repository become permanent, immutable learning assets with DOI-style institutional records. Frozen PDF and DOCX files will be permanently generated.
+              </p>
+
+              <div className="space-y-3 p-3.5 rounded-xl border border-border bg-primary-soft/30">
+                <label className="flex items-start gap-2.5 text-xs text-text cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={confirmConsent}
+                    onChange={(e) => setConfirmConsent(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-border text-accent focus:ring-accent"
+                  />
+                  <span className="leading-snug">
+                    <strong className="block text-text font-semibold">Author Distribution Consent:</strong>
+                    I confirm that I am the author/co-author and grant Shanti Business School non-exclusive institutional distribution rights under SBS IP Policy 2026.1.
+                  </span>
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="space-y-1">
+                  <label className="font-semibold text-text block">
+                    Similarity Index (% Match)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={similarityScore}
+                      onChange={(e) => setSimilarityScore(Number(e.target.value))}
+                      className="w-full p-2 rounded-xl border border-border bg-surface text-text font-mono"
+                    />
+                    <span className="text-[11px] font-bold text-success">Verified</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-text block">
+                    Creator Revenue Share (%)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={creatorSharePct}
+                    onChange={(e) => setCreatorSharePct(Number(e.target.value))}
+                    className="w-full p-2 rounded-xl border border-border bg-surface text-text font-mono"
+                    placeholder="70"
+                  />
+                </div>
+
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="font-semibold text-text block">
+                    Institutional Download Price (₹ INR, 0 for Open Campus Access)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={priceInr}
+                    onChange={(e) => setPriceInr(Number(e.target.value))}
+                    className="w-full p-2 rounded-xl border border-border bg-surface text-text font-mono"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setUploadModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-border text-muted hover:bg-primary-soft text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isWorkflowLoading || !confirmConsent}
+                  onClick={handleUploadToRepository}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>{isWorkflowLoading ? "Uploading..." : "Complete Institutional Upload"}</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

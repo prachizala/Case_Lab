@@ -2249,7 +2249,7 @@ class MockStore {
       case_id: c.id,
       version_number: c.version || 1,
       title: c.title,
-      content: JSON.parse(JSON.stringify(c.content)),
+      content: c.content ? JSON.parse(JSON.stringify(c.content)) : {},
       updated_by: reviewerId,
       change_summary: comment
         ? `Curriculum review approved: ${comment}`

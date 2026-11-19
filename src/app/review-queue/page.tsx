@@ -49,11 +49,22 @@ export default function ReviewQueuePage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters & Tabs
-  const [activeTab, setActiveTab] = useState<"in_review" | "changes_requested" | "approved" | "published" | "archived" | "all">("in_review");
+  const [activeTab, setActiveTab] = useState<"pending" | "in_review" | "done" | "all">("pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [domainFilter, setDomainFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [visibilityFilter, setVisibilityFilter] = useState("all");
+
+  // Reviewer Drawer State
+  const [drawerCase, setDrawerCase] = useState<CaseStudy | null>(null);
+  const [drawerActiveSection, setDrawerActiveSection] = useState<
+    "narrative" | "dilemma" | "exhibits" | "teaching_notes" | "checks"
+  >("narrative");
+  const [drawerRounds, setDrawerRounds] = useState<any[]>([]);
+  const [drawerComments, setDrawerComments] = useState<any[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [newCommentText, setNewCommentText] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   // Workflow Action Modals
   const [selectedCase, setSelectedCase] = useState<CaseStudy | null>(null);
@@ -124,14 +135,74 @@ export default function ReviewQueuePage() {
     }
   };
 
+  const isOverdue = (c: CaseStudy) => {
+    const ts = c.submitted_at || c.created_at;
+    if (!ts) return false;
+    const diffDays = (Date.now() - new Date(ts).getTime()) / (1000 * 60 * 60 * 24);
+    return (c.status === "submitted" || c.status === "in_review") && diffDays > 3;
+  };
+
+  const openReviewerDrawer = async (c: CaseStudy) => {
+    setDrawerCase(c);
+    setDrawerActiveSection("narrative");
+    setNewCommentText("");
+    setLoadingComments(true);
+    try {
+      const res = await fetch(`/api/cases/${c.id}/review-comments`);
+      if (res.ok) {
+        const data = await res.json();
+        setDrawerRounds(data.rounds || []);
+        setDrawerComments(data.comments || []);
+      }
+    } catch (e) {
+      console.error("Failed to load review comments:", e);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleAddSectionComment = async () => {
+    if (!drawerCase || !newCommentText.trim()) return;
+    const activeRound = drawerRounds.find((r) => r.decision === "pending") || drawerRounds[drawerRounds.length - 1];
+    const roundId = activeRound ? activeRound.id : `round-${drawerCase.id}-1`;
+
+    setIsSubmittingComment(true);
+    try {
+      const res = await fetch(`/api/cases/${drawerCase.id}/review-comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          round_id: roundId,
+          section: drawerActiveSection,
+          text: newCommentText.trim(),
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.comment) {
+          setDrawerComments((prev) => [...prev, data.comment]);
+          setNewCommentText("");
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Failed to add section comment.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error adding section comment.");
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
+
   // Tab counts
   const counts = useMemo(() => {
     return {
+      pending: cases.filter((c) => c.status === "submitted" || c.status === "draft").length,
       in_review: cases.filter((c) => c.status === "in_review").length,
-      changes_requested: cases.filter((c) => c.status === "changes_requested").length,
-      approved: cases.filter((c) => c.status === "approved").length,
-      published: cases.filter((c) => c.status === "published").length,
-      archived: cases.filter((c) => c.status === "archived").length,
+      done: cases.filter((c) =>
+        ["approved", "uploaded", "published", "changes_requested", "rejected", "archived"].includes(c.status)
+      ).length,
       all: cases.length,
     };
   }, [cases]);
@@ -140,7 +211,16 @@ export default function ReviewQueuePage() {
   const filteredCases = useMemo(() => {
     return cases.filter((c) => {
       // Tab filter
-      if (activeTab !== "all" && c.status !== activeTab) {
+      if (activeTab === "pending" && c.status !== "submitted" && c.status !== "draft") {
+        return false;
+      }
+      if (activeTab === "in_review" && c.status !== "in_review") {
+        return false;
+      }
+      if (
+        activeTab === "done" &&
+        !["approved", "uploaded", "published", "changes_requested", "rejected", "archived"].includes(c.status)
+      ) {
         return false;
       }
 
@@ -399,6 +479,27 @@ export default function ReviewQueuePage() {
         <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-1 scrollbar-none">
           <button
             type="button"
+            onClick={() => setActiveTab("pending")}
+            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
+              activeTab === "pending"
+                ? "border-accent text-accent"
+                : "border-transparent text-muted hover:text-text"
+            }`}
+          >
+            <span>Pending Review</span>
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                activeTab === "pending"
+                  ? "bg-accent text-accent-text"
+                  : "bg-surface border border-border text-muted"
+              }`}
+            >
+              {counts.pending}
+            </span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("in_review")}
             className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === "in_review"
@@ -406,7 +507,7 @@ export default function ReviewQueuePage() {
                 : "border-transparent text-muted hover:text-text"
             }`}
           >
-            <span>Under Review</span>
+            <span>In Review</span>
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                 activeTab === "in_review"
@@ -420,67 +521,22 @@ export default function ReviewQueuePage() {
 
           <button
             type="button"
-            onClick={() => setActiveTab("changes_requested")}
+            onClick={() => setActiveTab("done")}
             className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === "changes_requested"
+              activeTab === "done"
                 ? "border-accent text-accent"
                 : "border-transparent text-muted hover:text-text"
             }`}
           >
-            <span>Changes Requested</span>
+            <span>Done</span>
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                activeTab === "changes_requested"
+                activeTab === "done"
                   ? "bg-accent text-accent-text"
                   : "bg-surface border border-border text-muted"
               }`}
             >
-              {counts.changes_requested}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("approved")}
-            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === "approved"
-                ? "border-accent text-accent"
-                : "border-transparent text-muted hover:text-text"
-            }`}
-          >
-            <span>Approved (Unpublished)</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-surface border border-border text-muted">
-              {counts.approved}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("published")}
-            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === "published"
-                ? "border-accent text-accent"
-                : "border-transparent text-muted hover:text-text"
-            }`}
-          >
-            <span>Published</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-surface border border-border text-muted">
-              {counts.published}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("archived")}
-            className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
-              activeTab === "archived"
-                ? "border-accent text-accent"
-                : "border-transparent text-muted hover:text-text"
-            }`}
-          >
-            <span>Archived</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-surface border border-border text-muted">
-              {counts.archived}
+              {counts.done}
             </span>
           </button>
 
@@ -493,8 +549,14 @@ export default function ReviewQueuePage() {
                 : "border-transparent text-muted hover:text-text"
             }`}
           >
-            <span>All Repository Cases</span>
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-surface border border-border text-muted">
+            <span>All Submissions</span>
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                activeTab === "all"
+                  ? "bg-accent text-accent-text"
+                  : "bg-surface border border-border text-muted"
+              }`}
+            >
               {counts.all}
             </span>
           </button>
@@ -613,6 +675,12 @@ export default function ReviewQueuePage() {
                     <div className="flex flex-wrap items-center gap-2">
                       {renderStatusBadge(c.status)}
                       {renderVisibilityBadge(c.visibility)}
+                      {isOverdue(c) && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                          <Clock className="w-2.5 h-2.5" />
+                          <span>⚠️ Overdue (&gt;3d)</span>
+                        </span>
+                      )}
 
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary-soft text-text border border-border">
                         {c.type === "flash"
@@ -714,6 +782,16 @@ export default function ReviewQueuePage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
+                      {/* Review Drawer Button */}
+                      <button
+                        type="button"
+                        onClick={() => openReviewerDrawer(c)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-accent/40 bg-accent/5 text-accent text-xs font-bold hover:bg-accent hover:text-accent-text transition-all"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Review Drawer</span>
+                      </button>
+
                       {/* Reviewer Actions based on status */}
                       {c.status === "in_review" && (
                         <>
@@ -724,7 +802,7 @@ export default function ReviewQueuePage() {
                               setActionType("request-changes");
                               setActionComment("");
                             }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold hover:bg-rose-500/20 transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/30 bg-danger/10 text-danger text-xs font-bold hover:bg-danger/20 transition-all"
                           >
                             <AlertTriangle className="w-3.5 h-3.5" />
                             <span>Request Changes</span>
@@ -737,7 +815,7 @@ export default function ReviewQueuePage() {
                               setActionType("reject");
                               setActionComment("");
                             }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/30 bg-danger/10 text-danger text-xs font-bold hover:bg-danger/20 transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/40 bg-danger/10 text-danger text-xs font-bold hover:bg-danger/20 transition-all"
                           >
                             <X className="w-3.5 h-3.5" />
                             <span>Reject Case</span>
@@ -751,7 +829,7 @@ export default function ReviewQueuePage() {
                                 setActionType("approve");
                                 setActionComment("");
                               }}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success hover:opacity-90 text-white text-xs font-bold shadow-xs transition-all"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                               <span>Approve Case</span>
@@ -1025,6 +1103,316 @@ export default function ReviewQueuePage() {
                 >
                   Close Audit View
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* REVIEWER SLIDE-OVER DRAWER */}
+        {drawerCase && (
+          <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-in fade-in">
+            <div className="w-full max-w-2xl bg-surface border-l border-border h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+              {/* Drawer Header */}
+              <div className="p-5 border-b border-border flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    {renderStatusBadge(drawerCase.status)}
+                    {isOverdue(drawerCase) && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                        <Clock className="w-2.5 h-2.5" />
+                        <span>Overdue (&gt;3 days)</span>
+                      </span>
+                    )}
+                    <span className="text-xs text-muted font-mono">
+                      v{drawerCase.version || 1}
+                    </span>
+                  </div>
+                  <h2 className="font-serif font-bold text-lg text-text">
+                    {drawerCase.title}
+                  </h2>
+                  <p className="text-xs text-muted">
+                    Authored by <span className="font-semibold text-text">{drawerCase.author_name || "Faculty Member"}</span> • {drawerCase.domain}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDrawerCase(null)}
+                  className="p-1.5 rounded-xl text-muted hover:text-text hover:bg-background transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* 5 Tab Navigation */}
+              <div className="flex items-center border-b border-border bg-background px-4 overflow-x-auto scrollbar-none">
+                {[
+                  { id: "narrative", label: "1. Narrative" },
+                  { id: "dilemma", label: "2. Dilemma" },
+                  { id: "exhibits", label: "3. Exhibits" },
+                  { id: "teaching_notes", label: "4. Teaching Notes" },
+                  { id: "checks", label: "5. Checks" },
+                ].map((sec) => (
+                  <button
+                    key={sec.id}
+                    type="button"
+                    onClick={() => setDrawerActiveSection(sec.id as any)}
+                    className={`px-3 py-2.5 text-xs font-bold border-b-2 whitespace-nowrap transition-all ${
+                      drawerActiveSection === sec.id
+                        ? "border-accent text-accent"
+                        : "border-transparent text-muted hover:text-text"
+                    }`}
+                  >
+                    {sec.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Drawer Content Body */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
+                {drawerActiveSection === "narrative" && (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Executive Summary
+                      </h4>
+                      <p className="text-muted leading-relaxed whitespace-pre-wrap">
+                        {drawerCase.content?.summary || "No summary provided."}
+                      </p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Background Context & Industry Environment
+                      </h4>
+                      <p className="text-muted leading-relaxed whitespace-pre-wrap">
+                        {drawerCase.content?.background || "No background details provided."}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {drawerActiveSection === "dilemma" && (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Core Challenge & Conflict
+                      </h4>
+                      <p className="text-muted leading-relaxed whitespace-pre-wrap">
+                        {drawerCase.content?.challenge || "No central challenge defined."}
+                      </p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Decisive Pivot Point
+                      </h4>
+                      <p className="text-muted leading-relaxed whitespace-pre-wrap">
+                        {drawerCase.content?.decision_point || "No decision point defined."}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {drawerActiveSection === "exhibits" && (
+                  <div className="space-y-4">
+                    <h4 className="font-serif font-bold text-sm text-text">
+                      Financial Exhibits & Quantitative Data
+                    </h4>
+                    {drawerCase.content?.key_data && drawerCase.content.key_data.length > 0 ? (
+                      <div className="border border-border rounded-xl overflow-hidden">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-background border-b border-border text-[10px] font-bold uppercase text-muted">
+                            <tr>
+                              <th className="p-2.5">Metric / Line Item</th>
+                              <th className="p-2.5">Value</th>
+                              <th className="p-2.5">Context</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {drawerCase.content.key_data.map((row: any, i: number) => (
+                              <tr key={i} className="hover:bg-background/40">
+                                <td className="p-2.5 font-medium text-text">{row.metric || row.item || `Exhibit ${i + 1}`}</td>
+                                <td className="p-2.5 font-mono text-accent font-semibold">{row.value || "-"}</td>
+                                <td className="p-2.5 text-muted">{row.context || row.notes || "-"}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <p className="text-muted italic">No tabular exhibits recorded for this case study.</p>
+                    )}
+                  </div>
+                )}
+
+                {drawerActiveSection === "teaching_notes" && (
+                  <div className="space-y-4">
+                    <div className="p-3 rounded-xl border border-accent/20 bg-accent/5 text-text flex items-start gap-2">
+                      <Lock className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold block text-accent text-xs">
+                          Restricted Pedagogical Content
+                        </span>
+                        <span className="text-[11px] text-muted">
+                          Visible strictly to verified Faculty Reviewers and Institutional Administrators. Students never receive these items.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Facilitator Teaching Note
+                      </h4>
+                      <p className="text-muted leading-relaxed whitespace-pre-wrap">
+                        {typeof drawerCase.content?.teaching_note === "string"
+                          ? drawerCase.content.teaching_note
+                          : drawerCase.content?.teaching_note
+                          ? JSON.stringify(drawerCase.content.teaching_note, null, 2)
+                          : "No facilitator note attached."}
+                      </p>
+                    </div>
+
+                    {drawerCase.content?.discussion_questions && drawerCase.content.discussion_questions.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-serif font-bold text-sm text-text">
+                          Discussion Prompts & Model Solutions
+                        </h4>
+                        <div className="space-y-2">
+                          {drawerCase.content.discussion_questions.map((q: any, i: number) => (
+                            <div key={i} className="p-3 rounded-xl border border-border bg-background space-y-1.5">
+                              <span className="font-bold text-text block">
+                                Q{i + 1}: {q.question || q}
+                              </span>
+                              {q.model_answer && (
+                                <p className="text-[11px] text-accent/90 italic pl-3 border-l-2 border-accent">
+                                  Model Answer Key: {q.model_answer}
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {drawerActiveSection === "checks" && (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Bloom&apos;s Taxonomy Cognitive Target
+                      </h4>
+                      <span className="inline-block px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent font-bold uppercase text-[11px]">
+                        {drawerCase.content?.blooms_level || "Analyze / Evaluate"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <h4 className="font-serif font-bold text-sm text-text">
+                        Pedagogical Rigor Benchmark
+                      </h4>
+                      <p className="text-muted leading-relaxed">
+                        Calibrated for MBA & Executive Education classroom analysis. Evaluates whether students can synthesize incomplete data, weigh strategic trade-offs, and defend actionable recommendations.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Section Review Comments Thread */}
+                <div className="pt-4 border-t border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="font-bold text-xs text-text flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5 text-accent" />
+                      <span>Section Review Comments ({drawerActiveSection.replace("_", " ")})</span>
+                    </h5>
+                    <span className="text-[10px] text-muted">
+                      {drawerComments.filter((c) => c.section === drawerActiveSection).length} comment(s)
+                    </span>
+                  </div>
+
+                  {loadingComments ? (
+                    <div className="text-muted text-[11px]">Loading section notes...</div>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {drawerComments
+                        .filter((c) => c.section === drawerActiveSection)
+                        .map((comm) => (
+                          <div key={comm.id} className="p-2.5 rounded-lg border border-border bg-background text-[11px] space-y-1">
+                            <div className="flex items-center justify-between text-muted text-[10px]">
+                              <span className="font-bold text-text">{comm.author_name || "Reviewer"}</span>
+                              <span>{new Date(comm.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <p className="text-text">{comm.text}</p>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* Add Comment Input */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={`Add note for ${drawerActiveSection.replace("_", " ")}...`}
+                      value={newCommentText}
+                      onChange={(e) => setNewCommentText(e.target.value)}
+                      className="flex-1 px-3 py-1.5 rounded-lg border border-border bg-background text-text text-xs focus:ring-1 focus:ring-accent"
+                    />
+                    <button
+                      type="button"
+                      disabled={isSubmittingComment || !newCommentText.trim()}
+                      onClick={handleAddSectionComment}
+                      className="px-3 py-1.5 rounded-lg bg-accent text-accent-text text-xs font-bold hover:bg-accent-hover transition-colors disabled:opacity-50"
+                    >
+                      Post Note
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer Actions */}
+              <div className="p-4 border-t border-border bg-background flex items-center justify-between gap-2">
+                <Link
+                  href={`/cases/${drawerCase.id}`}
+                  className="px-3 py-2 rounded-lg border border-border text-xs font-semibold text-muted hover:text-text hover:border-text transition-colors flex items-center gap-1.5"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Full Editor View</span>
+                </Link>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCase(drawerCase);
+                      setActionType("request-changes");
+                      setActionComment("");
+                    }}
+                    className="px-3 py-2 rounded-lg border border-danger/30 bg-danger/10 text-danger text-xs font-bold hover:bg-danger/20 transition-all"
+                  >
+                    Request Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCase(drawerCase);
+                      setActionType("reject");
+                      setActionComment("");
+                    }}
+                    className="px-3 py-2 rounded-lg border border-danger/40 text-danger text-xs font-bold hover:bg-danger/10 transition-all"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCase(drawerCase);
+                      setActionType("approve");
+                      setActionComment("");
+                    }}
+                    className="px-4 py-2 rounded-lg bg-success text-white text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    <span>Approve Case</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -261,6 +261,7 @@ export interface CaseStudy {
   version?: number; // current version number
   reviewer_id?: string | null;
   reviewer_comment?: string | null;
+  submitted_at?: string | null;
   created_at: string;
   updated_at?: string;
 }
@@ -580,6 +581,8 @@ export type AuditAction =
   | "case_submitted"
   | "case_approval"
   | "case_published"
+  | "case_uploaded"
+  | "case_downloaded"
   | "case_changes_requested"
   | "case_rejected"
   | "case_archived"

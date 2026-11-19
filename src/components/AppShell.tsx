@@ -22,6 +22,7 @@ import {
   UserCheck,
   ArrowRightLeft,
   ClipboardCheck,
+  Layers,
   Search,
   Command as CommandIcon,
 } from "lucide-react";
@@ -184,8 +185,9 @@ export function AppShell({ children }: AppShellProps) {
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Generate Case", href: "/create", icon: Sparkles },
     { label: "Review Queue", href: "/review-queue", icon: ClipboardCheck },
-    { label: "Case Library", href: "/library", icon: BookOpen },
+    { label: "Repository", href: "/repository", icon: BookOpen },
     { label: "Trending Cases", href: "/trending", icon: TrendingUp },
+    { label: "Case Library", href: "/library", icon: Layers, isSecondary: true },
     { label: "Analytics", href: "/analytics", icon: BarChart3, isSecondary: true },
     { label: "Pricing", href: "/pricing", icon: CreditCard, isSecondary: true },
     { label: "Facilitator Guide", href: "/guide", icon: GraduationCap, isSecondary: true },
@@ -197,7 +199,8 @@ export function AppShell({ children }: AppShellProps) {
     { label: "Admin Center", href: "/admin", icon: ShieldCheck },
     { label: "Generate Case", href: "/create", icon: Sparkles },
     { label: "Review Queue", href: "/review-queue", icon: ClipboardCheck },
-    { label: "Case Library", href: "/library", icon: BookOpen },
+    { label: "Repository", href: "/repository", icon: BookOpen },
+    { label: "Case Library", href: "/library", icon: Layers, isSecondary: true },
     { label: "Trending Cases", href: "/trending", icon: TrendingUp, isSecondary: true },
     { label: "Analytics", href: "/analytics", icon: BarChart3, isSecondary: true },
     { label: "Facilitator Guide", href: "/guide", icon: GraduationCap, isSecondary: true },
@@ -206,7 +209,8 @@ export function AppShell({ children }: AppShellProps) {
   // Student
   const studentNav: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Case Library", href: "/library", icon: BookOpen },
+    { label: "Repository", href: "/repository", icon: BookOpen },
+    { label: "Case Library", href: "/library", icon: Layers, isSecondary: true },
     { label: "My Answers", href: "/my-answers", icon: FileQuestion },
     { label: "Portfolio", href: "/portfolio", icon: Briefcase },
   ];
