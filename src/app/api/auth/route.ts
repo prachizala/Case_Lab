@@ -345,8 +345,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "demo-login") {
-      // Allowed only in dev/demo environments
-      if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE !== "true") {
+      const targetEmail = (email || "").toLowerCase().trim();
+      const officialDemoAccounts = [
+        "admin@shantibschool.edu.in",
+        "faculty@shantibschool.edu.in",
+        "student@shantibschool.edu.in",
+        "neha.sharma@shantibschool.edu.in",
+        "reena.paswan@shantibschool.edu.in",
+        "prachi.z24bca@shantibschool.edu.in",
+      ];
+      const isOfficialDemo = officialDemoAccounts.includes(targetEmail);
+      const isDemoModeDisabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "false";
+
+      // Allowed in dev, demo environments, or for official evaluation personas
+      if (isDemoModeDisabled && !isOfficialDemo) {
         return NextResponse.json(
           { error: "One-click demo persona access is restricted to development and evaluation environments." },
           { status: 403 }
@@ -357,7 +369,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Email is required." }, { status: 400 });
       }
 
-      const profile = mockStore.getProfile(email.toLowerCase().trim());
+      const profile = mockStore.getProfile(targetEmail);
       if (!profile) {
         return NextResponse.json({ error: "Demo account not found." }, { status: 404 });
       }
@@ -372,15 +384,23 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "switch-role") {
-      // Allows quick switching between Admin, Faculty, and Student personas only in dev/demo mode
-      if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE !== "true") {
+      const targetUserId = body.userId;
+      const allowedDemoUserIds = [
+        "usr-admin-1",
+        "usr-faculty-1",
+        "usr-student-1",
+      ];
+      const isOfficialDemoUser = allowedDemoUserIds.includes(targetUserId);
+      const isDemoModeDisabled = process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "false";
+
+      // Allows quick switching between Admin, Faculty, and Student personas for evaluators
+      if (isDemoModeDisabled && !isOfficialDemoUser) {
         return NextResponse.json(
           { error: "Persona switching is strictly restricted to development and demo modes." },
           { status: 403 }
         );
       }
 
-      const targetUserId = body.userId;
       const profile = mockStore.getProfile(targetUserId);
       if (!profile) {
         return NextResponse.json({ error: "User profile not found." }, { status: 404 });

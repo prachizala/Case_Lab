@@ -72,12 +72,16 @@ export default function LoginPage() {
         body: JSON.stringify({ action: "demo-login", email: targetEmail }),
       });
 
-      if (!res.ok) throw new Error("Could not log into demo account.");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Could not log into demo account.");
+      }
       invalidateAuthCache();
       window.location.href = "/dashboard";
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      setError("Demo login failed.");
+      const msg = err instanceof Error ? err.message : "Demo login failed.";
+      setError(msg);
     } finally {
       setLoading(false);
     }

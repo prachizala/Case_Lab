@@ -30,10 +30,9 @@ export const AI_ENGINE_LABEL =
   process.env.NEXT_PUBLIC_AI_ENGINE_LABEL || "AI Case Engine";
 
 // Persona / Role Switcher Demo Protection Flag
-// In production, persona switching is disabled unless explicitly set in NEXT_PUBLIC_ENABLE_DEMO_MODE
+// In production, persona switching is enabled by default for evaluations unless explicitly disabled via "false"
 export const ENABLE_DEMO_PERSONA_SWITCHER =
-  process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true" ||
-  process.env.NODE_ENV !== "production";
+  process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE !== "false";
 
 export const ALLOWED_EMAIL_SUFFIX = `@${ALLOWED_EMAIL_DOMAIN}`;
 
