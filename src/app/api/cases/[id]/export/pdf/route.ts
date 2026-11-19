@@ -537,6 +537,25 @@ export async function GET(
       y += qLines.length * 4.5 + 2.5;
     });
 
+    const totalPages = doc.getNumberOfPages();
+    const dateStr = new Date().toLocaleDateString("en-IN");
+    const watermarkText = user.role === "student"
+      ? `SBS CaseLab - Student Copy - ${user.name || "Student"} - ${dateStr}`
+      : "SBS CaseLab - Faculty Review Copy";
+
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7.5);
+      doc.setTextColor(140, 140, 140);
+      doc.text(watermarkText, margin, 8);
+      doc.text(
+        `${watermarkText} • Page ${i} of ${totalPages}`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 6,
+        { align: "center" }
+      );
+    }
+
     const pdfOutput = doc.output("arraybuffer");
     const safeTitle = caseStudy.title.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40);
 

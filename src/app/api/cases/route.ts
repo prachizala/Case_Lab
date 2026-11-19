@@ -26,8 +26,8 @@ export async function GET(req: NextRequest) {
   // Determine base cases list with role-based visibility
   let cases: CaseStudy[] = mockStore.getCasesForUser(user.id, user.role, user.department_id);
 
-  // Filter by Scope: "my-cases"
-  if (scope === "my-cases") {
+  // Filter by Scope: "my-cases" or "mine"
+  if (scope === "my-cases" || scope === "mine") {
     cases = cases.filter((c) => c.author_id === user.id);
   }
 
@@ -161,7 +161,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin"]);
+    const { user, errorResponse } = await authenticateUser(req, ["student", "faculty", "admin"]);
     if (errorResponse || !user) {
       return errorResponse || NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -187,10 +187,30 @@ export async function POST(req: NextRequest) {
 
     const saved = mockStore.saveCase({
       ...caseData,
-      author_id: caseData.author_id || user.id,
-      author_name: caseData.author_name || user.name,
+      author_id: user.id,
+      author_name: user.name,
+      author_role: user.role as "faculty" | "student" | "admin",
+      department_id: caseData.department_id || user.department_id || null,
+      course_id: caseData.course_id || user.course_id || null,
     });
-    return NextResponse.json({ success: true, caseStudy: saved });
+
+    let returnedCase = { ...saved };
+    if (user.role === "student" && returnedCase.content) {
+      const sanitized = { ...returnedCase.content } as Record<string, unknown>;
+      delete sanitized.teaching_note;
+      delete sanitized.teaching_notes;
+      delete sanitized.answers;
+      delete sanitized.answer_key;
+      delete sanitized.model_answers;
+      delete sanitized.solution_keys;
+      delete sanitized.pedagogical_checks;
+      delete sanitized.rubrics;
+      delete sanitized.quality;
+      delete sanitized.validation;
+      returnedCase.content = sanitized as any;
+    }
+
+    return NextResponse.json({ success: true, caseStudy: returnedCase });
   } catch (err: unknown) {
     console.error("Save case error:", err);
     return NextResponse.json(

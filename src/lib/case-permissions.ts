@@ -113,6 +113,9 @@ export function sanitizeCaseStudyForStudent(caseStudy: CaseStudy): CaseStudy {
     if (content.teaching_notes) {
       delete content.teaching_notes;
     }
+    if (content.answer_key) {
+      delete content.answer_key;
+    }
     if (content.answers) {
       content.answers = [];
     }

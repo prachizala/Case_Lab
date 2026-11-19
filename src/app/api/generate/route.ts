@@ -70,6 +70,12 @@ export async function POST(req: NextRequest) {
 
       if (action === "submit-review") {
         existing.status = "in_review";
+        existing.review_status = "in_review";
+        try {
+          mockStore.assignReviewer(existing.id);
+        } catch (e) {
+          console.warn("Reviewer assignment skipped or failed:", e);
+        }
         mockStore.logAudit(
           userId,
           user.email,
@@ -80,6 +86,7 @@ export async function POST(req: NextRequest) {
         );
       } else {
         existing.status = "draft";
+        existing.review_status = "draft";
       }
 
       existing.updated_at = new Date().toISOString();
@@ -306,8 +313,14 @@ export async function POST(req: NextRequest) {
       learning_objectives: params.learningObjectives,
       tone: params.tone,
       blooms_level: params.bloomsLevel,
-      course_id: courseId || null,
+      course_id: body.course_id || courseId || user.course_id || null,
       course_name: courseName || null,
+      department_id: body.department_id || user.department_id || null,
+      case_category_id: body.case_category_id || null,
+      keywords: Array.isArray(body.keywords) && body.keywords.length > 0 ? body.keywords : ["management", "business", "case-study"],
+      page_target: body.page_target === 10 ? 10 : 5,
+      author_role: user.role as "faculty" | "student" | "admin",
+      review_status: "draft",
       level: params.level || "MBA / Intermediate",
       language: params.language,
       complexity: params.complexity,

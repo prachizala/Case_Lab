@@ -25,6 +25,8 @@ import {
   CaseTone,
   CaseType,
   Course,
+  Department,
+  CaseCategory,
   Profile,
   TokenBudgetInfo,
 } from "@/lib/types";
@@ -50,6 +52,7 @@ import {
   Plus,
   Trash2,
   X,
+  Tag,
   Building,
   Target,
   FileSpreadsheet,
@@ -151,6 +154,16 @@ function CreateCaseContent() {
   const [type, setType] = useState<CaseType>("ce_pack");
   const [format, setFormat] = useState<CaseFormat>("hypothetical");
   const [budgetInfo, setBudgetInfo] = useState<TokenBudgetInfo | null>(null);
+
+  // Institutional Lookup & Repository Metadata State
+  const [departmentsList, setDepartmentsList] = useState<Department[]>([]);
+  const [coursesList, setCoursesList] = useState<Course[]>([]);
+  const [categoriesList, setCategoriesList] = useState<CaseCategory[]>([]);
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [pageTarget, setPageTarget] = useState<5 | 10>(5);
+  const [keywords, setKeywords] = useState<string[]>(["Strategy", "Decision-Making", "Operations"]);
+  const [keywordInput, setKeywordInput] = useState<string>("");
 
   // CE Case Pack Configuration State
   const [department, setDepartment] = useState<"finance" | "hr" | "marketing">("finance");
@@ -359,7 +372,50 @@ function CreateCaseContent() {
 
   useEffect(() => {
     fetchCurrentUser();
+    fetch("/api/lookup")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success && res.data) {
+          setDepartmentsList(res.data.departments || []);
+          setCoursesList(res.data.courses || []);
+          setCategoriesList(res.data.categories || []);
+          if (res.data.departments?.length > 0) {
+            setSelectedDepartmentId((prev) => prev || res.data.departments[0].id);
+          }
+          if (res.data.categories?.length > 0) {
+            setSelectedCategoryId((prev) => prev || res.data.categories[0].id);
+          }
+        }
+      })
+      .catch((err) => console.error("Error loading institutional lookups:", err));
   }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.department_id) {
+        setSelectedDepartmentId(currentUser.department_id);
+      }
+      if (currentUser.course_id) {
+        setSelectedCourseId(currentUser.course_id);
+      }
+    }
+  }, [currentUser]);
+
+  const handleAddKeyword = () => {
+    const trimmed = keywordInput.trim();
+    if (trimmed && !keywords.includes(trimmed) && keywords.length < 8) {
+      setKeywords([...keywords, trimmed]);
+      setKeywordInput("");
+    }
+  };
+
+  const handleRemoveKeyword = (kwToRemove: string) => {
+    if (keywords.length <= 3) {
+      alert("At least 3 keywords are required for institutional repository indexing.");
+      return;
+    }
+    setKeywords(keywords.filter((k) => k !== kwToRemove));
+  };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -751,6 +807,11 @@ function CreateCaseContent() {
           content: generatedCasePack,
           status: "draft",
           visibility: "sbs_only",
+          department_id: selectedDepartmentId || currentUser?.department_id || null,
+          course_id: selectedCourseId || currentUser?.course_id || null,
+          case_category_id: selectedCategoryId || null,
+          page_target: pageTarget,
+          keywords: keywords.length >= 3 ? keywords : ["Management", "Strategy", "Operations"],
         }),
       });
       if (!res.ok) throw new Error("Failed to save CE Case Pack");
@@ -925,6 +986,11 @@ function CreateCaseContent() {
         complexity,
         targetLength,
         sourceNotes,
+        department_id: selectedDepartmentId || currentUser?.department_id || null,
+        course_id: selectedCourseId || currentUser?.course_id || null,
+        case_category_id: selectedCategoryId || null,
+        page_target: pageTarget,
+        keywords: keywords.length >= 3 ? keywords : ["Management", "Strategy", "Operations"],
         simulateBadJson: forceRetry ? false : simulateBadJson,
       };
 
@@ -1245,22 +1311,22 @@ function CreateCaseContent() {
                       desc: "Comprehensive Teaching Case + Analysis Questions + Model Solutions & Discussion Notes.",
                     },
                     {
-                      id: "short" as CaseType,
-                      title: "Short Case",
-                      badge: "~2 Pages",
-                      desc: "Rapid boardroom crisis drill (20-30 min class). High-intensity operational tension.",
-                    },
-                    {
                       id: "full" as CaseType,
                       title: "Full Case Study",
                       badge: "8-10 Pages",
                       desc: "Comprehensive Harvard/Ivey standard. Deep institutional context, multi-stage teaching note.",
                     },
                     {
-                      id: "research" as CaseType,
-                      title: "Case Research",
-                      badge: "Multi-Company",
-                      desc: "Cross-firm competitive comparison contrasting business models, moats, and financial matrices.",
+                      id: "short" as CaseType,
+                      title: "Short Case",
+                      badge: "~2-3 Pages",
+                      desc: "Rapid boardroom crisis drill (20-30 min class). High-intensity operational tension.",
+                    },
+                    {
+                      id: "flash" as CaseType,
+                      title: "Flash Case",
+                      badge: "1-2 Pages",
+                      desc: "Micro-case simulation designed for quick classroom debate and instant decision-making.",
                     },
                   ].map((ct) => (
                     <button
@@ -1544,6 +1610,171 @@ function CreateCaseContent() {
                     {format === "real_signal" && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
                     <span>Real Signal</span>
                   </button>
+                </div>
+              </div>
+
+              {/* Institutional Department, Course & Category Alignment */}
+              <div className="pt-4 border-t border-border space-y-4">
+                <div className="flex items-center gap-2">
+                  <Building className="w-4 h-4 text-accent" />
+                  <span className="text-xs font-bold text-text">Institutional Academic Alignment</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Department */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-text block">
+                      Academic Department
+                    </label>
+                    <select
+                      value={selectedDepartmentId}
+                      onChange={(e) => {
+                        const newDeptId = e.target.value;
+                        setSelectedDepartmentId(newDeptId);
+                        const matchedCourses = coursesList.filter((c) => c.department_id === newDeptId);
+                        if (matchedCourses.length > 0) {
+                          setSelectedCourseId(matchedCourses[0].id);
+                        }
+                      }}
+                      className="w-full p-2.5 rounded-xl border border-border bg-surface text-text text-xs focus:outline-none focus:border-accent"
+                    >
+                      {departmentsList.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} ({d.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Course */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-text block">
+                      Target Course / Program
+                    </label>
+                    <select
+                      value={selectedCourseId}
+                      onChange={(e) => setSelectedCourseId(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-border bg-surface text-text text-xs focus:outline-none focus:border-accent"
+                    >
+                      {(coursesList.filter((c) => !selectedDepartmentId || c.department_id === selectedDepartmentId).length > 0
+                        ? coursesList.filter((c) => !selectedDepartmentId || c.department_id === selectedDepartmentId)
+                        : coursesList
+                      ).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Category */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-semibold text-text block">
+                      Curriculum Category
+                    </label>
+                    <select
+                      value={selectedCategoryId}
+                      onChange={(e) => setSelectedCategoryId(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-border bg-surface text-text text-xs focus:outline-none focus:border-accent"
+                    >
+                      {categoriesList.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Target Length & Page Budget */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="text-[11px] font-semibold text-text block">
+                    Page Budget Target ({pageTarget} Pages / ~{pageTarget === 5 ? "2,250" : "4,500"} words)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setPageTarget(5)}
+                      className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
+                        pageTarget === 5
+                          ? "bg-accent/15 border-accent text-accent"
+                          : "bg-surface border-border text-muted hover:text-text"
+                      }`}
+                    >
+                      <div className="font-bold">5 Pages (~2,250 words)</div>
+                      <div className="text-[10px] opacity-80">Standard institutional teaching case</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPageTarget(10)}
+                      className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
+                        pageTarget === 10
+                          ? "bg-accent/15 border-accent text-accent"
+                          : "bg-surface border-border text-muted hover:text-text"
+                      }`}
+                    >
+                      <div className="font-bold">10 Pages (~4,500 words)</div>
+                      <div className="text-[10px] opacity-80">Comprehensive executive/Ivey-length study</div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Keywords Chips (3 to 8 chips) */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <label className="font-semibold text-text flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5 text-accent" />
+                      <span>Keywords & Indexing Tags (Required: 3 to 8)</span>
+                    </label>
+                    <span className={`font-mono text-[10px] ${keywords.length >= 3 && keywords.length <= 8 ? "text-success font-bold" : "text-danger"}`}>
+                      {keywords.length} of 8 keywords ({keywords.length < 3 ? `Add ${3 - keywords.length} more` : "Valid"})
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-xl border border-border bg-surface min-h-10">
+                    {keywords.map((kw) => (
+                      <span
+                        key={kw}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-soft text-text text-xs border border-border font-medium"
+                      >
+                        <span>{kw}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveKeyword(kw)}
+                          className="text-muted hover:text-danger ml-0.5"
+                          title="Remove keyword"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ))}
+                    {keywords.length < 8 && (
+                      <div className="flex items-center gap-1 flex-1 min-w-[140px]">
+                        <input
+                          type="text"
+                          value={keywordInput}
+                          placeholder={keywords.length < 3 ? "Type tag & hit Enter..." : "Add tag..."}
+                          onChange={(e) => setKeywordInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddKeyword();
+                            }
+                          }}
+                          className="flex-1 bg-transparent border-none text-xs text-text placeholder:text-muted/60 focus:outline-none p-1"
+                        />
+                        {keywordInput.trim() && (
+                          <button
+                            type="button"
+                            onClick={handleAddKeyword}
+                            className="px-2 py-0.5 rounded bg-accent text-accent-text text-[10px] font-bold"
+                          >
+                            Add
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

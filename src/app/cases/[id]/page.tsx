@@ -31,6 +31,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   BookOpen,
+  FileText,
   Table,
   HelpCircle,
   GraduationCap,
@@ -117,6 +118,10 @@ export default function CaseDetailPage({
   const [workflowMessage, setWorkflowMessage] = useState<string | null>(null);
   const [requestChangesModalOpen, setRequestChangesModalOpen] = useState(false);
   const [reviewerCommentInput, setReviewerCommentInput] = useState("");
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [confirmOriginality, setConfirmOriginality] = useState(false);
+  const [confirmFigures, setConfirmFigures] = useState(false);
+  const [submissionNote, setSubmissionNote] = useState("");
 
   // Version history modal state
   const [versionModalOpen, setVersionModalOpen] = useState(false);
@@ -341,17 +346,27 @@ export default function CaseDetailPage({
   // Workflow: Submit for Approval
   const handleSubmitForApproval = async () => {
     if (!caseStudy) return;
+    if (!confirmOriginality || !confirmFigures) {
+      alert("Please confirm both originality and data accuracy to proceed with submission.");
+      return;
+    }
     setIsWorkflowLoading(true);
     try {
       const res = await fetch(`/api/cases/${caseId}/workflow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "submit-approval" }),
+        body: JSON.stringify({
+          action: "submit-approval",
+          confirm_originality: confirmOriginality,
+          confirm_figures: confirmFigures,
+          submission_note: submissionNote.trim(),
+        }),
       });
       const data = await res.json();
       if (data.success && data.caseStudy) {
         setCaseStudy(data.caseStudy);
-        setWorkflowMessage("Case submitted for peer review.");
+        setSubmitModalOpen(false);
+        setWorkflowMessage("Case successfully submitted for institutional peer review.");
         setTimeout(() => setWorkflowMessage(null), 4000);
       } else {
         alert(data.error || "Failed to submit case.");
@@ -1184,8 +1199,16 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
               <Printer className="w-4 h-4" />
             </button>
 
+            {/* Live Word & Page Count Metric in Toolbar */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-border text-xs font-mono text-muted">
+              <FileText className="w-3.5 h-3.5 text-accent" />
+              <span className="font-semibold text-text">{wordMetrics.words} words</span>
+              <span>•</span>
+              <span>~{Math.max(1, Math.round(wordMetrics.words / 450))} pages</span>
+            </div>
+
             {/* Edit / Save controls for faculty/author */}
-            {!isStudent && (
+            {(isAuthor || !isStudent) && (
               isEditing ? (
                 <div className="flex items-center gap-2 pl-2 border-l border-border">
                   <div className="flex items-center gap-1.5 text-[11px] text-muted font-mono">
@@ -1229,8 +1252,8 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
           </div>
         </div>
 
-        {/* WORKFLOW STATUS & ACTION BANNER (FACULTY / ADMIN) */}
-        {!isStudent && (
+        {/* WORKFLOW STATUS & ACTION BANNER (AUTHOR / FACULTY / ADMIN) */}
+        {(isAuthor || !isStudent) && (
           <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
@@ -1277,11 +1300,16 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   <button
                     type="button"
                     disabled={isWorkflowLoading}
-                    onClick={handleSubmitForApproval}
+                    onClick={() => {
+                      setConfirmOriginality(false);
+                      setConfirmFigures(false);
+                      setSubmissionNote("");
+                      setSubmitModalOpen(true);
+                    }}
                     className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs hover:shadow-md transition-all"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Submit for Curriculum Approval</span>
+                    <span>Submit for Institutional Review</span>
                   </button>
                 )}
 
@@ -2942,6 +2970,95 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: CASE SUBMISSION CONFIRMATION */}
+        {submitModalOpen && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-lg rounded-2xl bg-surface border border-border shadow-2xl p-6 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div className="flex items-center gap-2 text-accent">
+                  <Send className="w-5 h-5" />
+                  <h3 className="font-serif font-bold text-base text-text">
+                    Submit Case Study for Review
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSubmitModalOpen(false)}
+                  className="text-muted hover:text-text"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-xs text-muted leading-relaxed">
+                  Submitting will lock this draft and assign it atomically to an active departmental faculty reviewer. Please affirm institutional standards below:
+                </p>
+
+                <div className="space-y-3 p-3.5 rounded-xl border border-border bg-primary-soft/30">
+                  <label className="flex items-start gap-2.5 text-xs text-text cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={confirmOriginality}
+                      onChange={(e) => setConfirmOriginality(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-border text-accent focus:ring-accent"
+                    />
+                    <span className="leading-snug">
+                      <strong className="block text-text font-semibold">Pedagogical Originality:</strong>
+                      I confirm that this case study is original academic work and adheres to institutional plagiarism, AI ethics, and academic integrity policies.
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 text-xs text-text cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={confirmFigures}
+                      onChange={(e) => setConfirmFigures(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-border text-accent focus:ring-accent"
+                    />
+                    <span className="leading-snug">
+                      <strong className="block text-text font-semibold">Data & Numerical Accuracy:</strong>
+                      I confirm that all financial exhibits, operational figures, and referenced corporate calculations have been verified for mathematical consistency.
+                    </span>
+                  </label>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-text block">
+                    Author's Submission Note (Optional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Provide any relevant context, target syllabus units, or note specific revisions addressed for the reviewer..."
+                    value={submissionNote}
+                    onChange={(e) => setSubmissionNote(e.target.value)}
+                    className="w-full p-3 text-xs rounded-xl border border-border bg-surface text-text placeholder:text-muted/60 focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => setSubmitModalOpen(false)}
+                    className="px-4 py-2 rounded-xl border border-border text-muted hover:bg-primary-soft text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isWorkflowLoading || !confirmOriginality || !confirmFigures}
+                    onClick={handleSubmitForApproval}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{isWorkflowLoading ? "Submitting..." : "Submit for Institutional Review"}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

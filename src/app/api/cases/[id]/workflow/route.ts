@@ -8,7 +8,7 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { user, errorResponse } = await authenticateUser(req, ["faculty", "admin"]);
+    const { user, errorResponse } = await authenticateUser(req, ["student", "faculty", "admin"]);
     if (errorResponse || !user) {
       return errorResponse || NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,23 +23,46 @@ export async function POST(
     }
 
     // Submit for peer review / curriculum committee approval
-    if (action === "submit-approval") {
+    if (action === "submit-approval" || action === "submit-review") {
+      if (body.confirm_originality === false || body.confirm_figures === false) {
+        return NextResponse.json(
+          { error: "Submission requires author confirmation of originality and data accuracy." },
+          { status: 400 }
+        );
+      }
+
       const updated = mockStore.submitForApproval(caseId, user.id);
+      let assignedRound = null;
+      try {
+        assignedRound = mockStore.assignReviewer(caseId);
+      } catch (e) {
+        console.warn("Auto reviewer assignment skipped or failed:", e);
+      }
       return NextResponse.json({
         success: true,
         message: "Case submitted for curriculum committee review.",
         caseStudy: updated,
+        round: assignedRound,
       });
     }
 
-    // Approve case (ONLY admin can approve a case. Faculty cannot self-approve or approve.)
+    // Approve case (Admin OR Designated Faculty Reviewer; Author cannot approve own case)
     if (action === "approve") {
-      if (user.role !== "admin") {
+      const isReviewer = user.role === "faculty" && Boolean(user.is_reviewer);
+      if (user.role !== "admin" && !isReviewer) {
         return NextResponse.json(
-          { error: "Forbidden. Only administrators can approve case studies." },
+          { error: "Forbidden. Only designated faculty reviewers and administrators can approve case studies." },
           { status: 403 }
         );
       }
+
+      if (existingCase.author_id === user.id && user.role !== "admin") {
+        return NextResponse.json(
+          { error: "Forbidden. Case authors cannot approve their own submissions." },
+          { status: 403 }
+        );
+      }
+
       const updated = mockStore.approveCase(caseId, user.id, comment);
       return NextResponse.json({
         success: true,
@@ -50,6 +73,14 @@ export async function POST(
 
     // Request revisions / changes
     if (action === "request-changes") {
+      const isReviewer = user.role === "faculty" && Boolean(user.is_reviewer);
+      if (user.role !== "admin" && !isReviewer) {
+        return NextResponse.json(
+          { error: "Forbidden. Only designated reviewers and administrators can request revisions." },
+          { status: 403 }
+        );
+      }
+
       if (!comment || typeof comment !== "string" || !comment.trim()) {
         return NextResponse.json(
           { error: "Reviewer feedback comment is required when requesting revisions." },
@@ -67,6 +98,14 @@ export async function POST(
 
     // Reject case
     if (action === "reject") {
+      const isReviewer = user.role === "faculty" && Boolean(user.is_reviewer);
+      if (user.role !== "admin" && !isReviewer) {
+        return NextResponse.json(
+          { error: "Forbidden. Only designated reviewers and administrators can reject cases." },
+          { status: 403 }
+        );
+      }
+
       if (!comment || typeof comment !== "string" || !comment.trim()) {
         return NextResponse.json(
           { error: "Explanation comment is required when rejecting a case." },

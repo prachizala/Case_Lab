@@ -52,6 +52,11 @@ export async function GET(
     const isCEPack =
       caseStudy.type === "ce_pack" || (content && "case" in content && "questions" in content);
 
+    const dateStr = new Date().toLocaleDateString("en-IN");
+    const watermarkText = user.role === "student"
+      ? `SBS CaseLab - Student Copy - ${user.name || "Student"} - ${dateStr}`
+      : "SBS CaseLab - Faculty Review Copy";
+
     // =========================================================================
     // BRANCH A: CE CASE PACK DOCX EXPORT (Continuous Evaluation Exam Standard)
     // =========================================================================
@@ -61,6 +66,22 @@ export async function GET(
       const isStudentHandout = mode === "student";
 
       const children: (Paragraph | Table)[] = [];
+
+      // Watermark Notice
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: watermarkText.toUpperCase(),
+              size: 16,
+              color: "888888",
+              italics: true,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 120 },
+        })
+      );
 
       // 1. Institutional Header Banner
       children.push(
@@ -600,6 +621,18 @@ export async function GET(
           properties: {},
           children: [
             // Institutional Header
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: watermarkText.toUpperCase(),
+                  size: 16,
+                  color: "888888",
+                  italics: true,
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 120 },
+            }),
             new Paragraph({
               text: COLLEGE_NAME.toUpperCase(),
               heading: HeadingLevel.HEADING_2,

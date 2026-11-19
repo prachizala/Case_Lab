@@ -730,7 +730,20 @@ export default function ReviewQueuePage() {
                             <span>Request Changes</span>
                           </button>
 
-                          {currentUser?.role === "admin" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCase(c);
+                              setActionType("reject");
+                              setActionComment("");
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/30 bg-danger/10 text-danger text-xs font-bold hover:bg-danger/20 transition-all"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Reject Case</span>
+                          </button>
+
+                          {(currentUser?.role === "admin" || (currentUser?.role === "faculty" && currentUser?.is_reviewer)) && (
                             <button
                               type="button"
                               onClick={() => {
@@ -912,10 +925,10 @@ export default function ReviewQueuePage() {
                     disabled={isSubmittingAction}
                     className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold shadow-xs transition-all ${
                       actionType === "request-changes" || actionType === "reject"
-                        ? "bg-rose-600 hover:bg-rose-700 text-white"
+                        ? "bg-danger hover:opacity-90 text-white"
                         : actionType === "publish"
                         ? "bg-primary hover:opacity-90 text-white"
-                        : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        : "bg-success hover:opacity-90 text-white"
                     } ${isSubmittingAction ? "opacity-60 cursor-not-allowed" : ""}`}
                   >
                     {isSubmittingAction ? (
