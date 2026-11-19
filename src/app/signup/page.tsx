@@ -485,7 +485,7 @@ function SignUpForm() {
                       >
                         {availableBatches.map((b) => (
                           <option key={b.id} value={b.id}>
-                            Batch {b.label} (Access through {b.end_year + 1})
+                            {b.label.startsWith("Batch") ? b.label : `Batch ${b.label}`}
                           </option>
                         ))}
                       </select>
