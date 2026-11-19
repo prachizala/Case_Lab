@@ -76,8 +76,8 @@ export function NotificationDropdown({ currentUser }: NotificationDropdownProps)
         setNotifications(list);
         cachedNotifications = { userId: currentUser.id, data: list, timestamp: Date.now() };
       }
-    } catch (err) {
-      console.error("Failed to load notifications:", err);
+    } catch {
+      // Gracefully ignore transient background fetch errors to prevent dev overlay interruptions
     } finally {
       if (!isBackground) setLoading(false);
     }

@@ -875,8 +875,12 @@ function CreateCaseContent() {
           console.log("CE Case Pack generation canceled by user.");
           return;
         }
-        console.error("CE Case Pack generation failed:", err);
-        const msg = err instanceof Error ? err.message : "Failed to generate CE Case Pack.";
+        const isNetworkErr = err instanceof TypeError && (err.message.includes("fetch") || err.message.includes("network"));
+        const msg = isNetworkErr
+          ? "Unable to reach the server. Please verify the local CaseLab server is running on port 3000 and try again."
+          : err instanceof Error
+          ? err.message
+          : "Failed to generate CE Case Pack.";
         setGenerationError({
           message: msg,
           retryable: true,
@@ -986,8 +990,12 @@ function CreateCaseContent() {
         console.log("Generation canceled by user.");
         return;
       }
-      console.error("Generation failed:", err);
-      const msg = err instanceof Error ? err.message : "Failed to generate case study.";
+      const isNetworkErr = err instanceof TypeError && (err.message.includes("fetch") || err.message.includes("network"));
+      const msg = isNetworkErr
+        ? "Unable to reach the server. Please verify the local CaseLab server is running on port 3000 and try again."
+        : err instanceof Error
+        ? err.message
+        : "Failed to generate case study.";
       setGenerationError({
         message: msg,
         retryable: true,
@@ -1111,90 +1119,66 @@ function CreateCaseContent() {
   return (
     <AppShell>
       <div className="space-y-6 md:space-y-8">
-        {/* Page Title & Breadcrumb */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
+        {/* Page Title & Compact Usage Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border pb-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-accent uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted uppercase tracking-wider mb-0.5">
               <span>{COLLEGE_SHORT} Curriculum Studio</span>
               <span>•</span>
               <span>{AI_ENGINE_LABEL}</span>
             </div>
-            <h1 className="font-serif text-3xl font-bold text-text tracking-tight">
+            <h1 className="font-serif text-2xl md:text-3xl font-bold text-text tracking-tight">
               Generate Case Studio
             </h1>
-            <p className="text-sm text-muted mt-1">
-              Author elite business teaching cases, multi-company research benchmarks, and synchronized AACSB/OBE teaching notes.
+            <p className="text-xs text-muted mt-0.5">
+              Author curriculum-aligned business cases and synchronized classroom teaching notes.
             </p>
           </div>
 
-          {/* Preset Dev Testing Quick Switch (Guarded by Demo Persona Switcher) */}
-          {ENABLE_DEMO_PERSONA_SWITCHER && (
-            <div className="flex items-center gap-1.5 bg-surface px-2.5 py-1.5 rounded-xl border border-border/70 text-xs shadow-2xs">
-              <span className="text-[10px] font-mono font-bold text-muted uppercase tracking-wider">
-                Dev Hook:
-              </span>
-              <button
-                type="button"
-                onClick={() => setSimulateBadJson(!simulateBadJson)}
-                className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-colors ${
-                  simulateBadJson
-                    ? "bg-danger text-accent-text"
-                    : "bg-surface hover:bg-muted/10 text-muted hover:text-text border border-border/60"
-                }`}
-                title="Test: AI returns bad JSON -> UI shows error & retry button"
-              >
-                {simulateBadJson ? "Bad JSON: ON" : "Simulate Bad JSON"}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* USAGE COUNTER PILL & STATUS */}
-        {currentUser && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-surface border border-border shadow-xs">
-            <div className="flex items-center flex-wrap gap-2.5">
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                  currentUser.user_type === "sbs_member"
-                    ? "bg-accent/15 text-accent border border-accent/20"
-                    : "bg-primary/10 text-primary border border-primary/20"
-                }`}
-              >
-                {currentUser.user_type === "sbs_member" ? "SBS Member Tier" : "External Guest Tier"}
-              </span>
-
-              <div className="flex items-center gap-1.5 text-xs text-text">
-                <span className="text-muted">Monthly Generations:</span>
-                <span className="font-mono font-bold">
+          <div className="flex items-center flex-wrap gap-2.5 shrink-0">
+            {currentUser && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface border border-border text-xs shadow-2xs">
+                <span className="text-muted">This Month:</span>
+                <span className="font-mono font-bold text-text">
                   {currentUser.free_cases_used_this_month ?? currentUser.monthly_generations_used ?? 0}
                   {" / "}
                   {currentUser.monthly_generation_limit ?? (currentUser.user_type === "sbs_member" ? 30 : 3)}
                 </span>
-                <span className="text-[11px] text-muted hidden md:inline">
-                  (Resets 1st of each month, 00:00 Asia/Kolkata)
+                <span className="text-[11px] text-muted hidden sm:inline">
+                  (Resets 1st)
                 </span>
+                {!currentUser.email_verified_at && (
+                  <button
+                    type="button"
+                    onClick={() => setOtpModalOpen(true)}
+                    className="ml-1 text-warning hover:underline font-semibold text-[11px] flex items-center gap-1"
+                  >
+                    <ShieldAlert className="w-3 h-3 text-warning" />
+                    <span>Verify</span>
+                  </button>
+                )}
               </div>
-            </div>
+            )}
 
-            <div className="flex items-center gap-2">
-              {!currentUser.email_verified_at ? (
+            {/* Preset Dev Testing Quick Switch (Guarded by Demo Persona Switcher) */}
+            {ENABLE_DEMO_PERSONA_SWITCHER && (
+              <div className="flex items-center gap-1.5 bg-surface px-2 py-1 rounded-xl border border-border/70 text-xs shadow-2xs">
                 <button
                   type="button"
-                  onClick={() => setOtpModalOpen(true)}
-                  className="px-3 py-1.5 rounded-xl bg-warning/20 border border-warning/40 text-warning-text hover:bg-warning/30 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  onClick={() => setSimulateBadJson(!simulateBadJson)}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-colors ${
+                    simulateBadJson
+                      ? "bg-danger text-accent-text"
+                      : "bg-surface hover:bg-muted/10 text-muted hover:text-text border border-border/60"
+                  }`}
+                  title="Test: AI returns bad JSON -> UI shows error & retry button"
                 >
-                  <ShieldAlert className="w-3.5 h-3.5 text-warning" />
-                  <span>Verify Email to Unlock</span>
+                  {simulateBadJson ? "Bad JSON: ON" : "Simulate Bad JSON"}
                 </button>
-              ) : (
-                <span className="px-2.5 py-1 rounded-xl bg-success/15 border border-success/30 text-success text-xs font-medium flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-                  <span>Verified</span>
-                </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* UNVERIFIED EMAIL PROMINENT BANNER */}
         {currentUser && !currentUser.email_verified_at && (
@@ -1238,16 +1222,16 @@ function CreateCaseContent() {
                     1
                   </span>
                   <h3 className="font-serif text-sm font-bold text-text">
-                    Case Study Architecture & Type
+                    Case Format & Department
                   </h3>
                 </div>
-                <span className="text-xs text-accent font-semibold">Step 1 of 5</span>
+                <span className="text-xs text-muted font-medium">Step 1 of 5</span>
               </div>
 
               {/* Case Type 4-Way Selector */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-text block">
-                  Select Pedagogical Model & Length
+                  Choose Case Format
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                   {[
@@ -1282,21 +1266,25 @@ function CreateCaseContent() {
                       onClick={() => setType(ct.id)}
                       className={`p-3.5 rounded-xl border text-left transition-all relative ${
                         type === ct.id
-                          ? "bg-primary text-on-primary border-primary shadow-md ring-2 ring-accent/30"
-                          : "bg-surface border-border text-text hover:border-accent"
+                          ? "bg-primary text-white border-primary shadow-md"
+                          : "bg-surface border-border text-text hover:border-primary/50"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-xs">{ct.title}</span>
+                      <div className="flex items-center justify-between mb-1.5 gap-1.5">
+                        <span className={`font-bold text-xs ${type === ct.id ? "text-white" : "text-text"}`}>
+                          {ct.title}
+                        </span>
                         <span
-                          className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
-                            type === ct.id ? "bg-accent text-accent-text" : "bg-primary-soft text-muted"
+                          className={`text-[11px] px-2 py-0.5 rounded font-medium border ${
+                            type === ct.id
+                              ? "bg-white/15 text-white border-white/40"
+                              : "bg-primary-soft/40 text-muted border-border/80"
                           }`}
                         >
                           {ct.badge}
                         </span>
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${type === ct.id ? "text-on-primary-muted" : "text-muted"}`}>
+                      <p className={`text-[11px] leading-relaxed ${type === ct.id ? "text-white/80" : "text-muted"}`}>
                         {ct.desc}
                       </p>
                     </button>
@@ -1306,11 +1294,11 @@ function CreateCaseContent() {
 
               {/* CE Case Pack Department & Syllabus Configuration */}
               {type === "ce_pack" && (
-                <div className="mt-3 p-4 rounded-xl border border-accent/30 bg-accent/5 space-y-4">
+                <div className="mt-3 p-4 rounded-xl border border-primary/20 bg-primary-soft/30 dark:bg-primary-soft/10 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
                     <div>
-                      <span className="text-xs font-bold text-accent uppercase font-mono tracking-wider block">
-                        Department Profile & Syllabus Alignment
+                      <span className="text-xs font-bold text-text block">
+                        Department & Syllabus Alignment
                       </span>
                       <p className="text-xs text-muted">
                         Select department to load syllabus units, frameworks, and pedagogical rules.
@@ -1326,8 +1314,8 @@ function CreateCaseContent() {
                           onClick={() => handleDepartmentChange(d)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
                             department === d
-                              ? "bg-accent text-accent-text shadow-sm"
-                              : "text-muted hover:text-text"
+                              ? "bg-primary text-white shadow-xs"
+                              : "text-muted hover:text-text font-medium"
                           }`}
                         >
                           {d.toUpperCase()}
@@ -1521,7 +1509,7 @@ function CreateCaseContent() {
               {/* Factual Basis Toggle: Hypothetical vs Real Signal */}
               <div className="pt-2 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                  <span className="text-xs font-semibold text-text block">Factual Grounding Basis</span>
+                  <span className="text-xs font-semibold text-text block">Case Data Source</span>
                   <span className="text-[11px] text-muted">
                     {format === "real_signal"
                       ? "Grounded in live macro signals with mandatory fact-verification banner."
@@ -1532,24 +1520,26 @@ function CreateCaseContent() {
                   <button
                     type="button"
                     onClick={() => setFormat("hypothetical")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                       format === "hypothetical"
-                        ? "bg-surface text-text shadow-sm"
-                        : "text-muted hover:text-text"
+                        ? "bg-primary text-white shadow-xs"
+                        : "text-muted hover:text-text font-medium"
                     }`}
                   >
-                    Hypothetical
+                    {format === "hypothetical" && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
+                    <span>Hypothetical</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormat("real_signal")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                       format === "real_signal"
-                        ? "bg-surface text-text shadow-sm"
-                        : "text-muted hover:text-text"
+                        ? "bg-primary text-white shadow-xs"
+                        : "text-muted hover:text-text font-medium"
                     }`}
                   >
-                    Real Signal
+                    {format === "real_signal" && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
+                    <span>Real Signal</span>
                   </button>
                 </div>
               </div>
@@ -1566,7 +1556,7 @@ function CreateCaseContent() {
                     Domain, Difficulty & Primary Entity
                   </h3>
                 </div>
-                <span className="text-xs text-accent font-semibold">Step 2 of 5</span>
+                <span className="text-xs text-muted font-medium">Step 2 of 5</span>
               </div>
 
               {/* Domain Chips */}
@@ -1903,7 +1893,7 @@ function CreateCaseContent() {
                     Source Material & Macro Signals
                   </h3>
                 </div>
-                <span className="text-xs text-accent font-semibold">Step 3 of 5</span>
+                <span className="text-xs text-muted font-medium">Step 3 of 5</span>
               </div>
 
               {/* 3 Source Tabs */}
@@ -2052,7 +2042,7 @@ function CreateCaseContent() {
                     Tone, Exhibits & Bloom&apos;s Level
                   </h3>
                 </div>
-                <span className="text-xs text-accent font-semibold">Step 4 of 5</span>
+                <span className="text-xs text-muted font-medium">Step 4 of 5</span>
               </div>
 
               {/* Tone Selection */}

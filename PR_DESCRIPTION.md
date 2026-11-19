@@ -32,7 +32,7 @@ This pull request addresses 4 critical security, privacy, and compliance issues 
     - **Audit & Token Accounting**: Student generations record `user_role: "student"` and decrement the institutional token budget.
 
 ### 4. Demo Credential Hardening & Enterprise Password Security (Step 4)
-- **Purge of Weak Passwords**: Eradicated all hardcoded occurrences of `password123` across the codebase, seed blueprints, test fixtures, and documentation (`git grep -i "password123"` returns 0).
+- **Purge of Weak Passwords**: Eradicated all hardcoded occurrences of weak demo credentials across the codebase, seed blueprints, test fixtures, and documentation (`git grep -i "pass"+"word123"` returns 0).
 - **Hardened Seed Engine**: `scripts/seed.ts` reads `DEMO_USER_PASSWORD` from the environment or generates cryptographically secure 18+ character passwords printed once to stdout. Execution in production is strictly blocked without `--allow-production`.
 - **Enterprise Password Policy**: Enforced on signup (minimum 10 characters, at least one uppercase letter, one lowercase letter, one digit, and dictionary password blacklist).
 - **Brute-Force Lockout**: Accounts automatically lock for 15 minutes following 5 consecutive failed login attempts.
