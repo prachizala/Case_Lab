@@ -22,6 +22,7 @@
     "test:auth": "tsx scripts/test-auth-lifecycle.ts",
     "test:workflow": "tsx scripts/test-create-workflow.ts",
     "test:repository": "tsx scripts/test-reviewer-rotation-repository.ts",
+    "test:admin": "tsx scripts/test-admin-repository-management.ts",
     "test:secret-scan": "tsx scripts/secret-scan.ts"
   },
   "dependencies": {

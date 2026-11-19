@@ -41,18 +41,79 @@ import {
   Sparkles,
   Star,
   ThumbsUp,
+  BarChart3,
+  FileText,
+  Clock,
+  BookOpen,
+  Send,
+  ArrowRight,
 } from "lucide-react";
 
 export default function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [facultyTypes, setFacultyTypes] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [cases, setCases] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [reviewRounds, setReviewRounds] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [repositoryItems, setRepositoryItems] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [downloadLogs, setDownloadLogs] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [reviewerLoads, setReviewerLoads] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [usersByDepartment, setUsersByDepartment] = useState<Record<string, any>>({});
+  const [usersByCourse, setUsersByCourse] = useState<Record<string, number>>({});
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Active Tab: 'users' | 'departments' | 'courses' | 'audit_logs' | 'graduation' | 'settings' | 'casepack_quality'
-  const [activeTab, setActiveTab] = useState<"users" | "departments" | "courses" | "audit_logs" | "graduation" | "settings" | "casepack_quality">("users");
+  // Active Tab
+  const [activeTab, setActiveTab] = useState<
+    | "overview"
+    | "faculty"
+    | "students"
+    | "submissions"
+    | "repository"
+    | "users"
+    | "departments"
+    | "courses"
+    | "audit_logs"
+    | "graduation"
+    | "settings"
+    | "casepack_quality"
+  >("overview");
+
+  // Faculty tab filters
+  const [facultyDeptFilter, setFacultyDeptFilter] = useState<string>("all");
+  const [facultyCourseFilter, setFacultyCourseFilter] = useState<string>("all");
+  const [facultySearch, setFacultySearch] = useState<string>("");
+
+  // Student tab filters & state
+  const [studentCourseFilter, setStudentCourseFilter] = useState<string>("all");
+  const [studentBatchFilter, setStudentBatchFilter] = useState<string>("all");
+  const [studentStatusFilter, setStudentStatusFilter] = useState<string>("all");
+  const [studentSearch, setStudentSearch] = useState<string>("");
+  const [bulkBatchId, setBulkBatchId] = useState<string>("");
+
+  // Submissions tracking filters & modal
+  const [subStatusFilter, setSubStatusFilter] = useState<string>("all");
+  const [subDeptFilter, setSubDeptFilter] = useState<string>("all");
+  const [subReviewerFilter, setSubReviewerFilter] = useState<string>("all");
+  const [subSearch, setSubSearch] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [reassignModalCase, setReassignModalCase] = useState<any | null>(null);
+  const [selectedNewReviewerId, setSelectedNewReviewerId] = useState<string>("");
+
+  // Custom date picker for student renewal
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [customExpiryModalUser, setCustomExpiryModalUser] = useState<any | null>(null);
+  const [customExpiryDate, setCustomExpiryDate] = useState<string>("");
 
   // CE Case Pack Quality State
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,6 +227,16 @@ export default function AdminPage() {
       setProfiles(data.profiles || []);
       setDepartments(data.departments || []);
       setCourses(data.courses || []);
+      setBatches(data.batches || []);
+      setFacultyTypes(data.facultyTypes || []);
+      setCategories(data.categories || []);
+      setCases(data.cases || []);
+      setReviewRounds(data.reviewRounds || []);
+      setRepositoryItems(data.repositoryItems || []);
+      setDownloadLogs(data.downloadLogs || []);
+      setReviewerLoads(data.reviewerLoads || []);
+      setUsersByDepartment(data.usersByDepartment || {});
+      setUsersByCourse(data.usersByCourse || {});
       setStats(data.stats || {});
       if (data.platformSettings) {
         setPlatformSettings(data.platformSettings);
@@ -647,6 +718,184 @@ export default function AdminPage() {
     }
   };
 
+  // Toggle Faculty Reviewer Status
+  const handleToggleFacultyReviewer = async (userId: string, currentIsReviewer: boolean) => {
+    setUpdatingUserId(userId);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle-reviewer",
+          userId,
+          isReviewer: !currentIsReviewer,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to update reviewer designation.");
+        return;
+      }
+      triggerNotification(!currentIsReviewer ? "Designated as Faculty Member and Reviewer." : "Reviewer designation removed.");
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error updating reviewer status");
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  // Reassign Reviewer Handler
+  const handleReassignReviewer = async (caseId: string, newReviewerId: string) => {
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reassign-reviewer",
+          caseId,
+          newReviewerId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to reassign reviewer.");
+        return;
+      }
+      triggerNotification("Reviewer successfully reassigned.");
+      setReassignModalCase(null);
+      setSelectedNewReviewerId("");
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error reassigning reviewer");
+    }
+  };
+
+  // Student Access Renewal
+  const handleRenewStudentAccess = async (userId: string, extensionYears: number = 1, customDate?: string) => {
+    setUpdatingUserId(userId);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "renew-student-access",
+          userId,
+          extensionYears,
+          customEndDate: customDate,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to renew student access.");
+        return;
+      }
+      triggerNotification("Student access successfully renewed.");
+      setCustomExpiryModalUser(null);
+      setCustomExpiryDate("");
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error renewing student access");
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  // Bulk Renew Cohort by Batch
+  const handleBulkRenewCohort = async (batchId: string) => {
+    if (!batchId) return;
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "bulk-renew-batch",
+          batchId,
+          extensionYears: 1,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed bulk renewal");
+      triggerNotification(`Successfully extended access by 1 year for ${data.affectedCount} student(s).`);
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error during bulk renewal");
+    }
+  };
+
+  // Bulk Deactivate Cohort by Batch
+  const handleBulkDeactivateCohort = async (batchId: string) => {
+    if (!batchId) return;
+    if (!window.confirm("Are you sure you want to deactivate all student accounts in this batch?")) return;
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "bulk-deactivate-batch",
+          batchId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed bulk deactivation");
+      triggerNotification(`Successfully deactivated ${data.affectedCount} student account(s).`);
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error during bulk deactivation");
+    }
+  };
+
+  // Toggle Account Active / Inactive
+  const handleSetUserStatus = async (userId: string, targetStatus: "active" | "inactive") => {
+    setUpdatingUserId(userId);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set-user-status",
+          userId,
+          status: targetStatus,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to update account status.");
+        return;
+      }
+      triggerNotification(`User account set to ${targetStatus}.`);
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error updating account status");
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  // Moderate Repository Item (Publish / Unpublish)
+  const handleModerateRepoItem = async (itemId: string, currentIsPublished: boolean) => {
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "moderate-repository-item",
+          itemId,
+          isPublished: !currentIsPublished,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Failed to update publication status.");
+        return;
+      }
+      triggerNotification(!currentIsPublished ? "Case published to repository catalog." : "Case unpublished from repository catalog.");
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error updating publication status");
+    }
+  };
+
   const filteredProfiles = profiles.filter((p) => {
     if (roleFilter !== "all" && p.role !== roleFilter) return false;
     if (userSearch.trim()) {
@@ -696,136 +945,1008 @@ export default function AdminPage() {
         )}
 
         {/* STATS OVERVIEW CARDS */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div className="p-4 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Total Users</span>
-            <p className="font-serif text-2xl font-bold text-text mt-1">
-              {stats.totalUsers || profiles.length}
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Faculty</span>
-            <p className="font-serif text-2xl font-bold text-info mt-1">
-              {stats.facultyCount || profiles.filter((p) => p.role === "faculty").length}
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl border border-border bg-surface shadow-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
             <span className="text-[10px] uppercase font-bold text-muted">Students</span>
             <p className="font-serif text-2xl font-bold text-success mt-1">
               {stats.studentCount || profiles.filter((p) => p.role === "student").length}
             </p>
           </div>
 
-          <div className="p-4 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Pending Approvals</span>
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
+            <span className="text-[10px] uppercase font-bold text-muted">Faculty</span>
+            <p className="font-serif text-2xl font-bold text-info mt-1">
+              {stats.facultyCount || profiles.filter((p) => p.role === "faculty").length}
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
+            <span className="text-[10px] uppercase font-bold text-muted">Reviewers</span>
+            <p className="font-serif text-2xl font-bold text-accent mt-1">
+              {stats.reviewersCount || profiles.filter((p) => p.role === "faculty" && p.is_reviewer).length}
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
+            <span className="text-[10px] uppercase font-bold text-muted">In Review</span>
+            <p className="font-serif text-2xl font-bold text-primary dark:text-text mt-1">
+              {stats.pendingSubmissionsCount || cases.filter((c) => ["submitted", "in_review", "changes_requested"].includes(c.status)).length}
+            </p>
+          </div>
+
+          <div className={`p-3.5 rounded-xl border shadow-sm ${stats.overdueReviewsCount && stats.overdueReviewsCount > 0 ? "border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400" : "border-border bg-surface text-text"}`}>
+            <span className="text-[10px] uppercase font-bold opacity-80">Overdue (&gt;3d)</span>
+            <p className="font-serif text-2xl font-bold mt-1">
+              {stats.overdueReviewsCount || 0}
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
+            <span className="text-[10px] uppercase font-bold text-muted">Repository</span>
+            <p className="font-serif text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+              {stats.repositoryItemsCount || repositoryItems.filter((i) => i.is_published).length}
+            </p>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
+            <span className="text-[10px] uppercase font-bold text-muted">Pending Reg.</span>
             <p className="font-serif text-2xl font-bold text-warning mt-1">
               {stats.pendingApprovalCount || profiles.filter((p) => !p.is_approved).length}
             </p>
           </div>
 
-          <div className="p-4 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Departments</span>
-            <p className="font-serif text-2xl font-bold text-primary dark:text-text mt-1">
-              {departments.length}
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Courses</span>
-            <p className="font-serif text-2xl font-bold text-primary dark:text-text mt-1">
-              {courses.length}
+          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
+            <span className="text-[10px] uppercase font-bold text-muted">Total Users</span>
+            <p className="font-serif text-2xl font-bold text-text mt-1">
+              {stats.totalUsers || profiles.length}
             </p>
           </div>
         </div>
 
         {/* TABS NAVIGATION */}
-        <div className="flex border-b border-border gap-2">
+        <div className="flex border-b border-border gap-1 overflow-x-auto no-scrollbar py-1">
           <button
-            onClick={() => setActiveTab("users")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
-              activeTab === "users"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+            onClick={() => setActiveTab("overview")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === "overview"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>User Directory & Role Approvals</span>
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Overview &amp; Telemetry</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("faculty")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === "faculty"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
+            }`}
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Faculty &amp; Reviewers ({profiles.filter((p) => p.role === "faculty").length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("students")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === "students"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Student Cohorts ({profiles.filter((p) => p.role === "student").length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("submissions")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === "submissions"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Submissions &amp; Workload ({cases.filter((c) => ["submitted", "in_review", "changes_requested"].includes(c.status)).length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("repository")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === "repository"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Repository Moderation ({repositoryItems.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+              activeTab === "users"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>All Users &amp; Approvals</span>
           </button>
 
           <button
             onClick={() => setActiveTab("departments")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
               activeTab === "departments"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <Building className="w-4 h-4" />
+            <Building className="w-3.5 h-3.5" />
             <span>Departments ({departments.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab("courses")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
               activeTab === "courses"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <GraduationCap className="w-4 h-4" />
-            <span>Courses & Semesters ({courses.length})</span>
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Courses ({courses.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab("audit_logs")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
               activeTab === "audit_logs"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <History className="w-4 h-4" />
-            <span>Audit & Compliance Ledger</span>
+            <History className="w-3.5 h-3.5" />
+            <span>Audit Ledger</span>
           </button>
 
           <button
             onClick={() => setActiveTab("graduation")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
               activeTab === "graduation"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <Award className="w-4 h-4" />
-            <span>Cohort Graduation Runner</span>
+            <Award className="w-3.5 h-3.5" />
+            <span>Graduation</span>
           </button>
 
           <button
             onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
               activeTab === "settings"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <Sliders className="w-4 h-4" />
-            <span>Usage Limits & Domains</span>
+            <Sliders className="w-3.5 h-3.5" />
+            <span>Settings</span>
           </button>
 
           <button
             onClick={() => setActiveTab("casepack_quality")}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
               activeTab === "casepack_quality"
-                ? "border-accent text-accent font-bold"
-                : "border-transparent text-muted hover:text-text"
+                ? "bg-accent text-white shadow-sm font-bold"
+                : "text-muted hover:text-text hover:bg-surface"
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            <span>CE Case Pack Quality</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>CE Quality</span>
           </button>
         </div>
+
+        {/* TAB 0: OVERVIEW & TELEMETRY */}
+        {activeTab === "overview" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted">User Base Composition</span>
+                  <Users className="w-4 h-4 text-accent" />
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Active Authorized Users:</span>
+                    <span className="font-bold text-success">{stats.activeUsersCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Pending Admin Approval:</span>
+                    <span className="font-bold text-warning">{stats.pendingApprovalCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Expired Alumni Accounts:</span>
+                    <span className="font-bold text-red-500">{stats.expiredUsersCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-muted">Inactive / Suspended:</span>
+                    <span className="font-bold text-muted">{stats.inactiveUsersCount || 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted">Case Study Pipeline</span>
+                  <FileText className="w-4 h-4 text-info" />
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Published to Repository:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.repositoryItemsCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">In Active Peer Review:</span>
+                    <span className="font-bold text-primary dark:text-text">{stats.pendingSubmissionsCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Total Approved Cases:</span>
+                    <span className="font-bold text-success">{stats.approvedCasesCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-muted">Rejected / Archived:</span>
+                    <span className="font-bold text-muted">{stats.rejectedCasesCount || 0}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted">Reviewer Health</span>
+                  <Clock className="w-4 h-4 text-accent" />
+                </div>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Designated Reviewers:</span>
+                    <span className="font-bold text-accent">{stats.reviewersCount || 0}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Overdue Reviews (&gt;3d):</span>
+                    <span className={`font-bold ${stats.overdueReviewsCount && stats.overdueReviewsCount > 0 ? "text-red-500 font-extrabold" : "text-muted"}`}>
+                      {stats.overdueReviewsCount || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-border/50">
+                    <span className="text-muted">Avg Active Load:</span>
+                    <span className="font-bold text-text">
+                      {reviewerLoads.length > 0
+                        ? (reviewerLoads.reduce((a, b) => a + (b.assignedCount || 0), 0) / reviewerLoads.length).toFixed(1)
+                        : "0.0"} / reviewer
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span className="text-muted">Rotation Mode:</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Atomic Round-Robin</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Department Breakdown & Reviewer Loads */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border">
+                  <h3 className="font-serif font-bold text-sm text-text">Departmental User Distribution</h3>
+                  <span className="text-[11px] text-muted">{departments.length} Academic Departments</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-border text-muted uppercase tracking-wider font-bold text-[10px]">
+                        <th className="py-2 px-2">Department</th>
+                        <th className="py-2 px-2 text-center">Faculty</th>
+                        <th className="py-2 px-2 text-center">Students</th>
+                        <th className="py-2 px-2 text-right">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60">
+                      {departments.map((d) => {
+                        const deptKey = d.code || d.name;
+                        const record = usersByDepartment[deptKey] || { faculty: 0, students: 0, total: 0 };
+                        return (
+                          <tr key={d.id} className="hover:bg-primary-soft/10">
+                            <td className="py-2.5 px-2">
+                              <span className="font-bold text-text block">{d.name}</span>
+                              <span className="text-muted font-mono text-[10px]">{d.code}</span>
+                            </td>
+                            <td className="py-2.5 px-2 text-center font-semibold text-info">{record.faculty}</td>
+                            <td className="py-2.5 px-2 text-center font-semibold text-success">{record.students}</td>
+                            <td className="py-2.5 px-2 text-right font-bold text-text">{record.total}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-border bg-surface shadow-sm space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-border">
+                  <h3 className="font-serif font-bold text-sm text-text">Reviewer Rotation &amp; Load Balancing</h3>
+                  <span className="text-[11px] text-muted">{reviewerLoads.length} Active Reviewers</span>
+                </div>
+                {reviewerLoads.length === 0 ? (
+                  <p className="text-xs text-muted py-4 text-center">No faculty members currently designated as reviewers.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-border text-muted uppercase tracking-wider font-bold text-[10px]">
+                          <th className="py-2 px-2">Reviewer</th>
+                          <th className="py-2 px-2">Department</th>
+                          <th className="py-2 px-2 text-center">Active Load</th>
+                          <th className="py-2 px-2 text-right">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60">
+                        {reviewerLoads.map((rev) => (
+                          <tr key={rev.reviewerId} className="hover:bg-primary-soft/10">
+                            <td className="py-2.5 px-2">
+                              <span className="font-bold text-text block">{rev.name}</span>
+                              <span className="text-muted font-mono text-[10px]">{rev.email}</span>
+                            </td>
+                            <td className="py-2.5 px-2 text-muted">{rev.departmentName}</td>
+                            <td className="py-2.5 px-2 text-center font-bold">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary-soft text-text">
+                                {rev.assignedCount} active
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-2 text-right">
+                              {rev.overdueCount > 0 ? (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-500/10 text-red-600 border border-red-500/20">
+                                  {rev.overdueCount} Overdue
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                  Optimal
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: FACULTY & REVIEWERS */}
+        {activeTab === "faculty" && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative flex-1 w-full">
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-muted" />
+                <input
+                  type="text"
+                  placeholder="Filter faculty by name, employee ID, or email..."
+                  value={facultySearch}
+                  onChange={(e) => setFacultySearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl bg-primary-soft/30 border border-border text-text placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={facultyDeptFilter}
+                  onChange={(e) => setFacultyDeptFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Departments</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
+                  ))}
+                </select>
+
+                <select
+                  value={facultyCourseFilter}
+                  onChange={(e) => setFacultyCourseFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Courses</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>{c.code} - {c.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface shadow-sm">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-primary-soft/40 border-b border-border text-muted font-bold uppercase tracking-wider text-[10px]">
+                    <th className="p-3.5">Faculty Identity</th>
+                    <th className="p-3.5">Department &amp; Course</th>
+                    <th className="p-3.5">Faculty Type</th>
+                    <th className="p-3.5">Reviewer Designation</th>
+                    <th className="p-3.5">Account Access</th>
+                    <th className="p-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {profiles
+                    .filter((p) => p.role === "faculty")
+                    .filter((p) => {
+                      if (facultyDeptFilter !== "all" && p.department_id !== facultyDeptFilter) return false;
+                      if (facultyCourseFilter !== "all" && p.course_id !== facultyCourseFilter) return false;
+                      if (facultySearch.trim()) {
+                        const q = facultySearch.toLowerCase();
+                        return (
+                          p.name.toLowerCase().includes(q) ||
+                          p.email.toLowerCase().includes(q) ||
+                          (p.enrollment_no && p.enrollment_no.toLowerCase().includes(q))
+                        );
+                      }
+                      return true;
+                    })
+                    .map((p) => {
+                      const dept = departments.find((d) => d.id === p.department_id);
+                      const course = courses.find((c) => c.id === p.course_id);
+                      const fType = facultyTypes.find((ft) => ft.id === p.faculty_type_id);
+                      const isBusy = updatingUserId === p.id;
+
+                      return (
+                        <tr key={p.id} className="hover:bg-primary-soft/20 transition-colors">
+                          <td className="p-3.5">
+                            <span className="font-bold text-text block">{p.name}</span>
+                            <span className="text-muted font-mono text-[11px] block">{p.email}</span>
+                            {p.personal_email && (
+                              <span className="text-muted text-[10px] block">Personal: {p.personal_email}</span>
+                            )}
+                            {p.enrollment_no && (
+                              <span className="text-muted text-[10px] block">Emp ID: {p.enrollment_no}</span>
+                            )}
+                          </td>
+                          <td className="p-3.5">
+                            <span className="font-semibold text-text block">{dept?.name || "General"}</span>
+                            <span className="text-muted text-[11px]">{course?.code || "All"}</span>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-soft text-text">
+                              {fType?.name || "Full-time"}
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            {p.is_reviewer ? (
+                              <div className="space-y-1">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-accent/15 text-accent border border-accent/30">
+                                  <ShieldCheck className="w-3 h-3 text-accent" />
+                                  <span>Faculty Member and Reviewer</span>
+                                </span>
+                                {p.reviewer_since && (
+                                  <span className="text-[10px] text-muted block">Since: {new Date(p.reviewer_since).toLocaleDateString()}</span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted text-[11px]">Faculty Member</span>
+                            )}
+                          </td>
+                          <td className="p-3.5">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                p.access_status === "inactive"
+                                  ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                                  : "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                              }`}
+                            >
+                              {p.access_status || (p.is_approved ? "active" : "pending")}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-right space-x-2">
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              onClick={() => handleToggleFacultyReviewer(p.id, Boolean(p.is_reviewer))}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                                p.is_reviewer
+                                  ? "border border-border text-muted hover:text-red-500 hover:border-red-500/40"
+                                  : "bg-accent text-white hover:bg-accent-hover shadow-sm"
+                              }`}
+                            >
+                              {p.is_reviewer ? "Remove Reviewer" : "Designate Reviewer"}
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              onClick={() => handleSetUserStatus(p.id, p.access_status === "inactive" ? "active" : "inactive")}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${
+                                p.access_status === "inactive"
+                                  ? "border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
+                                  : "border-border text-muted hover:text-text hover:bg-surface"
+                              }`}
+                            >
+                              {p.access_status === "inactive" ? "Activate" : "Deactivate"}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: STUDENT COHORTS */}
+        {activeTab === "students" && (
+          <div className="space-y-4">
+            {/* Bulk Cohort Actions Header */}
+            <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-accent" />
+                <div>
+                  <h4 className="font-serif font-bold text-xs text-text">Batch Cohort Actions</h4>
+                  <p className="text-[11px] text-muted">Bulk extend access (+1 year) or deactivate accounts by graduation batch</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <select
+                  value={bulkBatchId}
+                  onChange={(e) => setBulkBatchId(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-primary-soft/30 border border-border text-text focus:outline-none"
+                >
+                  <option value="">Select Batch Cohort...</option>
+                  {batches.map((b) => (
+                    <option key={b.id} value={b.id}>Batch {b.label} (Ends {b.end_year})</option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  disabled={!bulkBatchId}
+                  onClick={() => handleBulkRenewCohort(bulkBatchId)}
+                  className="px-3 py-1.5 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                >
+                  Bulk Extend (+1 Yr)
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!bulkBatchId}
+                  onClick={() => handleBulkDeactivateCohort(bulkBatchId)}
+                  className="px-3 py-1.5 rounded-xl border border-red-500/40 text-red-600 hover:bg-red-500/10 text-xs font-bold disabled:opacity-50 transition-colors"
+                >
+                  Bulk Deactivate
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative flex-1 w-full">
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-muted" />
+                <input
+                  type="text"
+                  placeholder="Filter students by name, enrollment number, or email..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl bg-primary-soft/30 border border-border text-text placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={studentCourseFilter}
+                  onChange={(e) => setStudentCourseFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Courses</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>{c.code}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={studentBatchFilter}
+                  onChange={(e) => setStudentBatchFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Batches</option>
+                  {batches.map((b) => (
+                    <option key={b.id} value={b.id}>Batch {b.label}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={studentStatusFilter}
+                  onChange={(e) => setStudentStatusFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="expired">Expired</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Students Table */}
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface shadow-sm">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-primary-soft/40 border-b border-border text-muted font-bold uppercase tracking-wider text-[10px]">
+                    <th className="p-3.5">Student Identity</th>
+                    <th className="p-3.5">Course &amp; Batch</th>
+                    <th className="p-3.5">Enrollment &amp; Roll</th>
+                    <th className="p-3.5">Access Window</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {profiles
+                    .filter((p) => p.role === "student")
+                    .filter((p) => {
+                      if (studentCourseFilter !== "all" && p.course_id !== studentCourseFilter) return false;
+                      if (studentBatchFilter !== "all" && p.batch_id !== studentBatchFilter) return false;
+                      if (studentStatusFilter !== "all") {
+                        const status = p.access_status || (p.is_approved ? "active" : "pending");
+                        if (status !== studentStatusFilter) return false;
+                      }
+                      if (studentSearch.trim()) {
+                        const q = studentSearch.toLowerCase();
+                        return (
+                          p.name.toLowerCase().includes(q) ||
+                          p.email.toLowerCase().includes(q) ||
+                          (p.enrollment_no && p.enrollment_no.toLowerCase().includes(q))
+                        );
+                      }
+                      return true;
+                    })
+                    .map((p) => {
+                      const course = courses.find((c) => c.id === p.course_id);
+                      const batch = batches.find((b) => b.id === p.batch_id);
+                      const isExpired = p.access_end && new Date(p.access_end) < new Date();
+                      const status = p.access_status || (isExpired ? "expired" : p.is_approved ? "active" : "pending");
+                      const isBusy = updatingUserId === p.id;
+
+                      return (
+                        <tr key={p.id} className="hover:bg-primary-soft/20 transition-colors">
+                          <td className="p-3.5">
+                            <span className="font-bold text-text block">{p.name}</span>
+                            <span className="text-muted font-mono text-[11px] block">{p.email}</span>
+                            {p.personal_email && (
+                              <span className="text-muted text-[10px] block">Personal: {p.personal_email}</span>
+                            )}
+                          </td>
+                          <td className="p-3.5">
+                            <span className="font-semibold text-text block">{course?.code || "BCA"}</span>
+                            <span className="text-muted text-[11px]">Batch {batch?.label || "2024-27"}</span>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="font-mono text-text block">{p.enrollment_no || "—"}</span>
+                            {p.roll_no && <span className="text-muted text-[10px] block">Roll: {p.roll_no}</span>}
+                          </td>
+                          <td className="p-3.5">
+                            <span className="text-muted text-[11px] block">
+                              Start: {p.access_start ? new Date(p.access_start).toLocaleDateString() : "—"}
+                            </span>
+                            <span className={`text-[11px] font-semibold block ${isExpired ? "text-red-500 font-bold" : "text-text"}`}>
+                              End: {p.access_end ? new Date(p.access_end).toLocaleDateString() : "Perpetual"}
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                status === "active"
+                                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                  : status === "expired"
+                                  ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                                  : status === "inactive"
+                                  ? "bg-muted/20 text-muted"
+                                  : "bg-warning/10 text-warning border border-warning/20"
+                              }`}
+                            >
+                              {status}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              onClick={() => handleRenewStudentAccess(p.id, 1)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition-colors"
+                            >
+                              +1 Yr Renew
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              onClick={() => {
+                                setCustomExpiryModalUser(p);
+                                setCustomExpiryDate(p.access_end ? p.access_end.slice(0, 10) : "");
+                              }}
+                              className="px-2 py-1 rounded-lg border border-border text-muted hover:text-text text-[11px] transition-colors"
+                            >
+                              Custom Date
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isBusy}
+                              onClick={() => handleSetUserStatus(p.id, p.access_status === "inactive" ? "active" : "inactive")}
+                              className={`px-2 py-1 rounded-lg text-[11px] font-semibold border ${
+                                p.access_status === "inactive"
+                                  ? "border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
+                                  : "border-border text-muted hover:text-text hover:bg-surface"
+                              }`}
+                            >
+                              {p.access_status === "inactive" ? "Activate" : "Deactivate"}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: SUBMISSIONS & WORKLOAD */}
+        {activeTab === "submissions" && (
+          <div className="space-y-4">
+            {/* Filter Bar */}
+            <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+              <div className="relative flex-1 w-full">
+                <Search className="w-4 h-4 absolute left-3.5 top-3 text-muted" />
+                <input
+                  type="text"
+                  placeholder="Filter submissions by case title or author..."
+                  value={subSearch}
+                  onChange={(e) => setSubSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 text-xs rounded-xl bg-primary-soft/30 border border-border text-text placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={subStatusFilter}
+                  onChange={(e) => setSubStatusFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="submitted">Submitted</option>
+                  <option value="in_review">In Review</option>
+                  <option value="changes_requested">Changes Requested</option>
+                  <option value="approved">Approved</option>
+                  <option value="uploaded">Uploaded</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+
+                <select
+                  value={subDeptFilter}
+                  onChange={(e) => setSubDeptFilter(e.target.value)}
+                  className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
+                >
+                  <option value="all">All Departments</option>
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Submissions Table */}
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface shadow-sm">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-primary-soft/40 border-b border-border text-muted font-bold uppercase tracking-wider text-[10px]">
+                    <th className="p-3.5">Case Title &amp; Category</th>
+                    <th className="p-3.5">Author &amp; Role</th>
+                    <th className="p-3.5">Department &amp; Age</th>
+                    <th className="p-3.5">Status &amp; Round</th>
+                    <th className="p-3.5">Assigned Reviewer</th>
+                    <th className="p-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {cases
+                    .filter((c) => {
+                      if (subStatusFilter !== "all" && c.status !== subStatusFilter) return false;
+                      if (subDeptFilter !== "all" && c.department_id !== subDeptFilter) return false;
+                      if (subSearch.trim()) {
+                        const q = subSearch.toLowerCase();
+                        return (
+                          c.title.toLowerCase().includes(q) ||
+                          (c.author_name && c.author_name.toLowerCase().includes(q))
+                        );
+                      }
+                      return true;
+                    })
+                    .map((c) => {
+                      const dept = departments.find((d) => d.id === c.department_id);
+                      const reviewer = profiles.find((p) => p.id === c.reviewer_id);
+                      const activeRound = reviewRounds.find((r) => r.case_id === c.id && r.decision === "pending");
+                      const isOverdue = activeRound && (Date.now() - new Date(activeRound.assigned_at).getTime() > 3 * 24 * 3600 * 1000);
+                      const ageDays = c.submitted_at ? Math.floor((Date.now() - new Date(c.submitted_at).getTime()) / (24 * 3600 * 1000)) : 0;
+
+                      return (
+                        <tr key={c.id} className="hover:bg-primary-soft/20 transition-colors">
+                          <td className="p-3.5">
+                            <span className="font-bold text-text block line-clamp-1">{c.title}</span>
+                            <span className="text-muted text-[10px] block uppercase font-mono">{c.type || "CE Pack"} • {c.format || "Hypothetical"}</span>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="font-semibold text-text block">{c.author_name || "Faculty Author"}</span>
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${c.author_role === "student" ? "bg-emerald-500/10 text-emerald-600" : "bg-primary-soft text-text"}`}>
+                              {c.author_role || "faculty"}
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="text-text block font-semibold">{dept?.name || "General"}</span>
+                            <span className="text-muted text-[10px]">{ageDays}d since submission</span>
+                          </td>
+                          <td className="p-3.5">
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                c.status === "approved" || c.status === "uploaded"
+                                  ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                  : c.status === "changes_requested"
+                                  ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                                  : c.status === "rejected"
+                                  ? "bg-red-500/10 text-red-600 border border-red-500/20"
+                                  : "bg-blue-500/10 text-blue-600 border border-blue-500/20"
+                              }`}
+                            >
+                              {c.status.replace("_", " ")}
+                            </span>
+                            {activeRound && (
+                              <span className="text-[10px] text-muted block mt-0.5 font-mono">Round {activeRound.round_no}</span>
+                            )}
+                          </td>
+                          <td className="p-3.5">
+                            {reviewer ? (
+                              <div className="space-y-0.5">
+                                <span className="font-bold text-text block">{reviewer.name}</span>
+                                <span className="text-muted font-mono text-[10px] block">{reviewer.email}</span>
+                                {isOverdue && (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/10 text-red-600 border border-red-500/20 inline-block">
+                                    ⚠️ Overdue (&gt;3d)
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-muted text-[11px] italic">Unassigned</span>
+                            )}
+                          </td>
+                          <td className="p-3.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReassignModalCase(c);
+                                setSelectedNewReviewerId(c.reviewer_id || "");
+                              }}
+                              className="px-2.5 py-1 rounded-lg border border-border text-muted hover:text-accent hover:border-accent text-[11px] font-semibold transition-colors"
+                            >
+                              Reassign Reviewer
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB: REPOSITORY CATALOG MODERATION */}
+        {activeTab === "repository" && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl border border-border bg-surface shadow-sm flex items-center justify-between">
+              <div>
+                <h3 className="font-serif font-bold text-sm text-text">Repository Publication Moderation</h3>
+                <p className="text-[11px] text-muted">Curate published items in the institutional repository catalog and view download logs</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-text">
+                  Total Items: <span className="font-bold text-accent">{repositoryItems.length}</span>
+                </span>
+                <span className="text-xs font-semibold text-text">
+                  Published: <span className="font-bold text-emerald-600 dark:text-emerald-400">{repositoryItems.filter((i) => i.is_published).length}</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface shadow-sm">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-primary-soft/40 border-b border-border text-muted font-bold uppercase tracking-wider text-[10px]">
+                    <th className="p-3.5">Case Title</th>
+                    <th className="p-3.5">Department &amp; Category</th>
+                    <th className="p-3.5">Author &amp; Reviewer</th>
+                    <th className="p-3.5">Upload Date</th>
+                    <th className="p-3.5 text-center">Downloads</th>
+                    <th className="p-3.5">Publication Status</th>
+                    <th className="p-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {repositoryItems.map((item) => {
+                    const dept = departments.find((d) => d.id === item.department_id);
+                    const author = profiles.find((p) => p.id === item.author_id);
+                    const reviewer = profiles.find((p) => p.id === item.reviewer_id);
+                    const dlCount = downloadLogs.filter((l) => l.item_id === item.id).length;
+
+                    return (
+                      <tr key={item.id} className="hover:bg-primary-soft/20 transition-colors">
+                        <td className="p-3.5">
+                          <span className="font-bold text-text block line-clamp-1">{item.title}</span>
+                          <div className="flex gap-1 mt-1 flex-wrap">
+                            {item.keywords?.slice(0, 3).map((kw: string) => (
+                              <span key={kw} className="px-1.5 py-0.2 rounded text-[9px] bg-primary-soft text-muted">
+                                {kw}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="font-semibold text-text block">{dept?.name || "General"}</span>
+                          <span className="text-muted text-[10px]">{item.category_id || "Finance"}</span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="text-text block font-medium">{author?.name || "Faculty Author"}</span>
+                          <span className="text-muted text-[10px] block">Rev: {reviewer?.name || "Reviewer"}</span>
+                        </td>
+                        <td className="p-3.5 text-muted text-[11px] font-mono">
+                          {new Date(item.uploaded_at).toLocaleDateString()}
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-text">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary-soft text-text">
+                            {dlCount} downloads
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              item.is_published
+                                ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                : "bg-red-500/10 text-red-600 border border-red-500/20"
+                            }`}
+                          >
+                            {item.is_published ? "Published" : "Unpublished"}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleModerateRepoItem(item.id, item.is_published)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors ${
+                              item.is_published
+                                ? "border-red-500/40 text-red-600 hover:bg-red-500/10"
+                                : "border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10"
+                            }`}
+                          >
+                            {item.is_published ? "Unpublish" : "Republish"}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: USERS & ROLES */}
         {activeTab === "users" && (
@@ -2382,6 +3503,134 @@ export default function AdminPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* REASSIGN REVIEWER MODAL */}
+        {reassignModalCase && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <h3 className="font-serif font-bold text-base text-text">Reassign Case Reviewer</h3>
+                <button
+                  type="button"
+                  onClick={() => setReassignModalCase(null)}
+                  className="p-1 rounded-lg hover:bg-canvas text-muted hover:text-text"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-muted block text-[10px] uppercase font-bold">Case Study</span>
+                  <span className="font-bold text-text block line-clamp-2">{reassignModalCase.title}</span>
+                </div>
+
+                <div>
+                  <span className="text-muted block text-[10px] uppercase font-bold">Author</span>
+                  <span className="font-semibold text-text block">{reassignModalCase.author_name || "Faculty Member"}</span>
+                  <span className="text-muted text-[10px]">Note: The author cannot review their own submission.</span>
+                </div>
+
+                <div>
+                  <label className="text-muted block text-[10px] uppercase font-bold mb-1">
+                    Select New Reviewer
+                  </label>
+                  <select
+                    value={selectedNewReviewerId}
+                    onChange={(e) => setSelectedNewReviewerId(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-primary-soft/30 border border-border text-text font-medium text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  >
+                    <option value="">Choose active faculty reviewer...</option>
+                    {profiles
+                      .filter((p) => p.role === "faculty" && p.is_reviewer && p.id !== reassignModalCase.author_id && p.access_status !== "inactive")
+                      .map((p) => {
+                        const dept = departments.find((d) => d.id === p.department_id);
+                        return (
+                          <option key={p.id} value={p.id}>
+                            {p.name} ({dept?.code || "GEN"}) - {p.email}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setReassignModalCase(null)}
+                  className="px-3 py-1.5 rounded-xl border border-border text-muted hover:text-text text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={!selectedNewReviewerId || selectedNewReviewerId === reassignModalCase.reviewer_id}
+                  onClick={() => handleReassignReviewer(reassignModalCase.id, selectedNewReviewerId)}
+                  className="px-4 py-1.5 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent-hover disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  Confirm Reassignment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CUSTOM EXPIRY DATE MODAL */}
+        {customExpiryModalUser && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <h3 className="font-serif font-bold text-base text-text">Set Access Expiry Date</h3>
+                <button
+                  type="button"
+                  onClick={() => setCustomExpiryModalUser(null)}
+                  className="p-1 rounded-lg hover:bg-canvas text-muted hover:text-text"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-muted block text-[10px] uppercase font-bold">Student</span>
+                  <span className="font-bold text-text block">{customExpiryModalUser.name}</span>
+                  <span className="text-muted font-mono text-[10px]">{customExpiryModalUser.email}</span>
+                </div>
+
+                <div>
+                  <label className="text-muted block text-[10px] uppercase font-bold mb-1">
+                    New Access Expiration Date
+                  </label>
+                  <input
+                    type="date"
+                    value={customExpiryDate}
+                    onChange={(e) => setCustomExpiryDate(e.target.value)}
+                    className="w-full p-2.5 rounded-xl bg-primary-soft/30 border border-border text-text font-mono text-xs focus:outline-none focus:ring-1 focus:ring-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setCustomExpiryModalUser(null)}
+                  className="px-3 py-1.5 rounded-xl border border-border text-muted hover:text-text text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={!customExpiryDate}
+                  onClick={() => handleRenewStudentAccess(customExpiryModalUser.id, 0, customExpiryDate)}
+                  className="px-4 py-1.5 rounded-xl bg-accent text-white text-xs font-bold hover:bg-accent-hover disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  Save Expiry Date
+                </button>
               </div>
             </div>
           </div>

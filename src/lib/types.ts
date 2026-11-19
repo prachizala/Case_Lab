@@ -581,8 +581,12 @@ export type AuditAction =
   | "case_submitted"
   | "case_approval"
   | "case_published"
+  | "case_unpublished"
   | "case_uploaded"
   | "case_downloaded"
+  | "reviewer_reassigned"
+  | "access_renewed"
+  | "user_deactivated"
   | "case_changes_requested"
   | "case_rejected"
   | "case_archived"
@@ -619,7 +623,7 @@ export interface AuditLog {
   actor_name?: string;
   action: AuditAction;
   target_id: string;
-  target_type: "user" | "case" | "grade" | "subscription" | "data_subject" | "platform_settings" | "academic_list";
+  target_type: "user" | "case" | "grade" | "subscription" | "data_subject" | "platform_settings" | "academic_list" | "batch";
   details?: string;
   metadata?: Record<string, any>;
   ip_address?: string;

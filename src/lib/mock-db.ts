@@ -1675,6 +1675,33 @@ class MockStore {
     return log;
   }
 
+  getDownloadLogs(itemId?: string): DownloadLog[] {
+    if (itemId) return this.download_logs.filter((l) => l.item_id === itemId);
+    return [...this.download_logs];
+  }
+
+  moderateRepositoryItem(
+    itemId: string,
+    isPublished: boolean,
+    adminId?: string
+  ): { success: boolean; error?: string; item?: RepositoryItem } {
+    const item = this.repository_items.find((i) => i.id === itemId || i.case_id === itemId);
+    if (!item) return { success: false, error: "Repository record not found." };
+
+    item.is_published = isPublished;
+
+    this.logAudit(
+      adminId || "usr-admin-1",
+      "admin@shantibschool.edu.in",
+      isPublished ? "case_published" : "case_unpublished",
+      item.case_id,
+      "case",
+      { item_id: item.id, is_published: isPublished }
+    );
+
+    return { success: true, item: { ...item } };
+  }
+
   // DEPARTMENTS
   getDepartments(): Department[] {
     return [...this.departments];
@@ -1789,12 +1816,223 @@ class MockStore {
     return { ...p };
   }
 
-  toggleReviewer(id: string, isReviewer: boolean): Profile | null {
-    const p = this.profiles.find((item) => item.id === id || item.email === id);
-    if (!p) return null;
+  toggleReviewer(id: string, isReviewer: boolean, adminId?: string): Profile | null {
+    const res = this.setFacultyReviewer(id, isReviewer, adminId);
+    return res.profile || null;
+  }
+
+  setFacultyReviewer(
+    id: string,
+    isReviewer: boolean,
+    adminId?: string
+  ): { success: boolean; error?: string; profile?: Profile } {
+    const p = this.profiles.find((item) => item.id === id || item.email.toLowerCase() === id.toLowerCase());
+    if (!p) return { success: false, error: "Faculty member not found." };
+    if (p.role !== "faculty") {
+      return { success: false, error: "Only faculty members can be designated as reviewers." };
+    }
+
+    if (!isReviewer) {
+      const openRounds = this.review_rounds.filter(
+        (r) => r.reviewer_id === p.id && r.decision === "pending"
+      );
+      if (openRounds.length > 0) {
+        return {
+          success: false,
+          error: `Reviewer has ${openRounds.length} open review(s). Please reassign them before removing the reviewer designation.`,
+        };
+      }
+    }
+
     p.is_reviewer = isReviewer;
+    p.reviewer_since = isReviewer ? (p.reviewer_since || new Date().toISOString()) : null;
     p.updated_at = new Date().toISOString();
-    return { ...p };
+
+    this.logAudit(
+      adminId || "usr-admin-1",
+      "admin@shantibschool.edu.in",
+      "role_change",
+      p.id,
+      "user",
+      { field: "is_reviewer", value: isReviewer, label: isReviewer ? "Faculty Member and Reviewer" : "Faculty" }
+    );
+
+    return { success: true, profile: { ...p } };
+  }
+
+  reassignReviewer(
+    caseId: string,
+    newReviewerId: string,
+    adminId?: string
+  ): { success: boolean; error?: string; round?: ReviewRound } {
+    const c = this.cases.find((x) => x.id === caseId);
+    if (!c) return { success: false, error: "Case study not found." };
+
+    const newRev = this.profiles.find(
+      (p) => p.id === newReviewerId || p.email.toLowerCase() === newReviewerId.toLowerCase()
+    );
+    if (!newRev) return { success: false, error: "Selected reviewer not found." };
+    if (newRev.role !== "faculty" || !newRev.is_reviewer) {
+      return { success: false, error: "Assigned user must be active faculty with reviewer authorization." };
+    }
+    if (newRev.access_status === "inactive" || newRev.access_status === "expired") {
+      return { success: false, error: "Selected reviewer account is not active." };
+    }
+    if (newRev.id === c.author_id) {
+      return { success: false, error: "Author cannot be assigned as the reviewer of their own case study." };
+    }
+
+    const prevReviewerId = c.reviewer_id;
+    c.reviewer_id = newRev.id;
+    c.updated_at = new Date().toISOString();
+
+    let round = this.review_rounds.find((r) => r.case_id === caseId && r.decision === "pending");
+    if (round) {
+      round.reviewer_id = newRev.id;
+      round.reviewer_name = newRev.name;
+      round.assigned_at = new Date().toISOString();
+      round.due_at = new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString();
+    } else {
+      const existingRounds = this.review_rounds.filter((r) => r.case_id === caseId);
+      const roundNo = existingRounds.length + 1;
+      round = {
+        id: `round-${caseId}-${roundNo}-${Date.now()}`,
+        case_id: caseId,
+        round_no: roundNo,
+        reviewer_id: newRev.id,
+        reviewer_name: newRev.name,
+        assigned_at: new Date().toISOString(),
+        due_at: new Date(Date.now() + 3 * 24 * 3600 * 1000).toISOString(),
+        decision: "pending",
+        comments: null,
+        decided_at: null,
+        created_at: new Date().toISOString(),
+      };
+      this.review_rounds.push(round);
+    }
+
+    this.logAudit(
+      adminId || "usr-admin-1",
+      "admin@shantibschool.edu.in",
+      "reviewer_reassigned",
+      caseId,
+      "case",
+      { previous_reviewer: prevReviewerId, new_reviewer: newRev.id, new_reviewer_name: newRev.name }
+    );
+
+    return { success: true, round: { ...round } };
+  }
+
+  renewStudentAccess(
+    userId: string,
+    extensionYears: number = 1,
+    adminId?: string,
+    customEndDate?: string
+  ): { success: boolean; error?: string; profile?: Profile } {
+    const p = this.profiles.find((u) => u.id === userId || u.email.toLowerCase() === userId.toLowerCase());
+    if (!p) return { success: false, error: "User profile not found." };
+    if (p.role === "admin") {
+      return { success: false, error: "Admin accounts have permanent authorization and cannot be modified via student access renewal." };
+    }
+
+    let targetEndDate: string;
+    if (customEndDate) {
+      targetEndDate = new Date(customEndDate).toISOString();
+    } else {
+      const baseDate = p.access_end && new Date(p.access_end) > new Date() ? new Date(p.access_end) : new Date();
+      baseDate.setFullYear(baseDate.getFullYear() + extensionYears);
+      targetEndDate = baseDate.toISOString();
+    }
+
+    p.access_end = targetEndDate;
+    p.access_status = "active";
+    p.updated_at = new Date().toISOString();
+
+    this.logAudit(
+      adminId || "usr-admin-1",
+      "admin@shantibschool.edu.in",
+      "access_renewed",
+      p.id,
+      "user",
+      { new_access_end: targetEndDate, role: p.role }
+    );
+
+    return { success: true, profile: { ...p } };
+  }
+
+  bulkRenewStudentsByBatch(
+    batchId: string,
+    extensionYears: number = 1,
+    adminId?: string
+  ): { count: number; profiles: Profile[] } {
+    const students = this.profiles.filter((p) => p.role === "student" && p.batch_id === batchId);
+    for (const student of students) {
+      const baseDate = student.access_end && new Date(student.access_end) > new Date() ? new Date(student.access_end) : new Date();
+      baseDate.setFullYear(baseDate.getFullYear() + extensionYears);
+      student.access_end = baseDate.toISOString();
+      student.access_status = "active";
+      student.updated_at = new Date().toISOString();
+    }
+    if (students.length > 0) {
+      this.logAudit(
+        adminId || "usr-admin-1",
+        "admin@shantibschool.edu.in",
+        "access_renewed",
+        batchId,
+        "batch",
+        { affected_students: students.length, extension_years: extensionYears }
+      );
+    }
+    return { count: students.length, profiles: students.map((p) => ({ ...p })) };
+  }
+
+  bulkDeactivateStudentsByBatch(
+    batchId: string,
+    adminId?: string
+  ): { count: number; profiles: Profile[] } {
+    const students = this.profiles.filter((p) => p.role === "student" && p.batch_id === batchId);
+    for (const student of students) {
+      student.access_status = "inactive";
+      student.updated_at = new Date().toISOString();
+    }
+    if (students.length > 0) {
+      this.logAudit(
+        adminId || "usr-admin-1",
+        "admin@shantibschool.edu.in",
+        "user_deactivated",
+        batchId,
+        "batch",
+        { affected_students: students.length }
+      );
+    }
+    return { count: students.length, profiles: students.map((p) => ({ ...p })) };
+  }
+
+  setUserAccessStatus(
+    userId: string,
+    status: "active" | "inactive" | "expired",
+    adminId?: string
+  ): { success: boolean; error?: string; profile?: Profile } {
+    const p = this.profiles.find((u) => u.id === userId || u.email.toLowerCase() === userId.toLowerCase());
+    if (!p) return { success: false, error: "User profile not found." };
+    if (p.role === "admin" && status !== "active") {
+      return { success: false, error: "Security Policy: System administrators cannot deactivate their own or other administrator accounts." };
+    }
+
+    const prevStatus = p.access_status;
+    p.access_status = status;
+    p.updated_at = new Date().toISOString();
+
+    this.logAudit(
+      adminId || "usr-admin-1",
+      "admin@shantibschool.edu.in",
+      status === "inactive" ? "user_deactivated" : "role_change",
+      p.id,
+      "user",
+      { previous_status: prevStatus, new_status: status }
+    );
+
+    return { success: true, profile: { ...p } };
   }
 
   addProfile(profile: Profile): Profile {
