@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { validateEmailDomain } from "@/lib/auth";
 import {
   ALLOWED_EMAIL_DOMAIN,
+  COLLEGE_NAME,
   COLLEGE_NAME_WITH_SHORT,
   COLLEGE_SHORT,
   APP_NAME,
@@ -29,6 +30,9 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
+  X,
+  FileText,
+  ExternalLink,
 } from "lucide-react";
 import { Department, Course, AcademicBatch, FacultyType } from "@/lib/types";
 
@@ -64,8 +68,9 @@ function SignUpForm() {
   const [departmentId, setDepartmentId] = useState("");
   const [facultyTypeId, setFacultyTypeId] = useState("");
 
-  // DPDP Consent (Mandatory unchecked by default)
+  // DPDP Consent / Terms & Conditions (Mandatory unchecked by default)
   const [dpdpConsent, setDpdpConsent] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   // Lookup data from API
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -327,7 +332,7 @@ function SignUpForm() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/login"
-                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors shadow-xs"
+                className="px-6 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-sm transition-colors"
               >
                 Go to Sign In
               </Link>
@@ -342,7 +347,7 @@ function SignUpForm() {
         ) : (
           <div className="bg-surface rounded-3xl border border-border p-6 sm:p-10 shadow-lg">
             <div className="text-center mb-8">
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full">
+              <span className="text-xs font-semibold uppercase tracking-wider text-accent bg-accent/10 border border-accent/20 px-3 py-1 rounded-full">
                 Institutional Access
               </span>
               <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-text mt-3">
@@ -372,8 +377,8 @@ function SignUpForm() {
                     onClick={() => setUserType("student")}
                     className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
                       userType === "student"
-                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                        : "bg-surface border-border text-text-muted hover:border-text-muted"
+                        ? "bg-primary text-on-primary border-primary shadow-sm"
+                        : "bg-surface border-border text-text-muted hover:border-primary/50 hover:text-text"
                     }`}
                   >
                     <GraduationCap className="w-4 h-4" />
@@ -384,8 +389,8 @@ function SignUpForm() {
                     onClick={() => setUserType("faculty")}
                     className={`flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border text-sm font-semibold transition-all ${
                       userType === "faculty"
-                        ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                        : "bg-surface border-border text-text-muted hover:border-text-muted"
+                        ? "bg-primary text-on-primary border-primary shadow-sm"
+                        : "bg-surface border-border text-text-muted hover:border-primary/50 hover:text-text"
                     }`}
                   >
                     <Building2 className="w-4 h-4" />
@@ -406,7 +411,7 @@ function SignUpForm() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Zala Prachi / Ms. Reena Paswan"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                   />
                 </div>
 
@@ -420,7 +425,7 @@ function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={`name@${ALLOWED_EMAIL_DOMAIN}`}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                   />
                 </div>
               </div>
@@ -436,7 +441,7 @@ function SignUpForm() {
                     value={personalEmail}
                     onChange={(e) => setPersonalEmail(e.target.value)}
                     placeholder="personal.email@gmail.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                   />
                   <span className="text-[11px] text-text-muted mt-0.5 block">
                     Used for password recovery and alumni communications.
@@ -447,7 +452,7 @@ function SignUpForm() {
                   <label className="block text-xs font-semibold text-text mb-1">
                     Indian Mobile Number <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex rounded-xl bg-surface border border-border focus-within:ring-2 focus-within:ring-blue-600 focus-within:border-transparent overflow-hidden">
+                  <div className="flex rounded-xl bg-surface border border-border focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary overflow-hidden">
                     <span className="inline-flex items-center px-3.5 bg-surface-hover/50 border-r border-border text-xs font-semibold text-text-muted select-none">
                       +91
                     </span>
@@ -495,7 +500,7 @@ function SignUpForm() {
                       <select
                         value={courseId}
                         onChange={(e) => setCourseId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                       >
                         {studentCourses.map((c) => (
                           <option key={c.id} value={c.id}>
@@ -512,7 +517,7 @@ function SignUpForm() {
                       <select
                         value={batchId}
                         onChange={(e) => setBatchId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                       >
                         {availableBatches.map((b) => (
                           <option key={b.id} value={b.id}>
@@ -535,7 +540,7 @@ function SignUpForm() {
                     <select
                       value={departmentId}
                       onChange={(e) => setDepartmentId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                     >
                       {departments.map((d) => (
                         <option key={d.id} value={d.id}>
@@ -553,7 +558,7 @@ function SignUpForm() {
                       <select
                         value={courseId}
                         onChange={(e) => setCourseId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                       >
                         {courses.map((c) => (
                           <option key={c.id} value={c.id}>
@@ -570,7 +575,7 @@ function SignUpForm() {
                       <select
                         value={facultyTypeId}
                         onChange={(e) => setFacultyTypeId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
                       >
                         {facultyTypes.map((ft) => (
                           <option key={ft.id} value={ft.id}>
@@ -596,7 +601,7 @@ function SignUpForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600 pr-10"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary pr-10"
                     />
                     <button
                       type="button"
@@ -620,7 +625,7 @@ function SignUpForm() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-blue-600 pr-10"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary pr-10"
                     />
                     <button
                       type="button"
@@ -634,21 +639,26 @@ function SignUpForm() {
                 </div>
               </div>
 
-              {/* DPDP Consent Checkbox - Default Unchecked */}
-              <div className="p-4 rounded-2xl bg-surface-hover/30 border border-border">
-                <label className="flex items-start gap-3 cursor-pointer">
+              {/* Terms & Conditions Checkbox */}
+              <div className="p-3.5 rounded-2xl bg-surface border border-border">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={dpdpConsent}
                     onChange={(e) => setDpdpConsent(e.target.checked)}
-                    className="mt-1 h-4 w-4 rounded border-border text-blue-600 focus:ring-blue-600 shrink-0"
+                    className="h-4 w-4 rounded border-border accent-[#D1130D] text-accent focus:ring-accent shrink-0 cursor-pointer"
                   />
-                  <div className="text-xs text-text-muted leading-relaxed">
-                    <span className="font-semibold text-text">
-                      Statutory Consent under Digital Personal Data Protection (DPDP) Act 2023:
-                    </span>{" "}
-                    I consent to Shanti Business School collecting my institutional email, personal email, and Indian mobile number. This data is processed strictly for case study authoring, blind peer reviews, academic accreditation, and alumni access. Information is accessible solely to me and the institutional administrator, and consent may be withdrawn at any time in accordance with Section 11 of the DPDP Act.
-                  </div>
+                  <span className="text-xs text-text">
+                    I agree to the{" "}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="font-bold text-accent hover:underline cursor-pointer"
+                    >
+                      Terms &amp; Conditions
+                    </button>
+                    <span className="text-accent ml-0.5">*</span>
+                  </span>
                 </label>
               </div>
 
@@ -656,7 +666,7 @@ function SignUpForm() {
               <button
                 type="submit"
                 disabled={loading || !dpdpConsent}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <span>{loading ? "Submitting Registration..." : "Complete Registration"}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -665,13 +675,131 @@ function SignUpForm() {
 
             <div className="mt-6 text-center text-xs text-text-muted">
               Already have an institutional account?{" "}
-              <Link href="/login" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+              <Link href="/login" className="font-semibold text-accent hover:underline">
                 Sign In
               </Link>
             </div>
           </div>
         )}
       </div>
+
+      {/* 1-Page Brief Terms & Conditions Modal */}
+      {showTermsModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <div className="max-w-2xl w-full max-h-[85vh] rounded-3xl bg-surface border border-border shadow-2xl flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-border flex items-center justify-between gap-4 shrink-0 bg-surface">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-base sm:text-lg text-text">
+                    Terms &amp; Conditions Brief
+                  </h3>
+                  <p className="text-[11px] text-text-muted">
+                    {COLLEGE_NAME_WITH_SHORT} • Statutory DPDP Act 2023 Compliance
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(false)}
+                className="w-8 h-8 rounded-xl border border-border hover:bg-surface-hover flex items-center justify-center text-text-muted hover:text-text transition-colors cursor-pointer"
+                aria-label="Close Terms modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs text-text leading-relaxed font-sans divide-y divide-border/60">
+              <div className="space-y-1.5 pb-3">
+                <h4 className="font-serif font-bold text-sm text-text flex items-center gap-1.5">
+                  <span className="text-accent font-mono text-xs">01.</span> Academic Repository Purpose
+                </h4>
+                <p className="text-text-muted leading-relaxed">
+                  {APP_NAME} is an institutional pedagogical platform hosted by {COLLEGE_NAME}. It facilitates generative business case writing, blind peer evaluation, decision simulation, and Outcome-Based Education (OBE) tracking. Access is strictly granted to verified students, faculty members, and institutional evaluators.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 pt-3 pb-3">
+                <h4 className="font-serif font-bold text-sm text-text flex items-center gap-1.5">
+                  <span className="text-accent font-mono text-xs">02.</span> Statutory Consent under DPDP Act 2023
+                </h4>
+                <p className="text-text-muted leading-relaxed">
+                  Under Sections 6 &amp; 11 of the Digital Personal Data Protection (DPDP) Act 2023 of India, creating an account requires affirmative consent for collecting your official institutional email, personal email, and Indian mobile number. This data is processed strictly for academic credentials, case authoring, peer evaluation ledgering, and accreditation audits. It is never sold or repurposed.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 pt-3 pb-3">
+                <h4 className="font-serif font-bold text-sm text-text flex items-center gap-1.5">
+                  <span className="text-accent font-mono text-xs">03.</span> Confidentiality &amp; Row-Level Security
+                </h4>
+                <p className="text-text-muted leading-relaxed">
+                  Faculty teaching notes, grading rubrics, model financial calculations, and solution keys are protected through strict database-level Row Level Security (RLS). Students are prohibited from scraping, sharing, or publishing faculty evaluation notes or peer answers outside designated course sessions.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 pt-3 pb-3">
+                <h4 className="font-serif font-bold text-sm text-text flex items-center gap-1.5">
+                  <span className="text-accent font-mono text-xs">04.</span> Intellectual Property &amp; Copyright
+                </h4>
+                <p className="text-text-muted leading-relaxed">
+                  Business cases and teaching materials authored in SBS CaseLab remain the academic property of {COLLEGE_NAME} and the contributing authors. Plagiarism, unauthorized copying, or commercial distribution outside Shanti Business School is strictly prohibited.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 pt-3">
+                <h4 className="font-serif font-bold text-sm text-text flex items-center gap-1.5">
+                  <span className="text-accent font-mono text-xs">05.</span> Right to Withdraw Consent &amp; Erasure
+                </h4>
+                <p className="text-text-muted leading-relaxed">
+                  Pursuant to Section 11 &amp; Section 12 of the DPDP Act 2023, you retain the statutory right at any time to inspect your profile, export your academic submissions, or withdraw consent and permanently erase your account via the{" "}
+                  <Link href="/privacy" target="_blank" className="text-accent underline font-semibold">
+                    Privacy Compliance Center
+                  </Link>.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 sm:p-5 border-t border-border bg-surface-hover/30 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-xs text-text-muted hover:text-text inline-flex items-center gap-1"
+              >
+                <span>Read Full 1-Page Document in New Tab</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(false)}
+                  className="flex-1 sm:flex-initial px-4 py-2 rounded-xl border border-border bg-surface hover:bg-surface-hover text-xs font-semibold text-text transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDpdpConsent(true);
+                    setShowTermsModal(false);
+                  }}
+                  className="flex-1 sm:flex-initial px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-sm transition-all cursor-pointer"
+                >
+                  I Understand &amp; Agree
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="text-center py-4 text-xs text-text-muted border-t border-border">
