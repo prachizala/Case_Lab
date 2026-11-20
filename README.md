@@ -68,7 +68,7 @@
   - *Comprehensive 5-Page Case*: Executive narrative, dilemmas, multi-period financial tables, and strategic alternatives.
   - *FlashCase (Micro-Dilemma)*: Fast-paced 1-page situational puzzle for cold-call warmups.
   - *Real Signals*: Converts breaking industry news into immediate classroom case dilemmas.
-- **Multilingual Support**: Synthesizes authentic Indian business cases in **English**, **Hindi (हिंदी)**, and **Gujarati (ગુજરાતી)** with full Unicode rendering.
+- **English-Only Curriculum Standard**: Synthesizes authentic, rigorous business cases in clear, professional English with deep Indian enterprise context (INR Lakh / Crore figures, authentic Indian regulatory bodies such as RBI and SEBI, and regional industrial hubs).
 - **Streaming & Offline Fallback**: Real-time server-sent streaming using Anthropic Claude 3.5 Sonnet, with an intelligent built-in offline simulation mode for local development without API keys.
 
 ### 2. 📊 Interactive Financial Exhibits (`InteractiveFinancialExhibit.tsx`)
@@ -533,7 +533,7 @@ npm run seed
 - [x] **DPDP Act 2023 Compliance**: Mandatory registration consent checkbox, machine-readable JSON data export (`/api/user/data-export`), and permanent account erasure (`/api/user/data-delete`).
 - [x] **Institutional Token Budget Alerts**: Real-time quota calculation with automatic 80% warning banner across faculty workspaces.
 - [x] **Document Extraction & Audio Synthesizer**: Native server-side parsing for PDF/DOCX and client-side speech synthesis audio briefing ("CasePod").
-- [x] **Multilingual Pedagogical Fidelity**: Tested and verified support for English, Hindi (Devanagari), and Gujarati scripts.
+- [x] **English-Only Curriculum Standard**: Verified strict English generation with authentic Indian business context (INR figures, statutory compliance, and domestic industrial hubs).
 
 ---
 

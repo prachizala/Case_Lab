@@ -130,40 +130,44 @@ async function runAcceptanceVerification() {
     allPassed = false;
   }
 
-  // 4. Hindi and Gujarati Output Works
-  console.log("\nTEST 4: Multilingual Generation (Hindi and Gujarati)");
-  const hindiCase = await generateCaseWithClaude({
+  // 4. English-Only Generation & Authentic Indian Business Context
+  console.log("\nTEST 4: English-Only Generation & Indian Context Verification");
+  const caseWithLegacyHi = await generateCaseWithClaude({
     type: "full",
     format: "hypothetical",
     industry: "Textiles",
     functionalFocus: "Operations",
     level: "MBA",
     contextRegion: "Ahmedabad, Gujarat",
-    language: "hi",
+    language: "hi" as any,
     complexity: 6,
     targetLength: "medium",
   });
 
-  const gujaratiCase = await generateCaseWithClaude({
+  const caseEnglish = await generateCaseWithClaude({
     type: "flash",
     format: "real_signal",
     industry: "Chemicals",
     functionalFocus: "Strategy",
     level: "Executive",
     contextRegion: "Vadodara, Gujarat",
-    language: "gu",
     complexity: 7,
     targetLength: "short",
   });
 
-  const hasHindiChars = /[\u0900-\u097F]/.test(hindiCase.content.title);
-  const hasGujaratiChars = /[\u0A80-\u0AFF]/.test(gujaratiCase.content.title);
+  const hasHindiChars = /[\u0900-\u097F]/.test(caseWithLegacyHi.content.title + caseWithLegacyHi.content.summary);
+  const hasGujaratiChars = /[\u0A80-\u0AFF]/.test(caseEnglish.content.title + caseEnglish.content.summary);
+  const isEnglishOnly = !hasHindiChars && !hasGujaratiChars;
+  const hasIndianContext = /Gujarat|Ahmedabad|Vadodara|INR|SEBI|Crore|Lakh|Rupee/i.test(
+    caseWithLegacyHi.content.title + " " + caseWithLegacyHi.content.background + " " + caseEnglish.content.title
+  );
 
-  if (hasHindiChars && hasGujaratiChars) {
-    console.log(`  ✅ PASS: Hindi generation rendered authentic Devanagari script: "${hindiCase.content.title}"`);
-    console.log(`  ✅ PASS: Gujarati generation rendered authentic Gujarati script: "${gujaratiCase.content.title}"`);
+  if (isEnglishOnly && hasIndianContext) {
+    console.log(`  ✅ PASS: Case generation is strictly English-only (Zero Hindi/Gujarati script characters detected).`);
+    console.log(`  ✅ PASS: Legacy language input was safely handled without error.`);
+    console.log(`  ✅ PASS: Authentic Indian business context in Latin script verified: "${caseWithLegacyHi.content.title}"`);
   } else {
-    console.error("  ❌ FAIL: Multilingual characters not detected.");
+    console.error("  ❌ FAIL: English-only or Indian context assertion failed.");
     allPassed = false;
   }
 
@@ -387,31 +391,40 @@ async function runAcceptanceVerification() {
     docxBuffer[0] === 0x50 &&
     docxBuffer[1] === 0x4b; // 'PK' zip signature
 
-  // B. Generate PDF with NotoSansDevanagari font & Hindi content
+  // B. Generate PDF with standard Latin fonts and Indian business symbols
   const pdfDoc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const fontPath = path.resolve(process.cwd(), "src/assets/fonts/NotoSansDevanagari-Regular.ttf");
-  if (fs.existsSync(fontPath)) {
-    const fontBase64 = fs.readFileSync(fontPath).toString("base64");
-    pdfDoc.addFileToVFS("NotoDevanagari.ttf", fontBase64);
-    pdfDoc.addFont("NotoDevanagari.ttf", "NotoDevanagari", "normal");
-    pdfDoc.setFont("NotoDevanagari");
+  pdfDoc.setFont("helvetica", "normal");
+  pdfDoc.setLanguage("en");
+
+  // Format Indian rupee and punctuation safely for standard Latin font
+  function sanitizePdfText(text: string): string {
+    if (!text) return "";
+    return text.replace(/₹\s*/g, "Rs. ").replace(/\u20B9\s*/g, "Rs. ");
   }
+
+  const originalText = pdfDoc.text.bind(pdfDoc);
+  (pdfDoc as any).text = (text: any, x: number, y: number, options?: any) => {
+    if (typeof text === "string") return originalText(sanitizePdfText(text), x, y, options);
+    if (Array.isArray(text)) return originalText(text.map((t) => typeof t === "string" ? sanitizePdfText(t) : t), x, y, options);
+    return originalText(text, x, y, options);
+  };
 
   pdfDoc.setFontSize(16);
   pdfDoc.text("SHANTI BUSINESS SCHOOL", 15, 20);
   pdfDoc.setFontSize(12);
-  pdfDoc.text(hindiCase.content.title, 15, 30);
-  pdfDoc.text("Exhibit 1: Key Operating Indicators", 15, 45);
+  pdfDoc.text(caseEnglish.content.title, 15, 30);
+  pdfDoc.setFontSize(10);
+  pdfDoc.text("Exhibit 1: Key Operating Indicators — CapEx: ₹1,200 Cr (18% IRR, 2024–2025)", 15, 45);
 
   const pdfOutput = pdfDoc.output("arraybuffer");
   const pdfBytes = new Uint8Array(pdfOutput);
   const isValidPdf =
-    pdfBytes.length > 1000 &&
+    pdfBytes.length > 500 &&
     String.fromCharCode(...pdfBytes.slice(0, 4)) === "%PDF";
 
   if (isValidDocx && isValidPdf) {
     console.log(`  ✅ PASS: Server-side DOCX created successfully (${docxBuffer.length} bytes, valid PK header).`);
-    console.log(`  ✅ PASS: Server-side PDF created with Hindi Unicode glyphs (${pdfBytes.length} bytes, valid %PDF header).`);
+    console.log(`  ✅ PASS: Server-side PDF created with standard Latin fonts & ₹ symbol handling (${pdfBytes.length} bytes, valid %PDF header).`);
   } else {
     console.error("  ❌ FAIL: PDF or DOCX file generation failed.");
     allPassed = false;

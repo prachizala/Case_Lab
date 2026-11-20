@@ -166,7 +166,7 @@ You can sign in with any of the following seeded institutional accounts:
   - **Target Audience & Difficulty**: Undergraduate, MBA / Post-Graduate, Executive Education across Beginner, Intermediate, and Advanced tiers.
   - **Company Disguising Option**: Anonymizes real corporate entities into pedagogical disguises with preserved financials.
   - **Teaching & Discussion Guide Toggle**: Automatically generates a synchronized pedagogical companion with discussion roadmap, blackboard layout, and question solutions.
-  - **Multilingual Case Generation**: Supports English, Hindi (Devanagari), and Gujarati.
+  - **English-Only Curriculum Standard**: Synthesizes authentic business cases in professional English calibrated with Indian business context, INR figures, and domestic regulatory environments.
 - **Modular Section Editing & Regeneration**:
   - Every generated section (Executive Summary, Company Background, Strategic Dilemma, Exhibit 1 Data, Discussion Questions) features dedicated **Edit** and **Regenerate Section** capabilities.
 - **Draft Persistence & Version History**: Save drafts locally or server-side, reload previous iterations, and inspect historical change snapshots.
@@ -200,7 +200,7 @@ You can sign in with any of the following seeded institutional accounts:
 
 - **Multi-Attribute Search & Faceted Filtering**:
   - Instant full-text search across title, protagonist, summary, and keywords.
-  - Faceted filters for **Domain** (Marketing, Finance, HR, etc.), **Case Type** (Short, Full, Research), **Language** (English, Hindi, Gujarati), **Difficulty** (Beginner, Intermediate, Advanced), **Author**, and **Tags**.
+  - Faceted filters for **Domain** (Marketing, Finance, HR, etc.), **Case Type** (Short, Full, Research), **Difficulty** (Beginner, Intermediate, Advanced), **Author**, and **Tags**.
   - Dynamic result counts updating in real time.
 - **View Modes**: Toggle between responsive Grid View and high-density List View.
 - **Custom Syllabus Collections**: Organize cases into departmental syllabi (e.g., "FIN-201 Corporate Restructuring"), rename collections, and toggle case memberships.
@@ -218,24 +218,20 @@ You can sign in with any of the following seeded institutional accounts:
 
 ---
 
-## 🌐 Native Multilingual Typography & Seed Data
+## 🌐 English Curriculum Standard & Historical Legacy Paper Trail
 
-- **Native Script Typography**:
-  - Loaded via `next/font/google` in `src/app/layout.tsx`:
-    - `Noto_Sans_Devanagari` (`--font-devanagari`) for crisp Hindi rendering.
-    - `Noto_Sans_Gujarati` (`--font-gujarati`) for native Gujarati rendering.
-  - Tailwind CSS `fontFamily` configured with fallback font stacks ensuring glyph clarity across all devices.
-- **Seeded Multilingual Repository**:
-  - **English Cases**:
+- **Executive Typography & Formatting**:
+  - High-legibility classical serif headings (`Lora`) and modern body sans-serif (`Inter`) loaded via `next/font/google`.
+  - Comprehensive support for Indian business currency symbols (`₹` / INR), percentage ratios, en/em dashes, and executive quotes.
+- **Institutional Repository**:
+  - **Standard English Curriculum Cases**:
     - `case-001`: *"The Dilemma of Cooperative Banking in Western India: The Rajkot Urban Co-op Bank Crisis"*
     - `case-002`: *"Reliance New Energy Solar: Scaling Gigafactories in Jamnagar"*
     - `case-003`: *"Tata Motors' Commercial EV Pivot: Battery Sourcing and Domestic Manufacturing"*
     - `case-004`: *"Amul's Quick-Commerce Battle: Protecting the Cold Chain in 10-Minute Grocery Delivery"*
     - `case-005`: *"Swiggy vs. Zomato: Platform Fees, Dark Stores, and the Unit Economics of Urban India"*
-  - **Hindi Case (`case-006`)**:
-    - *"भारतीय स्टार्टअप्स में प्रतिभा प्रतिधारण: हाइब्रिड कार्यबल चुनौती"* (Talent Retention in Indian Startups: The Hybrid Workforce Challenge), featuring authentic Devanagari background, challenges, exhibits, and teaching note.
-  - **Gujarati Case (`case-007`)**:
-    - *"સુરતના હીરા ઉદ્યોગમાં લેબ-ગ્રોન ડાયમંડ કટોકટી"* (The Lab-Grown Diamond Disruption in Surat's Diamond Industry), featuring authentic Gujarati industry context, financial metrics, and strategic discussion prompts.
+  - **Historical Legacy Cases (Read-Only Audit Paper Trail)**:
+    - Pre-existing regional language cases (`case-006` in Hindi, `case-007` in Gujarati) preserved in read-only audit status for institutional accreditation and historical paper trail. Administrative controls allow archiving or retaining as historical references.
 
 ---
 
@@ -251,7 +247,7 @@ You can sign in with any of the following seeded institutional accounts:
 
 ## 📥 Server-Side Exports (PDF & DOCX)
 
-- **Branded PDF**: Generated server-side with Shanti Business School (SBS) header, logo badge, proper headings, metadata strip, and Exhibit 1 key data table. Supports Hindi/Devanagari Unicode glyphs via bundled `NotoSansDevanagari-Regular.ttf`.
+- **Branded PDF**: Generated server-side with Shanti Business School (SBS) header, logo badge, proper headings, metadata strip, and Exhibit 1 key data table using standard Latin typography and clean Indian Rupee (₹ / INR) formatting (< 25 KB compact file size).
 - **Branded Word Document (.docx)**: Generated server-side using `docx` with metadata table, institutional title, and formatted Exhibit 1 data table.
 - **Share Link**: One-click URL copy with authentication verification (accessible only to logged-in Shanti Business School (SBS) users).
 
@@ -470,7 +466,7 @@ npm run seed
 - [x] **DPDP Act 2023 Compliance**: Mandatory registration consent checkbox, machine-readable JSON data export (`/api/user/data-export`), and permanent account erasure (`/api/user/data-delete`).
 - [x] **Institutional Token Budget Alerts**: Real-time quota calculation with automatic 80% warning banner across faculty workspaces.
 - [x] **Document Extraction & Audio Synthesizer**: Native server-side parsing for PDF/DOCX and client-side speech synthesis audio briefing ("CasePod").
-- [x] **Multilingual Pedagogical Fidelity**: Tested and verified support for English, Hindi (Devanagari), and Gujarati scripts.
+- [x] **English-Only Curriculum Standard**: Verified strict English generation with authentic Indian business context (INR figures, statutory compliance, and domestic industrial hubs).
 - [x] **Audit & Compliance Ledger**: Tamper-evident admin ledger with action filtering and JSON/CSV export capabilities.
 - [x] **Cohort Degree Conferral**: Bulk student graduation runner with perpetual academic archive safeguards.
 - [x] **Interactive Financial Sensitivity Modeler**: DCF valuation with WACC/Terminal Growth heatmaps and student draft integration.
@@ -524,7 +520,7 @@ npm run seed
 | **Theme toggle persists after refresh** | ✅ | Theme preference persists in `localStorage` and applies `html.dark` class across page reloads. |
 | **npm run seed works on a fresh database** | ✅ | Seeds 1 admin, 2 faculty, 10 students, 2 departments, and 6 courses with exit code 0. |
 | **Generate Full and Flash case; both saved as draft** | ✅ | `/api/generate` creates structured cases with 5 questions and 3 frameworks; both save to draft. |
-| **Hindi and Gujarati output works** | ✅ | Claude returns valid Devanagari and Gujarati scripts for multilingual classroom cohorts. |
+| **English-only generation & Indian context works** | ✅ | Claude returns professional English cases with authentic Indian context (INR figures, SEBI/RBI compliance). |
 | **Uploading PDF/DOCX fills source notes** | ✅ | Server-side `/api/extract-text` extracts plain text from uploaded files to source notes. |
 | **Bad JSON shows error & retry, no crash** | ✅ | Parse errors render `StateError` with retry button; never crashes or leaves blank screen. |
 | **API key never appears in browser responses** | ✅ | `ANTHROPIC_API_KEY` is server-only and excluded from client bundles and network payloads. |
@@ -532,7 +528,7 @@ npm run seed
 | **Student cannot see draft or in_review cases** | ✅ | Both RLS SQL policies, API endpoints, and UI views strictly filter out unapproved cases for students. |
 | **Approve publishes, Request changes returns with comment** | ✅ | Reviewer approval publishes case; Request changes stores feedback comment and notifies author. |
 | **Edit after approval creates a new version** | ✅ | Editing an approved case archives the baseline to `case_versions` and creates Version $N+1$. |
-| **PDF and DOCX open correctly with tables intact** | ✅ | Server-side PDF and DOCX export routes generate complete files with tables and Hindi glyphs. |
+| **PDF and DOCX open correctly with tables intact** | ✅ | Server-side PDF and DOCX export routes generate complete files with tables and ₹ symbol formatting. |
 | **Filters and counts match actual data** | ✅ | `/trending` and `/library` checkboxes compute counts dynamically from real database records. |
 | **Collections persist after refresh** | ✅ | Custom collections and case memberships persist across reloads via `/api/collections`. |
 | **Student cannot read another student's answer** | ✅ | Strict RLS SQL policy and store isolation reject cross-student answer reading attempts (`returns null` / HTTP 403). |

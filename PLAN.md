@@ -72,7 +72,7 @@ This document specifies the end-to-end plan to transition **SBS CaseLab** (Shant
 1. **CE Case Pack Generator & Validators**:
    - `src/lib/casepack/generate.ts` and `src/lib/casepack/validate.ts` provide complete 10-check validation suite, Bloom taxonomy mapping, and deterministic financial math. Kept intact as default format.
 2. **Export Engines**:
-   - `src/lib/export/docx.ts` and `src/lib/export/pdf.ts` provide server-side DOCX and PDF generation with multi-page formatting and Devanagari/Gujarati Unicode font handling.
+   - Server-side DOCX and PDF export generation with multi-page formatting, standard Latin typography, and Indian business symbols.
 3. **Session & Security Infrastructure**:
    - `src/lib/session.ts`: Tamper-proof signed session cookies and `authenticateUser` middleware.
    - `src/lib/auth-security.ts`: Enterprise password hashing, brute-force lockout, single-use 6-digit OTPs.
