@@ -366,6 +366,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, message: "Rate limit reset." });
     }
 
+    if (action === "archive-legacy-case") {
+      const { caseId } = body;
+      if (!caseId) {
+        return NextResponse.json({ error: "Case ID is required." }, { status: 400 });
+      }
+      const c = mockStore.getCase(caseId);
+      if (!c) {
+        return NextResponse.json({ error: "Case not found." }, { status: 404 });
+      }
+      c.status = "archived";
+      c.updated_at = new Date().toISOString();
+      return NextResponse.json({ success: true, case: c, message: `Case ${c.id} archived as legacy paper trail.` });
+    }
+
+    if (action === "keep-legacy-case") {
+      const { caseId } = body;
+      if (!caseId) {
+        return NextResponse.json({ error: "Case ID is required." }, { status: 400 });
+      }
+      const c = mockStore.getCase(caseId);
+      if (!c) {
+        return NextResponse.json({ error: "Case not found." }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, case: c, message: `Case ${c.id} retained as approved historical reference.` });
+    }
+
     return NextResponse.json({ error: "Unknown admin action." }, { status: 400 });
   } catch (err: unknown) {
     console.error("Admin API error:", err);

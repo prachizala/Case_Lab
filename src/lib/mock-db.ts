@@ -2470,11 +2470,13 @@ class MockStore {
   saveCase(newCase: CaseStudy): CaseStudy {
     const idx = this.cases.findIndex((c) => c.id === newCase.id);
     if (idx >= 0) {
-      this.cases[idx] = { ...newCase, updated_at: new Date().toISOString() };
+      this.cases[idx] = { ...newCase, language: newCase.language || this.cases[idx].language || "en", updated_at: new Date().toISOString() };
+      return this.cases[idx];
     } else {
-      this.cases.unshift({ ...newCase, version: newCase.version || 1 });
+      const persisted = { ...newCase, language: newCase.language || "en", version: newCase.version || 1 };
+      this.cases.unshift(persisted);
+      return persisted;
     }
-    return newCase;
   }
 
   // APPROVAL & WORKFLOW ACTIONS

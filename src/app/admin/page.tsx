@@ -896,6 +896,25 @@ export default function AdminPage() {
     }
   };
 
+  const handleLegacyCaseAction = async (caseId: string, action: "archive-legacy-case" | "keep-legacy-case") => {
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, caseId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Action failed.");
+        return;
+      }
+      triggerNotification(data.message || "Legacy case status updated.");
+      loadAdminData();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Error updating legacy case.");
+    }
+  };
+
   const filteredProfiles = profiles.filter((p) => {
     if (roleFilter !== "all" && p.role !== roleFilter) return false;
     if (userSearch.trim()) {
@@ -1945,6 +1964,101 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* LEGACY MULTI-LANGUAGE CASES (READ-ONLY AUDIT PAPER TRAIL) */}
+            {cases.filter((c) => c.language && c.language !== "en").length > 0 && (
+              <div className="p-4 rounded-2xl border border-warning/30 bg-surface shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-warning/15 text-warning border border-warning/30">
+                        Paper Trail
+                      </span>
+                      <h3 className="font-serif font-bold text-sm text-text">
+                        Legacy Multi-Language Case Studies (Read-Only)
+                      </h3>
+                    </div>
+                    <p className="text-[11px] text-muted mt-1">
+                      Historical cases created in regional languages prior to English-only curriculum standardization. Preserved intact for academic audit and accreditation paper trail.
+                    </p>
+                  </div>
+                  <span className="text-xs font-semibold text-muted">
+                    {cases.filter((c) => c.language && c.language !== "en").length} Legacy Cases
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto rounded-xl border border-border">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-primary-soft/40 border-b border-border text-muted font-bold uppercase tracking-wider text-[10px]">
+                        <th className="p-3">Case ID & Title</th>
+                        <th className="p-3">Original Language</th>
+                        <th className="p-3">Department & Function</th>
+                        <th className="p-3">Status</th>
+                        <th className="p-3 text-right">Administrative Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {cases
+                        .filter((c) => c.language && c.language !== "en")
+                        .map((lc) => (
+                          <tr key={lc.id} className="hover:bg-primary-soft/20 transition-colors">
+                            <td className="p-3">
+                              <span className="font-mono text-[10px] text-muted block">{lc.id}</span>
+                              <span className="font-bold text-text block line-clamp-1">{lc.title}</span>
+                            </td>
+                            <td className="p-3">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase bg-primary-soft text-text">
+                                {lc.language === "hi" ? "Hindi (हिन्दी)" : lc.language === "gu" ? "Gujarati (ગુજરાતી)" : lc.language}
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <span className="text-text block font-medium">{lc.industry}</span>
+                              <span className="text-muted text-[10px]">{lc.function}</span>
+                            </td>
+                            <td className="p-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                lc.status === "archived"
+                                  ? "bg-muted/20 text-muted border border-muted/30"
+                                  : "bg-success/15 text-success border border-success/30"
+                              }`}>
+                                {lc.status === "archived" ? "Archived (Read-Only)" : "Approved (Read-Only)"}
+                              </span>
+                            </td>
+                            <td className="p-3 text-right space-x-2">
+                              {lc.status !== "archived" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleLegacyCaseAction(lc.id, "archive-legacy-case")}
+                                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold border border-warning/40 text-warning hover:bg-warning/10 transition-colors"
+                                >
+                                  Archive
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleLegacyCaseAction(lc.id, "keep-legacy-case")}
+                                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold border border-success/40 text-success hover:bg-success/10 transition-colors"
+                                >
+                                  Keep as is
+                                </button>
+                              )}
+                              <a
+                                href={`/cases/${lc.id}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-2.5 py-1 rounded-lg text-[11px] font-medium border border-border text-muted hover:text-text transition-colors"
+                              >
+                                View Case
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
