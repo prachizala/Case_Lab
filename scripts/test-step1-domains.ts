@@ -15,6 +15,8 @@ console.log("===================================================================
 console.log("🧪 RUNNING STEP 1 VERIFICATION TESTS: 8 BUSINESS DOMAINS & GENERATOR PIPELINE");
 console.log("==============================================================================");
 
+mockStore.seedTestFixtures();
+
 // 1. Verify exactly 8 domains with exact names
 const EXPECTED_NAMES = [
   "Finance",

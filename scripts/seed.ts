@@ -200,187 +200,8 @@ export const COURSES = [
   },
 ];
 
-export const CASES = [
-  {
-    id: "00000000-0000-0000-0000-000000000501",
-    title: "Titan Company Ltd: Eyewear Turnaround & Omnichannel Expansion Playbook",
-    status: "approved",
-    type: "full",
-    format: "real_signal",
-    domain: "Marketing",
-    industry: "Retail & Consumer Goods",
-    function: "Strategy & Marketing",
-    language: "en",
-    complexity: 7,
-    author_id: "00000000-0000-0000-0000-000000000002", // Ms. Reena Paswan
-    course_id: "00000000-0000-0000-0000-000000000102",
-    content: {
-      synopsis: "How Titan transformed its loss-making Eyewear division into an EBITDA-positive market leader using unified inventory, Fastrack prescription frames, and aggressive optometrist franchising.",
-      protagonist: { name: "Saumen Bhaumik", title: "CEO, Eyewear Division", org: "Titan Company Ltd" },
-      learning_objectives: [
-        "Evaluate omnichannel inventory pooling models vs traditional franchised retail.",
-        "Calculate unit economics and contribution margins across optical dispensing.",
-        "Formulate brand positioning strategies for premium vs entry-level fashion segments."
-      ],
-      sections: [
-        { title: "Market Landscape", body: "India's unorganized optical market historically represented over 75% of total spectacles sold..." },
-        { title: "Strategic Turnaround", body: "Titan pivoted to automated lens manufacturing labs in Chikkaballapur to compress delivery SLAs to 24 hours..." }
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000502",
-    title: "Tata Consultancy Services: Transitioning from IT Outsourcing to Generative AI Solutions",
-    status: "approved",
-    type: "full",
-    format: "real_signal",
-    domain: "IT",
-    industry: "Information Technology",
-    function: "Technology Strategy",
-    language: "en",
-    complexity: 8,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000104",
-    content: {
-      synopsis: "An in-depth investigation into TCS's multi-million workforce reskilling in AI foundation models and high-margin AI advisory offerings.",
-      protagonist: { name: "K. Krithivasan", title: "CEO & MD", org: "Tata Consultancy Services" },
-      learning_objectives: [
-        "Analyze revenue margin compression in legacy IT maintenance contracts.",
-        "Design workforce reskilling pipelines at enterprise scale (500k+ employees)."
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000503",
-    title: "Zomato vs Swiggy: The Unit Economics and Dark Store Density of 10-Minute Delivery",
-    status: "approved",
-    type: "flash",
-    format: "real_signal",
-    domain: "Supply Chain",
-    industry: "E-Commerce & Logistics",
-    function: "Operations & Unit Economics",
-    language: "en",
-    complexity: 6,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000102",
-    content: {
-      synopsis: "Evaluating Blinkit's contribution margin per order and micro-warehouse real estate strategies against Instamart.",
-      protagonist: { name: "Albinder Dhindsa", title: "Founder & CEO", org: "Blinkit (Zomato)" },
-      learning_objectives: [
-        "Construct dark store financial models with fixed rent vs throughput volume.",
-        "Understand advertising revenue as the ultimate driver of quick commerce profitability."
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000504",
-    title: "HDFC Bank & HDFC Ltd Mega-Merger: Managing Cultural and IT Integration at Scale",
-    status: "in_review",
-    type: "full",
-    format: "real_signal",
-    domain: "HR",
-    industry: "Banking & Financial Services",
-    function: "Finance & Organizational Behavior",
-    language: "en",
-    complexity: 9,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000103",
-    content: {
-      synopsis: "Examining post-merger deposit mobilization requirements (CRR/SLR burdens) and cultural harmonization across mortgage and retail banking divisions.",
-      protagonist: { name: "Sashidhar Jagdishan", title: "MD & CEO", org: "HDFC Bank" },
-      learning_objectives: [
-        "Evaluate regulatory liquidity buffers following large-scale financial consolidations.",
-        "Structure cross-selling strategies for home loans to 70M+ retail banking depositors."
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000505",
-    title: "Reliance Jio 5G Capital Allocation: Infrastructure ROI and Fixed Wireless Monetization",
-    status: "draft",
-    type: "full",
-    format: "real_signal",
-    domain: "Finance",
-    industry: "Telecommunications",
-    function: "Corporate Finance",
-    language: "en",
-    complexity: 7,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000101",
-    content: {
-      synopsis: "How Jio invested over $25 billion into standalone 5G networks, targeting 100M homes via JioAirFiber to drive ARPU uplift.",
-      protagonist: { name: "Akash Ambani", title: "Chairman", org: "Reliance Jio Infocomm" },
-      learning_objectives: [
-        "Calculate WACC and DCF returns on long-cycle telecommunications capital expenditures."
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000506",
-    title: "Nykaa: Beauty & Personal Care Portfolio Expansion and Private Label Margin Play",
-    status: "draft",
-    type: "flash",
-    format: "real_signal",
-    domain: "Strategy",
-    industry: "Beauty & Fashion Retail",
-    function: "Marketing & Strategy",
-    language: "en",
-    complexity: 6,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000102",
-    content: {
-      synopsis: "Balancing curated prestige beauty marketplace dynamics with house brand manufacturing to elevate gross margins above 45%.",
-      protagonist: { name: "Falguni Nayar", title: "Founder & CEO", org: "FSN E-Commerce Ventures (Nykaa)" },
-      learning_objectives: [
-        "Analyze Customer Acquisition Cost (CAC) vs Lifetime Value (LTV) in niche digital commerce."
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000507",
-    title: "Swiggy Dynamic Bundling & Algorithmic Delivery Fleet Predictive Analytics",
-    status: "approved",
-    type: "full",
-    format: "real_signal",
-    domain: "Analytics",
-    industry: "Quick Commerce & Food Delivery",
-    function: "Business Intelligence & Machine Learning",
-    language: "en",
-    complexity: 8,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000104",
-    content: {
-      synopsis: "How predictive dispatch models and real-time order batching reduced rider idle times by 22% during peak dinner hours.",
-      protagonist: { name: "Sriharsha Majety", title: "Group CEO", org: "Swiggy Ltd" },
-      learning_objectives: [
-        "Formulate predictive regression models for multi-restaurant delivery batching.",
-        "Evaluate customer retention elasticity across dynamic surge fees."
-      ]
-    }
-  },
-  {
-    id: "00000000-0000-0000-0000-000000000508",
-    title: "Maruti Suzuki Manesar: Lean Six Sigma & JIT Assembly Line Optimization",
-    status: "approved",
-    type: "full",
-    format: "real_signal",
-    domain: "Operations",
-    industry: "Automotive & Manufacturing",
-    function: "Lean Manufacturing & Process Engineering",
-    language: "en",
-    complexity: 8,
-    author_id: "00000000-0000-0000-0000-000000000002",
-    course_id: "00000000-0000-0000-0000-000000000103",
-    content: {
-      synopsis: "Re-engineering assembly line tact time to accommodate dual-powertrain (ICE and Hybrid) production without increasing footprint.",
-      protagonist: { name: "Hisashi Takeuchi", title: "MD & CEO", org: "Maruti Suzuki India Ltd" },
-      learning_objectives: [
-        "Apply SMED and Kanban inventory replenishment on mixed-model automotive assembly lines.",
-        "Calculate OEE and bottleneck shifts in high-throughput manufacturing plants."
-      ]
-    }
-  }
-];
+// Cases emptied: Sample cases purged per institutional request. New real cases will be provided tomorrow.
+export const CASES: any[] = [];
 
 export const SAMPLE_RUBRIC = {
   id: "00000000-0000-0000-0000-000000000601",
@@ -711,79 +532,83 @@ export async function runSeed() {
     else console.log(`  ✓ [${course.code}] ${course.name}`);
   }
 
-  // 4. Cases
-  console.log(`\n📝 Seeding ${CASES.length} Cases across Disciplines (Authored by Ms. Reena Paswan)...`);
-  for (const c of CASES) {
-    const { error } = await supabase.from("cases").upsert(
+  // 4. Cases (Purged: ready for new cases)
+  console.log(`\n📝 Seeding Cases across Disciplines...`);
+  if (CASES.length > 0) {
+    for (const c of CASES) {
+      const { error } = await supabase.from("cases").upsert(
+        {
+          id: c.id,
+          title: c.title,
+          status: c.status,
+          type: c.type,
+          format: c.format,
+          industry: c.industry,
+          function: c.function,
+          domain: (c as any).domain || "Strategy",
+          language: c.language,
+          complexity: c.complexity,
+          author_id: c.author_id,
+          course_id: c.course_id,
+          content: c.content,
+        },
+        { onConflict: "id" }
+      );
+      if (error) console.warn(`  Case (${c.title.substring(0, 30)}...):`, error.message);
+      else console.log(`  ✓ [${c.status.toUpperCase()}] ${c.title.substring(0, 45)}...`);
+    }
+
+    // 5. Rubrics
+    console.log("\n📋 Seeding Evaluation Rubric...");
+    const { error: rubErr } = await supabase.from("rubrics").upsert(
       {
-        id: c.id,
-        title: c.title,
-        status: c.status,
-        type: c.type,
-        format: c.format,
-        industry: c.industry,
-        function: c.function,
-        domain: (c as any).domain || "Strategy",
-        language: c.language,
-        complexity: c.complexity,
-        author_id: c.author_id,
-        course_id: c.course_id,
-        content: c.content,
+        id: SAMPLE_RUBRIC.id,
+        case_id: SAMPLE_RUBRIC.case_id,
+        criteria: SAMPLE_RUBRIC.criteria,
       },
-      { onConflict: "id" }
+      { onConflict: "case_id" }
     );
-    if (error) console.warn(`  Case (${c.title.substring(0, 30)}...):`, error.message);
-    else console.log(`  ✓ [${c.status.toUpperCase()}] ${c.title.substring(0, 45)}...`);
+    if (rubErr) console.warn("  Rubric error:", rubErr.message);
+    else console.log("  ✓ Case Rubric linked.");
+
+    // 6. Answers
+    console.log("\n✍️ Seeding Submitted Student Answer...");
+    const { error: ansErr } = await supabase.from("answers").upsert(
+      {
+        id: SAMPLE_ANSWER.id,
+        case_id: SAMPLE_ANSWER.case_id,
+        student_id: SAMPLE_ANSWER.student_id,
+        status: SAMPLE_ANSWER.status,
+        text: SAMPLE_ANSWER.text,
+        submitted_at: new Date().toISOString(),
+      },
+      { onConflict: "case_id,student_id" }
+    );
+    if (ansErr) console.warn("  Answer error:", ansErr.message);
+    else console.log("  ✓ Answer submitted.");
+
+    // 7. Grades
+    console.log("\n🎯 Seeding Evaluated & Published Grade...");
+    const { error: grdErr } = await supabase.from("grades").upsert(
+      {
+        id: SAMPLE_GRADE.id,
+        answer_id: SAMPLE_GRADE.answer_id,
+        graded_by: SAMPLE_GRADE.graded_by,
+        ai_marks: SAMPLE_GRADE.ai_marks,
+        ai_feedback: SAMPLE_GRADE.ai_feedback,
+        final_marks: SAMPLE_GRADE.final_marks,
+        criterion_scores: SAMPLE_GRADE.criterion_scores,
+        faculty_comment: SAMPLE_GRADE.faculty_comment,
+        is_published: SAMPLE_GRADE.is_published,
+        published_at: new Date().toISOString(),
+      },
+      { onConflict: "answer_id" }
+    );
+    if (grdErr) console.warn("  Grade error:", grdErr.message);
+    else console.log("  ✓ Grade published.");
+  } else {
+    console.log("  ℹ️ 0 sample cases in seed: all sample cases purged. Ready for new institutional cases.");
   }
-
-  // 5. Rubrics
-  console.log("\n📋 Seeding Evaluation Rubric...");
-  const { error: rubErr } = await supabase.from("rubrics").upsert(
-    {
-      id: SAMPLE_RUBRIC.id,
-      case_id: SAMPLE_RUBRIC.case_id,
-      criteria: SAMPLE_RUBRIC.criteria,
-    },
-    { onConflict: "case_id" }
-  );
-  if (rubErr) console.warn("  Rubric error:", rubErr.message);
-  else console.log("  ✓ Case Rubric linked to Titan Company Ltd case.");
-
-  // 6. Answers
-  console.log("\n✍️ Seeding Submitted Student Answer (Zala Prachi)...");
-  const { error: ansErr } = await supabase.from("answers").upsert(
-    {
-      id: SAMPLE_ANSWER.id,
-      case_id: SAMPLE_ANSWER.case_id,
-      student_id: SAMPLE_ANSWER.student_id,
-      status: SAMPLE_ANSWER.status,
-      text: SAMPLE_ANSWER.text,
-      submitted_at: new Date().toISOString(),
-    },
-    { onConflict: "case_id,student_id" }
-  );
-  if (ansErr) console.warn("  Answer error:", ansErr.message);
-  else console.log("  ✓ Answer submitted for Case 00000000-0000-0000-0000-000000000501.");
-
-  // 7. Grades
-  console.log("\n🎯 Seeding Evaluated & Published Grade...");
-  const { error: grdErr } = await supabase.from("grades").upsert(
-    {
-      id: SAMPLE_GRADE.id,
-      answer_id: SAMPLE_GRADE.answer_id,
-      graded_by: SAMPLE_GRADE.graded_by,
-      ai_marks: SAMPLE_GRADE.ai_marks,
-      ai_feedback: SAMPLE_GRADE.ai_feedback,
-      final_marks: SAMPLE_GRADE.final_marks,
-      criterion_scores: SAMPLE_GRADE.criterion_scores,
-      faculty_comment: SAMPLE_GRADE.faculty_comment,
-      is_published: SAMPLE_GRADE.is_published,
-      published_at: new Date().toISOString(),
-    },
-    { onConflict: "answer_id" }
-  );
-  if (grdErr) console.warn("  Grade error:", grdErr.message);
-  else console.log("  ✓ Grade published (Final Marks: 88.0/100).");
 
   // 8. Outcomes
   console.log("\n📊 Seeding Learning Outcomes (CO/PO)...");

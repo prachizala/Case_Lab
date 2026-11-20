@@ -445,7 +445,10 @@ export const initialProfiles: Profile[] = [
   },
 ];
 
-export const initialCases: CaseStudy[] = [
+// Sample cases purged per institutional request. Real institutional cases will be provided tomorrow.
+export const initialCases: CaseStudy[] = [];
+
+export const testFixtureCases: CaseStudy[] = [
   {
     id: "case-001",
     author_id: "usr-faculty-1",
@@ -971,7 +974,9 @@ export const initialCases: CaseStudy[] = [
   }
 ];
 
-export const initialCollections: CaseCollection[] = [
+export const initialCollections: CaseCollection[] = [];
+
+export const testFixtureCollections: CaseCollection[] = [
   {
     id: "col-1",
     user_id: "usr-faculty-1",
@@ -992,7 +997,9 @@ export const initialCollections: CaseCollection[] = [
   },
 ];
 
-export const initialRubrics: Rubric[] = [
+export const initialRubrics: Rubric[] = [];
+
+export const testFixtureRubrics: Rubric[] = [
   {
     id: "rubric-001",
     case_id: "case-001",
@@ -1031,7 +1038,9 @@ export const initialRubrics: Rubric[] = [
   },
 ];
 
-export const initialAnswers: StudentAnswer[] = [
+export const initialAnswers: StudentAnswer[] = [];
+
+export const testFixtureAnswers: StudentAnswer[] = [
   {
     id: "ans-alumni-2-case-001",
     case_id: "case-001",
@@ -1096,7 +1105,9 @@ In the face of unexpected 40% export duties, the executive team must negotiate b
   },
 ];
 
-export const initialGrades: Grade[] = [
+export const initialGrades: Grade[] = [];
+
+export const testFixtureGrades: Grade[] = [
   {
     id: "grade-ans-1",
     answer_id: "ans-student-1-case-001",
@@ -1221,7 +1232,9 @@ export const initialOutcomes: Outcome[] = [
   },
 ];
 
-export const initialCaseOutcomes: CaseOutcome[] = [
+export const initialCaseOutcomes: CaseOutcome[] = [];
+
+export const testFixtureCaseOutcomes: CaseOutcome[] = [
   { case_id: "case-001", outcome_id: "out-co-1" },
   { case_id: "case-001", outcome_id: "out-co-2" },
   { case_id: "case-001", outcome_id: "out-po-1" },
@@ -1545,18 +1558,32 @@ class MockStore {
     }
     return p;
   }
-  private case_versions: CaseVersion[] = [
-    {
-      id: "ver-case-001-v1",
-      case_id: "case-001",
-      version_number: 1,
-      title: "FinTech Disruption at Gujarat Cooperative Bank: The Micro-Lending Dilemma",
-      content: initialCases[0].content,
-      updated_by: "usr-faculty-1",
-      change_summary: "Initial approved curriculum dossier published for Shanti Business School (SBS).",
-      created_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
-    },
-  ];
+  private case_versions: CaseVersion[] = [];
+
+  /**
+   * Seed in-memory test fixtures for automated test suites.
+   * Keeps production / live instances clean with zero sample cases.
+   */
+  seedTestFixtures(): void {
+    this.cases = [...testFixtureCases];
+    this.case_versions = [
+      {
+        id: "ver-case-001-v1",
+        case_id: "case-001",
+        version_number: 1,
+        title: "FinTech Disruption at Gujarat Cooperative Bank: The Micro-Lending Dilemma",
+        content: testFixtureCases[0]?.content || ({} as any),
+        updated_by: "usr-faculty-1",
+        change_summary: "Initial approved curriculum dossier published for Shanti Business School (SBS).",
+        created_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+      },
+    ];
+    this.collections = [...testFixtureCollections];
+    this.rubrics = [...testFixtureRubrics];
+    this.answers = [...testFixtureAnswers];
+    this.grades = [...testFixtureGrades];
+    this.case_outcomes = [...testFixtureCaseOutcomes];
+  }
   private collections: CaseCollection[] = [...initialCollections];
   private rubrics: Rubric[] = [...initialRubrics];
   private answers: StudentAnswer[] = [...initialAnswers];

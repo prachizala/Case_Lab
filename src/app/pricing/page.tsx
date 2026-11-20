@@ -80,7 +80,7 @@ export default function PricingPage() {
   }, []);
 
   // Razorpay Checkout Handler
-  const handleRazorpayCheckout = async (plan: "monthly" | "yearly" | "lifetime", simulateFailure: boolean = false) => {
+  const handleRazorpayCheckout = async (plan: "monthly" | "yearly", simulateFailure: boolean = false) => {
     setCheckoutLoading(plan);
     setCheckoutMessage(null);
 
@@ -172,21 +172,6 @@ export default function PricingPage() {
       ],
       amountPaise: 60000,
       popular: true,
-    },
-    {
-      id: "lifetime" as const,
-      name: "Alumni Lifetime Fellowship",
-      price: "₹2,500",
-      period: "one-time payment (Perpetual)",
-      description: `Never expire. Permanent full access to the ${COLLEGE_NAME_WITH_SHORT} case library for life.`,
-      features: [
-        "Permanent, unrestricted curriculum library access",
-        "Perpetual live portfolio hosting & credential verification",
-        "Alumni Advisory Council voting privileges",
-        "Zero recurring renewal reminders",
-      ],
-      amountPaise: 250000,
-      popular: false,
     },
   ];
 
@@ -341,7 +326,7 @@ export default function PricingPage() {
             Graduated students retain permanent, lifetime free access to download all their past submissions and DPDP records. A continuing education subscription unlocks the live curriculum library, newly published business cases, trending signals, and a shareable public portfolio link.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl mx-auto gap-6 items-stretch pt-2">
             {alumniPlans.map((p) => (
               <div
                 key={p.id}

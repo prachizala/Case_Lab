@@ -26,6 +26,9 @@ async function runAcceptanceVerification() {
 
   let allPassed = true;
 
+  // Initialize test fixtures for acceptance test suite
+  mockStore.seedTestFixtures();
+
   // 1. Sign up with wrong domain is rejected
   console.log("TEST 1: Domain Validation Gatekeeping (@shantibschool.edu.in)");
   const validRealStudent = validateEmailDomain("prachi.z24bca@shantibschool.edu.in");

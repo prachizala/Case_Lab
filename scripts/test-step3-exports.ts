@@ -21,6 +21,8 @@ async function runStep3ExportTests() {
   console.log("🧪 SBS CaseLab: Step 3 Export & Assets Verification Suite");
   console.log("================================================================\n");
 
+  mockStore.seedTestFixtures();
+
   let passed = 0;
   let failed = 0;
 

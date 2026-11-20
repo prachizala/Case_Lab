@@ -42,6 +42,7 @@ function assert(condition: boolean, message: string) {
 }
 
 async function runStep3Tests() {
+  mockStore.seedTestFixtures();
   console.log("================================================================");
   console.log("🧪 STEP 3 TEST SUITE: No Downloads for Students Without Payment");
   console.log("================================================================\n");

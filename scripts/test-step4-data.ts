@@ -19,6 +19,8 @@ async function runStep4DataTests() {
   console.log("🧪 SBS CaseLab: Step 4 Data & Legacy Retention Verification Suite");
   console.log("================================================================\n");
 
+  mockStore.seedTestFixtures();
+
   let passed = 0;
   let failed = 0;
 

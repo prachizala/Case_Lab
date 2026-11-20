@@ -33,6 +33,8 @@ async function runTests() {
   console.log("PHASE 1: Repository Schema, RLS & Answer Key Privacy Tests");
   console.log("================================================================\n");
 
+  mockStore.seedTestFixtures();
+
   // --------------------------------------------------------------------------
   // TEST 1: Migration Files Verification
   // --------------------------------------------------------------------------
@@ -198,6 +200,8 @@ async function runTests() {
   console.log("\n================================================================");
   console.log(`RLS & REPOSITORY TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
   console.log("================================================================\n");
+
+  mockStore.seedTestFixtures();
 
   if (failed > 0) {
     process.exit(1);
