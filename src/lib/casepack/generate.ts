@@ -18,7 +18,7 @@ export interface GenerateCasePackInput {
   topics?: string[];
   concepts?: string[];
   level?: string;
-  language?: "en" | "hi" | "gu";
+  language?: string; // Optional for backward compatibility; ignored (always English)
   industry?: string;
   geography?: string;
   length?: "short" | "standard";
@@ -88,12 +88,13 @@ DEPARTMENT PEDAGOGICAL PROFILE:
 
 MANDATORY RULES:
 1. ORIGINALITY: Create a fictional enterprise, protagonists, Indian city/region, and realistic numerical figures. Never use real companies or invent quotes from living people unless explicitly requested.
-2. CONCEPT GROUNDING: Every selected concept must appear within a tangible managerial decision featuring distinct benefits AND associated costs/risks. Every question must be fully answerable using case facts.
-3. DATA TABLES: Include at least one structured, multi-column financial or operational metrics table (e.g., cash flow projections, workforce metrics, market share benchmarks).
-4. TERMINOLOGY & SPELLING: Maintain strict, uniform spelling for technical terms across the narrative, questions, and answers (e.g., use 'forfaiting' consistently; never alternate spellings).
-5. INDIAN ENTERPRISE REALITY: Use Indian Rupees (INR Lakh / Crore), Indian regulatory bodies (RBI, SEBI, MCA), and authentic supply chain / market dynamics.
-6. BLOOM'S TAXONOMY: Questions must utilize explicit Bloom verbs (Analyze, Compare, Evaluate, Justify, Calculate, Diagnose).
-7. OUTPUT FORMAT: Output strictly valid JSON matching the target schema. Do not output markdown backticks or commentary outside the JSON.`;
+2. LANGUAGE: Write in clear, professional English only. Use Indian business context, INR figures and Indian examples where relevant. Names of Indian people, places and companies stay as they are.
+3. CONCEPT GROUNDING: Every selected concept must appear within a tangible managerial decision featuring distinct benefits AND associated costs/risks. Every question must be fully answerable using case facts.
+4. DATA TABLES: Include at least one structured, multi-column financial or operational metrics table (e.g., cash flow projections, workforce metrics, market share benchmarks).
+5. TERMINOLOGY & SPELLING: Maintain strict, uniform spelling for technical terms across the narrative, questions, and answers (e.g., use 'forfaiting' consistently; never alternate spellings).
+6. INDIAN ENTERPRISE REALITY: Use Indian Rupees (INR Lakh / Crore), Indian regulatory bodies (RBI, SEBI, MCA), and authentic supply chain / market dynamics.
+7. BLOOM'S TAXONOMY: Questions must utilize explicit Bloom verbs (Analyze, Compare, Evaluate, Justify, Calculate, Diagnose).
+8. OUTPUT FORMAT: Output strictly valid JSON matching the target schema. Do not output markdown backticks or commentary outside the JSON.`;
 }
 
 /**
@@ -103,7 +104,7 @@ function generateSimulatedCasePack(input: GenerateCasePackInput): CECasePack {
   const profile = getDepartmentProfile(input.department);
   const isShort = input.length === "short";
   const numQ = input.numQuestions || (isShort ? 1 : 2);
-  const lang = input.language || "en";
+  const lang = "en";
   const level = input.level || "MBA / PGDM";
   const maxMarks = input.examMetadata?.maximum_marks || 40;
   const marksPerQ = input.examMetadata?.marks_per_question || 20;
@@ -532,7 +533,7 @@ Subject: ${input.subject || profile.units[0].title}
 Topics: ${input.topics?.join(", ") || profile.units[0].topics.slice(0, 2).join(", ")}
 Concepts: ${input.concepts?.join(", ") || "Core analytical concepts"}
 Level: ${input.level || "MBA / PGDM"}
-Language: ${input.language || "en"}
+Language: English (en)
 Industry: ${input.industry || "Indian Manufacturing / Services"}
 Length: ${input.length || "standard"}
 Number of Questions: ${input.numQuestions || 2}

@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
         const anthropic = new Anthropic({ apiKey });
         const prompt = `You are a curriculum dean and case study assessment architect at ${COLLEGE_NAME_WITH_SHORT}.
 Design a rigorous 4-part grading rubric for student analysis of the following business teaching case:
+Write in clear, professional English only. Use Indian business context, INR figures and Indian examples where relevant. Names of Indian people, places and companies stay as they are.
 
 Case Title: "${caseStudy.title}"
 Industry: ${caseStudy.industry}

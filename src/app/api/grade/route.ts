@@ -87,8 +87,9 @@ ${answer.text}
 """
 
 INSTRUCTIONS:
-1. Award marks for each criterion strictly between 0 and max_marks. Do NOT exceed max_marks.
-2. Provide concise, constructive feedback (2 to 3 sentences) highlighting key strengths and areas for strategic improvement.
+1. Write in clear, professional English only. Use Indian business context, INR figures and Indian examples where relevant. Names of Indian people, places and companies stay as they are.
+2. Award marks for each criterion strictly between 0 and max_marks. Do NOT exceed max_marks.
+3. Provide concise, constructive feedback (2 to 3 sentences) highlighting key strengths and areas for strategic improvement.
 3. Return ONLY valid JSON in this exact structure:
 {
   "criteria_scores": {

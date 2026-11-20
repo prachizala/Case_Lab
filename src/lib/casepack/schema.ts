@@ -16,7 +16,7 @@ export const CasePackMetaSchema = z.object({
   ce_no: z.string().optional(),
   set: z.string().optional(),
   level: z.string().default("MBA / PGDM"),
-  language: z.enum(["en", "hi", "gu"]).default("en"),
+  language: z.string().optional().default("en"),
   industry: z.string().min(1, "Industry is required"),
   geography: z.string().min(1, "Geography is required"),
   length: z.enum(["short", "standard"]).default("standard"),

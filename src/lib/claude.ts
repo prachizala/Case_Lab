@@ -36,7 +36,7 @@ export interface GenerateCaseParams {
   level?: string;
   learningOutcomes?: string;
   contextRegion: string;
-  language: CaseLanguage; // 'en' | 'hi' | 'gu'
+  language?: string; // Optional for backward compatibility; generation is always English
   complexity: number; // 1 - 10
   targetLength?: "short" | "medium" | "comprehensive";
   sourceNotes?: string;
@@ -52,7 +52,7 @@ export interface GenerationResult {
 }
 
 export function buildSystemPrompt(params: {
-  language: CaseLanguage;
+  language?: string;
   format: CaseFormat;
   type: CaseType;
   tone?: CaseTone;
@@ -60,19 +60,11 @@ export function buildSystemPrompt(params: {
   includeTeachingNote?: boolean;
   includeExhibits?: ("financials" | "org_chart" | "market_data")[];
 }): string {
-  const languageNames: Record<CaseLanguage, string> = {
-    en: "English",
-    hi: "Hindi (हिंदी)",
-    gu: "Gujarati (ગુજરાતી)",
-  };
-
-  const selectedLang = languageNames[params.language] || "English";
-
   return `You are a distinguished Professor of Business Administration and Master Case Writer at ${COLLEGE_NAME_WITH_SHORT}.
 Your mission is to write an original, authentic, publication-grade pedagogical teaching case study conforming to the gold standard of Harvard Business School (HBS), Stanford GSB, and Ivey Publishing.
 
 CRITICAL PEDAGOGICAL & NARRATIVE ARCHITECTURE:
-1. OUTPUT LANGUAGE: The ENTIRE case content, including section narrative, exhibits, headings, quotes, and teaching notes MUST be written in ${selectedLang}.
+1. OUTPUT LANGUAGE: Write in clear, professional English only. Use Indian business context, INR figures and Indian examples where relevant. Names of Indian people, places and companies stay as they are.
 2. HARVARD / IVEY CASE STRUCTURE:
    - "background": MUST NOT be a brief generic summary. It must be a multi-paragraph, immersive academic narrative divided into structured sections:
      * ### The Opening Hook: Ground the scene in an exact date, time, and location (e.g. corporate headquarters in Ahmedabad, Mumbai, or Bengaluru). Introduce the key protagonist sitting at their desk or heading into an emergency executive committee meeting with a ticking clock (e.g. 72 hours until the Board of Directors convenes).
@@ -104,7 +96,7 @@ CRITICAL PEDAGOGICAL & NARRATIVE ARCHITECTURE:
 
 SCHEMA (Return pure valid JSON):
 {
-  "title": "Compelling, formal case study title in ${selectedLang}",
+  "title": "Compelling, formal case study title in English",
   "summary": "Executive abstract (120-180 words) summarizing the protagonist, company, industry dilemma, and pedagogical focus",
   "background": "Deep multi-section narrative with ### The Opening Hook, ### Enterprise Genesis & Core Capabilities, and ### Macro-Environment & Industry Upheaval",
   "challenge": "Deep operational challenge with ### Conflicting Boardroom Perspectives (stakeholder quotes) and ### Strategic Crossroads (The Three Mutually Exclusive Alternatives)",
@@ -180,7 +172,7 @@ export async function generateCaseWithClaude(
 - Academic Level: ${params.level}
 - Target Course: ${params.courseName || "General Management & Strategy"} (Semester: ${params.semester || "Current"})
 - Regional Context: ${params.contextRegion}
-- Language: ${params.language}
+- Language: English (en)
 - Complexity Index (1-10): ${params.complexity}
 - Target Scope: ${params.targetLength}
 ${params.learningOutcomes ? `- Course Outcomes / Program Outcomes (CO/PO): ${params.learningOutcomes}` : ""}
@@ -237,13 +229,12 @@ Please generate the complete, production-grade JSON case study now.`;
 }
 
 /**
- * High-fidelity fallback generating authentic teaching cases across English, Hindi, and Gujarati
+ * High-fidelity fallback generating authentic teaching cases in professional English
  */
 function generateHighFidelityMockCase(params: GenerateCaseParams): GenerationResult {
   const isShort = params.type === "short" || params.type === "flash";
   const isResearch = params.type === "research";
   const isReal = params.format === "real_signal";
-  const lang = params.language;
   const ind = params.industry || "Fintech & Banking";
   const func = params.functionalFocus || "Strategic Finance & Capital Allocation";
   const domain = params.domain || "Strategy";
@@ -268,157 +259,8 @@ function generateHighFidelityMockCase(params: GenerateCaseParams): GenerationRes
   let frameworks: { name: string; application: string; key_takeaway: string }[] = [];
 
   // =========================================================================
-  // 1. HINDI LOCALIZATION (हिंदी)
+  // ENGLISH STANDARD (HBS / IVEY BENCHMARK) - ENGLISH ONLY
   // =========================================================================
-  if (lang === "hi") {
-    title = `रणनीतिक नेतृत्व और व्यावसायिक परिवर्तन: ${company} के समक्ष ${ind} क्षेत्र में रणनीतिक संकट (${region})`;
-    summary = `शांति बिजनेस स्कूल (SBS) का यह प्रामाणिक शिक्षण केस स्टडी ${company} के शीर्ष नेतृत्व के समक्ष उत्पन्न पूंजी आवंटन, प्रतिस्पर्धी दबाव और संगठनात्मक परिवर्तन की गंभीर दुविधा का विश्लेषण करता है। ${region} के आर्थिक परिवेश में, ${decisionMaker} को अगले 72 घंटों में निदेशक मंडल के समक्ष एक सर्वसम्मत रणनीतिक योजना प्रस्तुत करनी है।`;
-    
-    background = `### 1. परिचयात्मक पृष्ठभूमि और तात्कालिक संकट
-सितंबर 2024 की एक महत्वपूर्ण शाम को, ${region} स्थित ${company} के कॉरपोरेट मुख्यालय के 8वें तल पर, ${decisionMaker} अपनी कार्यमेज़ पर फैली गोपनीय वित्तीय रिपोर्टों का गहन अध्ययन कर रहे थे। मेज़ पर सोमवार सुबह 9:00 बजे आयोजित होने वाली आपातकालीन निदेशक मंडल बैठक (Board of Directors Meeting) के तीन विस्तृत खंड रखे थे। प्रश्न केवल कुछ बजट मदों का नहीं था, बल्कि यह निर्णय कंपनी के आगामी 10 वर्षों के भविष्य और बाजार में उसके अस्तित्व को पुनर्परिभाषित करने वाला था।
-
-### 2. उद्यम की ऐतिहासिक यात्रा और मुख्य प्रतिस्पर्धात्मक लाभ
-विगत तीन दशकों में, ${company} ने ${region} के ${ind} क्षेत्र में एक विश्वसनीय और अग्रणी संस्थान के रूप में अपनी विशिष्ट पहचान बनाई थी। कंपनी का ऐतिहासिक प्रतिस्पर्धी लाभ (Competitive Moat) मुख्य रूप से तीन स्तंभों पर आधारित था:
-- **जमीनी आपूर्ति श्रृंखला और प्रत्यक्ष नेटवर्क**: टियर-1 से लेकर टियर-3 शहरों तक फैला व्यापक और सुदृढ़ वितरण तंत्र, जिसकी नकल करना किसी भी नए प्रतिस्पर्धी के लिए अत्यंत कठिन था।
-- **ब्रांड निष्ठा और संस्थागत साख**: दशकों की विश्वसनीय ग्राहक सेवा और गुणवत्ता के दम पर अर्जित असाधारण ग्राहक सद्भावना (Goodwill)।
-- **मितव्ययी परिचालन और कार्यशील पूंजी अनुशासन**: ऋण-इक्विटी अनुपात को हमेशा नियंत्रित रखते हुए स्वस्थ दोहरे अंकों में नियोजित पूंजी पर प्रतिफल (ROIC) अर्जित करना।
-
-### 3. व्यापक बाजार परिवर्तन और तकनीकी उथल-पुथल
-किंतु पिछले 24 महीनों में उद्योग की परिस्थितियों में अभूतपूर्व संरचनात्मक उथल-पुथल आई। वेंचर-कैपिटल समर्थित नए डिजिटल स्टार्टअप्स ने भारी छूट और प्रत्यक्ष उपभोक्ता (D2C) मॉडल के बल पर आक्रामक विपणन शुरू कर दिया। इसके अतिरिक्त, कच्चे माल की मुद्रास्फीति और नई नियामक अनुपालन नीतियों ने परिचालन लागत में भारी वृद्धि कर दी। FY23 से FY25 के मध्य, कंपनी के सकल लाभ मार्जिन (Gross Margin) में 380 आधार अंकों की गिरावट दर्ज की गई, जबकि युवा ग्राहकों (35 वर्ष से कम) के वर्ग में कंपनी का बाजार हिस्सा 18% कम हो गया।`;
-
-    challenge = `### 1. बोर्डरूम में परस्पर विरोधी दृष्टिकोण (हितधारकों के उद्धरण)
-शीर्ष प्रबंधन के मध्य तीन प्रमुख अधिकारियों के विचार स्पष्ट रूप से विभाजित हो चुके थे:
-
-> *"हम तीन दशकों से निर्मित वित्तीय अनुशासन को किसी अनिश्चित तकनीकी जुए की भेंट नहीं चढ़ा सकते,"* मुख्य वित्तीय अधिकारी (CFO) ने ऑडिट की गई वित्तीय रिपोर्ट पर उंगली रखते हुए जोर दिया। *"हमारा ऋण-इक्विटी अनुपात 0.45x से बढ़कर 0.88x तक पहुंच चुका है। यदि हम इस समय ₹140 करोड़ का भारी पूंजीगत व्यय (CAPEX) करते हैं, तो मांग में थोड़ी सी भी कमी हमारी बैंक शर्तों (Debt Covenants) का उल्लंघन कर सकती है।"*
-
-> *"यदि हमने स्वयं अपने पारंपरिक मॉडल को नहीं बदला, तो बाजार हमें बाहर कर देगा,"* रणनीतिक विकास उपाध्यक्ष (VP of Growth) ने दृढ़ता से प्रतिवाद किया। *"हमारे पारंपरिक वितरक संबंध कमजोर पड़ रहे हैं। यदि हम आधुनिक डिजिटल तकनीक और सीधे उपभोक्ता तक पहुंचने वाले मंच में निवेश नहीं करेंगे, तो 36 महीनों में हम केवल एक कम मार्जिन वाले सप्लायर बनकर रह जाएंगे।"*
-
-> *"हमारे संयंत्र और क्षेत्रीय वितरण साझेदार पहले से ही अपनी 94% क्षमता पर कार्य कर रहे हैं,"* मुख्य परिचालन अधिकारी (COO) ने आगाह किया। *"यदि हमने डिजिटल निवेश के लिए मौजूदा परिचालन बजट में कटौती की, तो कर्मचारियों का मनोबल गिरेगा और आपूर्ति व्यवस्था बाधित हो सकती है।"*
-
-### 2. रणनीतिक चौराहा: तीन परस्पर अनन्य विकल्प
-${dilemma} के संदर्भ में, ${decisionMaker} के समक्ष तीन स्पष्ट विकल्प प्रस्तुत हैं:
-
-- **विकल्प 1: आक्रामक आंतरिक डिजिटल परिवर्तन (भारी पूंजीगत व्यय)**
-  - *आवश्यक पूंजी*: ₹140 Cr – ₹175 Cr (बैंक ऋण और आंतरिक संचय द्वारा)।
-  - *रणनीति*: अत्याधुनिक स्वचालित आपूर्ति तंत्र, एकीकृत मोबाइल प्लेटफॉर्म और 1,200 कर्मचारियों का तकनीकी पुनर्कौशल।
-  - *सकारात्मक पक्ष*: दीर्घकालिक लागत नेतृत्व, 100% मार्जिन नियंत्रण और तकनीकी संप्रभुता।
-  - *जोखिम*: अल्पकालिक लाभ में तीव्र संकुचन, उच्च ऋण भार और क्रियान्वयन की विफलता की आशंका।
-
-- **विकल्प 2: रणनीतिक संयुक्त उद्यम / तकनीकी अधिग्रहण (परिसंपत्ति-हल्का मॉडल)**
-  - *आवश्यक पूंजी*: ₹65 Cr – ₹85 Cr (इक्विटी कमजोर पड़ने और रणनीतिक वारंट्स द्वारा)।
-  - *रणनीति*: किसी तेजी से उभरते हुए डिजिटल प्लेटफॉर्म का अधिग्रहण या किसी प्रमुख लॉजिस्टिक्स कंपनी के साथ 50:50 का संयुक्त उद्यम।
-  - *सकारात्मक पक्ष*: त्वरित बाजार पहुंच (6 माह से कम), युवा ग्राहक वर्ग की तत्काल प्राप्ति।
-  - *जोखिम*: संगठनात्मक संस्कृति का टकराव, परिचालन स्वायत्तता का ह्रास और शासन संबंधी जटिलताएं।
-
-- **विकल्प 3: रक्षात्मक समेकन और प्रीमियम मार्जिन संरक्षण**
-  - *आवश्यक पूंजी*: ₹25 Cr – ₹35 Cr (परिचालन नकदी प्रवाह द्वारा स्व-वित्तपोषित)।
-  - *रणनीति*: कम लाभ वाले उत्पादों और अकुशल ग्राहक वर्गों से बाहर निकलना, उच्च मार्जिन वाले कॉर्पोरेट अनुबंधों पर ध्यान केंद्रित करना।
-  - *सकारात्मक पक्ष*: स्वस्थ EBITDA मार्जिन (14%+) की तत्काल सुरक्षा, शून्य ऋण जोखिम और निरंतर लाभांश।
-  - *जोखिम*: कुल बाजार हिस्सेदारी में स्थायी गिरावट और दीर्घकाल में ब्रांड का अप्रासंगिक हो जाना।`;
-
-    decisionPoint = `सोमवार प्रातः 9:00 बजे की निदेशक मंडल बैठक में, ${decisionMaker} को किस रणनीतिक विकल्प का समर्थन करना चाहिए, और सभी हितधारकों के विश्वास को बनाए रखते हुए इस संक्रमण का वित्तपोषण कैसे किया जाना चाहिए?`;
-    
-    questions = [
-      `प्रदर्श 1 और 3 के आधार पर, ${company} के परिचालन मार्जिन में आई गिरावट के प्राथमिक मूल कारणों का निदान कीजिए।`,
-      `तीनों रणनीतिक विकल्पों (विकल्प 1, 2 और 3) के वित्तीय जोखिम और नियोजित पूंजी पर प्रतिफल (ROIC) का तुलनात्मक मूल्यांकन कीजिए।`,
-      `हितधारकों के परस्पर विरोधी दृष्टिकोणों को देखते हुए, आंतरिक प्रतिरोध को कम करने हेतु कौन सा संगठनात्मक ढांचा उपयुक्त होगा?`,
-      `नियामक और व्यापक आर्थिक अनिश्चितताओं के बीच ऋण-इक्विटी अनुपात की सुरक्षा सुनिश्चित करने के लिए क्या सुरक्षा उपाय किए जाने चाहिए?`,
-      `${decisionMaker} के लिए एक व्यापक 3-वर्षीय चरणबद्ध कार्ययोजना तैयार कीजिए जिसमें स्पष्ट शासन मील के पत्थर शामिल हों।`
-    ];
-
-    if (objectives.length === 0) {
-      objectives = [
-        `अत्यधिक प्रतिस्पर्धी बाजार में बहु-विभागीय उद्यम के रणनीतिक संकट का समग्र निदान करना।`,
-        `पूंजी आवंटन, ऋण जोखिम और परिचालन दक्षता के बीच के व्यापार-बंद (Trade-offs) का मात्रात्मक विश्लेषण करना।`,
-        `ब्लूम के वर्गीकरण (${bloomsLevel}) के अनुरूप कार्यकारी निर्णय निर्माण कौशल का विकास करना।`
-      ];
-    }
-
-    frameworks = [
-      { name: "पोर्टर का फाइव फोर्सेज मॉडल (Porter's 5 Forces)", application: "प्रतिस्पर्धी तीव्रता और आपूर्तिकर्ताओं की मोलभाव क्षमता का आकलन।", key_takeaway: "पारंपरिक बाधाएं डिजिटल प्रतिस्पर्धियों के सामने कमजोर पड़ रही हैं।" },
-      { name: "ड्यूपॉन्ट विश्लेषण (DuPont ROE Decomposition)", application: "इक्विटी पर प्रतिफल, परिसंपत्ति कारोबार और शुद्ध लाभ मार्जिन का विखंडन।", key_takeaway: "पूंजी की गहनता बढ़ने से जब तक टर्नओवर नहीं बढ़ता, तब तक आरओई पर दबाव बना रहेगा।" },
-      { name: "कोट्टर का 8-चरणीय परिवर्तन मॉडल (Kotter's Change Model)", application: "संगठनात्मक प्रतिरोध पर विजय पाने और रणनीतिक गठबंधन बनाने की रूपरेखा।", key_takeaway: "नेतृत्व में स्पष्ट आम सहमति के बिना जटिल रणनीतिक परिवर्तन विफल हो जाते हैं।" }
-    ];
-  }
-
-  // =========================================================================
-  // 2. GUJARATI LOCALIZATION (ગુજરાતી)
-  // =========================================================================
-  else if (lang === "gu") {
-    title = `વ્યૂહાત્મક નેતૃત્વ અને વ્યાપારિક રૂપાંતરણ: ${company} સામે ${ind} ક્ષેત્રમાં અસ્તિત્વનો પડકાર (${region})`;
-    summary = `શાંતિ બિઝનેસ સ્કૂલ (SBS) નો આ અધિકૃત શૈક્ષણિક કેસ સ્ટડી ${company} ના વરિષ્ઠ નેતૃત્વ સમક્ષ ઉપસ્થિત મૂડી ફાળવણી, ડિજિટલ સ્પર્ધા અને વ્યાપારિક પુનઃરચનાની ગંભીર કટોકટીનું પૃથક્કરણ કરે છે. ${region} ના ગતિશીલ વાતાવરણમાં, ${decisionMaker} એ આગામી 72 કલાકમાં બોર્ડ ઓફ ડિરેક્ટર્સ સમક્ષ સર્વગ્રાહી વ્યૂહરચના રજૂ કરવાની છે.`;
-
-    background = `### 1. પરિચય અને તાત્કાલિક કટોકટી
-સપ્ટેમ્બર 2024 ના એક નિર્ણાયક સાંજે, ${region} ખાતે આવેલી ${company} ની મુખ્ય વહીવટી કચેરીના આઠમા માળે, ${decisionMaker} આગામી બોર્ડ મીટિંગના ગોપનીય નાણાકીય દસ્તાવેજોનું નિરીક્ષણ કરી રહ્યા હતા. સોમવારે સવારે 9:00 વાગ્યે મળનારી બોર્ડ ઓફ ડિરેક્ટર્સની ઇમરજન્સી બેઠક માટે ત્રણ અલગ-અલગ યોજનાઓ તૈયાર હતી. આ નિર્ણય માત્ર આગામી ત્રિમાસિક ગાળા પૂરતો સીમિત નહોતો, પરંતુ પેઢીના આગામી દાયકાના ભવિષ્યની દિશા નક્કી કરવાનો હતો.
-
-### 2. પેઢીનો ઐતિહાસિક પાયો અને સ્પર્ધાત્મક તાકાત
-છેલ્લા ત્રણ દાયકામાં, ${company} એ ${region} ના ${ind} ઉદ્યોગમાં અગ્રેસર સ્થાન પ્રાપ્ત કર્યું હતું. પેઢીની પરંપરાગત વ્યાપારી શક્તિ નીચે મુજબના મુખ્ય આધારસ્તંભો પર નિર્ભર હતી:
-- **મજબૂત સ્થાનિક વિતરણ નેટવર્ક**: તાલુકા અને ગ્રામીણ સ્તર સુધી વિસ્તરેલું વિતરણ તંત્ર, જેને સરળતાથી પડકારી શકાય તેમ નહોતું.
-- **વિશ્વસનીય બ્રાન્ડ અને ગ્રાહક વફાદારી**: પેઢીની ગુણવત્તા અને પારદર્શક વ્યાપારી નીતિઓને કારણે બજારમાં ઊભી થયેલી અભૂતપૂર્વ શાખ (Goodwill).
-- **શિસ્તબદ્ધ કાર્યકારી મૂડી વ્યવસ્થાપન**: રૂઢિચુસ્ત દેવું-ઇક્વિટી રેશિયો જાળવી રાખીને નિયોજિત મૂડી પર સ્થિર વળતર (ROIC) મેળવવાની નીતિ.
-
-### 3. ઉદ્યોગમાં મોટા ફેરફારો અને ડિજિટલ પડકારો
-પરંતુ છેલ્લા 24 મહિનામાં ઉદ્યોગનું પરિદ્રશ્ય ઝડપથી બદલાઈ ગયું છે. સાહસિક મૂડી (Venture Capital) આધારિત નવા ડીજીટલ સ્ટાર્ટઅપ્સે આક્રમક કિંમતો અને સીધા ગ્રાહક (D2C) મોડેલ સાથે બજારમાં પ્રવેશ કર્યો છે. આ ઉપરાંત, કાચા માલના ભાવવધારા અને નિયમનકારી નીતિઓને લીધે ઓપરેટિંગ ખર્ચમાં મોટો ઉછાળો આવ્યો છે. FY23 થી FY25 વચ્ચે, કંપનીના કુલ નફાના માર્જિનમાં 380 બેસિસ પોઇન્ટ્સનો ઘટાડો થયો છે અને યુવા પેઢીના ગ્રાહકોમાં બજાર હિસ્સો 18% ઘટ્યો છે.`;
-
-    challenge = `### 1. બોર્ડરૂમમાં વિરોધાભાસી દ્રષ્ટિકોણ અને વાર્તાલાપ
-મેનેજમેન્ટ કમિટીમાં ત્રણ વરિષ્ઠ અધિકારીઓ વચ્ચે ગંભીર મતભેદો સપાટી પર આવ્યા હતા:
-
-> *"આપણે 30 વર્ષથી ઊભી કરેલી નાણાકીય શિસ્તને કોઈ અજમાવેલી ન હોય તેવી ટેકનોલોજી પાછળ જોખમમાં ન મૂકી શકીએ,"* ચીફ ફાઇનાન્સિયલ ઓફિસર (CFO) એ ઓડિટ કરેલા બેલેન્સ શીટ તરફ આંગળી ચીંધતા જણાવ્યું. *"આપણો ડેટ-ટુ-ઇક્વિટી રેશિયો 0.45x થી વધીને 0.88x થયો છે. જો આપણે હવે ₹140 કરોડનું નવું મૂડીરોકાણ (CAPEX) કરીશું, તો વેચાણમાં સહેજ પણ ઘટાડો બેંકની લોન શરતોનું ઉલ્લંઘન કરી શકે છે."*
-
-> *"પરિવર્તનનો સામનો કરવાને બદલે હાથ જોડીને બેસી રહેવું એ સૌથી મોટું વ્યાપારી જોખમ છે,"* વાઇસ પ્રેસિડેન્ટ (Strategic Growth) એ દલીલ કરી. *"જો આપણે ડાયરેક્ટ-ટુ-કન્ઝ્યુમર ડિજિટલ પ્લેટફોર્મ અને સપ્લાય ચેઇન ઓટોમેશનમાં રોકાણ નહીં કરીએ, તો આગામી 36 મહિનામાં આપણી પેઢી બજારમાંથી ફેંકાઈ જશે."*
-
-> *"આપણા ફેક્ટરી કર્મચારીઓ અને લોજિસ્ટિક્સ પાર્ટનર્સ હાલમાં જ 94% ક્ષમતા પર કામ કરી રહ્યા છે,"* ચીફ ઓપરેટિંગ ઓફિસર (COO) એ ચેતવણી આપી. *"જો આપણે ટેકનોલોજી પાછળ નાણાં ફાળવવા માટે ઓપરેશનલ બજેટ કાપીશું, તો કામગીરી ખોરવાઈ જશે."*
-
-### 2. વ્યૂહાત્મક ચોકડી: ત્રણ પરસ્પર વિશિષ્ટ વિકલ્પો
-${dilemma} ના સંદર્ભમાં, ${decisionMaker} સમક્ષ ત્રણ સ્પષ્ટ વિકલ્પો છે:
-
-- **વિકલ્પ 1: આક્રમક આંતરિક ડિજિટલ રૂપાંતરણ (મોટું મૂડીરોકાણ)**
-  - *જરૂરી મૂડી*: ₹140 Cr – ₹175 Cr (બેંક ધિરાણ અને આંતરિક ભંડોળ દ્વારા).
-  - *વ્યૂહરચના*: અત્યાધુનિક ઓટોમેટેડ વેરહાઉસિંગ, માલિકીનું મોબાઇલ પ્લેટફોર્મ અને કર્મચારીઓની ટેકનોલોજી તાલીમ.
-  - *લાભ*: સંપૂર્ણ માર્જિન પર અંકુશ અને સ્વતંત્ર ટેકનોલોજી.
-  - *જોખમ*: ભારે દેવાનો બોજ અને નજીકના ભવિષ્યમાં નફાકારકતામાં તીવ્ર ઘટાડો.
-
-- **વિકલ્પ 2: વ્યૂહાત્મક સંયુક્ત સાહસ / ડિજિટલ એક્વિઝિશન (લાઇટ મોડેલ)**
-  - *જરૂરી મૂડી*: ₹65 Cr – ₹85 Cr (ઇક્વિટી મંદી અને વ્યૂહાત્મક ભાગીદારી દ્વારા).
-  - *વ્યૂહરચના*: ઝડપથી વિકસતા ટેક પ્લેટફોર્મમાં મોટો હિસ્સો ખરીદવો અથવા પ્રતિષ્ઠિત લોજિસ્ટિક્સ ફર્મ સાથે 50:50 નું સંયુક્ત સાહસ.
-  - *લાભ*: ઝડપી બજાર પ્રવેશ (6 મહિનામાં) અને યુવા ગ્રાહકોની તાત્કાલિક પ્રાપ્તિ.
-  - *જોખમ*: બંને પેઢીઓની કાર્યસંસ્કૃતિનો વિવાદ અને નિર્ણય લેવાની સ્વતંત્રતામાં ઘટાડો.
-
-- **વિકલ્પ 3: રક્ષણાત્મક એકત્રીકરણ અને પ્રીમિયમ માર્જિન રક્ષણ**
-  - *જરૂરી મૂડી*: ₹25 Cr – ₹35 Cr (ઓપરેટિંગ રોકડ પ્રવાહમાંથી).
-  - *વ્યૂહરચના*: બિનનફાકારક ઉત્પાદનો બંધ કરવા, માત્ર ઉચ્ચ માર્જિન ધરાવતા કોર્પોરેટ ગ્રાહકો પર ધ્યાન કેન્દ્રિત કરવું.
-  - *લાભ*: સ્થિર EBITDA માર્જિન (14%+), દેવાનું કોઈ જોખમ નહીં અને નિયમિત ડિવિડન્ડ.
-  - *જોખમ*: બજાર હિસ્સામાં મોટો ઘટાડો અને લાંબાગાળે બ્રાન્ડ જૂની થઈ જવાનું જોખમ.`;
-
-    decisionPoint = `સોમવારે સવારે 9:00 વાગ્યે યોજાનારી બોર્ડ ઓફ ડિરેક્ટર્સની બેઠકમાં, ${decisionMaker} એ કયો વ્યૂહાત્મક વિકલ્પ પસંદ કરવો જોઈએ અને હિતધારકોના હિતોનું રક્ષણ કેવી રીતે કરવું જોઈએ?`;
-
-    questions = [
-      `પ્રદર્શ 1 અને 3 ના આધારે, ${company} ની નફાકારકતા ઘટવાના મૂળભૂત આર્થિક અને બજાર પરિબળોનું વિશ્લેષણ કરો.`,
-      `ત્રણેય વ્યૂહાત્મક વિકલ્પો વચ્ચેના નાણાકીય જોખમો અને મૂડી પરના વળતર (ROIC) ની સરખામણી કરો.`,
-      `સંચાલકીય મતભેદોને ધ્યાને લેતાં, સંસ્થાકીય વિરોધ ઘટાડવા માટે કયું નેતૃત્વ માળખું યોગ્ય ગણાશે?`,
-      `નિયમનકારી ફેરફારો અને વ્યાજદરના જોખમો સામે બેલેન્સ શીટનું રક્ષણ કરવા કયા પગલાં લેવા જોઈએ?`,
-      `${decisionMaker} માટે 3-વર્ષનો અમલીકરણ રોડમેપ તૈયાર કરો જેમાં શાસન અને જોખમ વ્યવસ્થાપનના માપદંડો સામેલ હોય.`
-    ];
-
-    if (objectives.length === 0) {
-      objectives = [
-        `ગતિશીલ ભારતીય બજારમાં જટિલ સંસ્થાકીય કટોકટીનું વ્યવસ્થિત નિદાન કરવું.`,
-        `મૂડી ફાળવણી, દેવાના જોખમો અને કાર્યકારી નફાકારકતા વચ્ચેના સંબંધોનું મૂલ્યાંકન કરવું.`,
-        `બ્લૂમ્સ ટેક્સોનોમી (${bloomsLevel}) આધારિત નિર્ણાયક સંચાલકીય વિચારસરણી કેળવવી.`
-      ];
-    }
-
-    frameworks = [
-      { name: "પોર્ટર્સ ફાઇવ ફોર્સિસ (Porter's 5 Forces)", application: "ઉદ્યોગમાં સ્પર્ધાત્મક તીવ્રતા અને સપ્લાયર્સની સોદાબાજી શક્તિનું મૂલ્યાંકન.", key_takeaway: "ડિજિટલ પ્લેટફોર્મના આગમનથી પરંપરાગત વ્યાપારી મોડ્સ નબળા પડી રહ્યા છે." },
-      { name: "ડ્યુપોન્ટ વિશ્લેષણ (DuPont ROE Analysis)", application: "ઇક્વિટી પરના વળતર, એસેટ ટર્નઓવર અને નેટ પ્રોફિટ માર્જિનનું વિભાજન.", key_takeaway: "ભારે મૂડીરોકાણ પછી જ્યાં સુધી ટર્નઓવર ઝડપી ન બને ત્યાં સુધી રોકાણકારોના વળતર પર દબાણ રહેશે." },
-      { name: "વ્રીઓ ફ્રેમવર્ક (VRIO Framework)", application: "પેઢીની લોજિસ્ટિક્સ ક્ષમતાઓ અને બ્રાન્ડની ટકાઉ ક્ષમતાનું ઓડિટ.", key_takeaway: "ભૌતિક વિતરણ નેટવર્ક કિંમતી છે, પરંતુ ડિજિટલ સ્પર્ધકો સામે રક્ષણ આપવા સક્ષમ નથી." }
-    ];
-  }
-
-  // =========================================================================
-  // 3. ENGLISH STANDARD (HBS / IVEY BENCHMARK)
-  // =========================================================================
-  else {
     title = isResearch
       ? `Case Research: ${company} vs. Emerging Challengers — Strategic Paradigms in ${ind} (${region})`
       : isShort
@@ -496,7 +338,6 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
       { name: "DuPont ROE Decomposition Model", application: "Deconstructing return on equity into net profit margin, asset turnover, and financial leverage.", key_takeaway: "Asset-heavy expansion dilutes ROE unless working capital turnover accelerates proportionally." },
       { name: "VRIO Strategic Capability Audit", application: "Auditing physical distribution infrastructure vs proprietary customer data.", key_takeaway: "Physical assets are valuable but imitable; direct customer relationships and algorithmic data are the true rare moats." }
     ];
-  }
 
   // =========================================================================
   // 4. EXHIBITS GENERATION (FINANCIALS, ORG CHART, MARKET DATA)
@@ -507,17 +348,9 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
   if (requestedExhibits.includes("financials")) {
     exhibits.push({
       id: "exhibit-1",
-      title: lang === "hi"
-        ? `प्रदर्श 1: ${company} — 3-वर्षीय ऑडिट किया गया वित्तीय विवरण और मुख्य परिचालन संकेतक`
-        : lang === "gu"
-        ? `પ્રદર્શ 1: ${company} — 3-વાર્ષિક ઓડિટેડ નાણાકીય પરિણામો અને કામગીરીના આંકડા`
-        : `Exhibit 1: ${company} — 3-Year Audited Financial Statement & Unit Economics`,
+      title: `Exhibit 1: ${company} — 3-Year Audited Financial Statement & Unit Economics`,
       type: "financials",
-      description: lang === "hi"
-        ? "कंपनी के वार्षिक वित्तीय परिणाम, सकल मार्जिन, परिचालन एबिट्डा और नकदी प्रवाह (सभी आंकड़े ₹ करोड़ में)"
-        : lang === "gu"
-        ? "કંપનીના ઓડિટેડ નાણાકીય પરિણામો, ગ્રોસ માર્જિન, એબિટ્ડા અને રોકડ પ્રવાહ (બધા આંકડા ₹ કરોડમાં)"
-        : "Audited financial highlights, operating margins, capital structure, and unit economics (all figures in ₹ Crores unless noted)",
+      description: "Audited financial highlights, operating margins, capital structure, and unit economics (all figures in ₹ Crores unless noted)",
       data: [
         { metric: "Gross Revenue (Topline)", y2023: "₹1,480 Cr", y2024: "₹1,660 Cr", y2025: "₹1,850 Cr", y2026_proj: "₹1,940 Cr", cagr: "+7.7%" },
         { metric: "Cost of Goods Sold (COGS)", y2023: "₹925 Cr", y2024: "₹1,062 Cr", y2025: "₹1,225 Cr", y2026_proj: "₹1,310 Cr", cagr: "+11.8%" },
@@ -540,17 +373,9 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
   if (requestedExhibits.includes("org_chart")) {
     exhibits.push({
       id: "exhibit-2",
-      title: lang === "hi"
-        ? "प्रदर्श 2: संगठनात्मक शासन संरचना और प्रमुख निर्णयकर्ता"
-        : lang === "gu"
-        ? "પ્રદર્શ 2: સંસ્થાકીય ગવર્નન્સ અને મુખ્ય નિર્ણાયક અધિકારીઓ"
-        : "Exhibit 2: Organizational Governance & C-Suite Decision Matrix",
+      title: "Exhibit 2: Organizational Governance & C-Suite Decision Matrix",
       type: "org_chart",
-      description: lang === "hi"
-        ? "निदेशक मंडल, वरिष्ठ कार्यकारी समिति और विभिन्न विभागों के बीच निर्णय लेने के अधिकार"
-        : lang === "gu"
-        ? "બોર્ડ ઓફ ડિરેક્ટર્સ, એક્ઝિક્યુટિવ કમિટી અને વહીવટી સત્તાઓનું માળખું"
-        : "Board of Directors, Executive Committee hierarchy, and strategic mandates at the heart of the dispute",
+      description: "Board of Directors, Executive Committee hierarchy, and strategic mandates at the heart of the dispute",
       data: [
         { role: "Board of Directors (Chairmanship)", occupant: "Independent Chairperson & 6 Non-Executive Directors", mandate: "Fiduciary oversight, audit compliance, capital allocation approvals above ₹50 Cr" },
         { role: "Managing Director & CEO", occupant: decisionMaker, mandate: "Overall enterprise strategy, P&L accountability, board-executive consensus building" },
@@ -564,17 +389,9 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
   if (requestedExhibits.includes("market_data")) {
     exhibits.push({
       id: "exhibit-3",
-      title: lang === "hi"
-        ? `प्रदर्श 3: ${region} में प्रतिस्पर्धी परिदृश्य और बाजार हिस्सेदारी (FY25)`
-        : lang === "gu"
-        ? `પ્રદર્શ 3: ${region} માં બજાર હિસ્સો અને સ્પર્ધાત્મક પરિસ્થિતિ (FY25)`
-        : `Exhibit 3: Competitive Market Share & Industry Benchmark Matrix in ${region} (FY25)`,
+      title: `Exhibit 3: Competitive Market Share & Industry Benchmark Matrix in ${region} (FY25)`,
       type: "market_data",
-      description: lang === "hi"
-        ? "उद्योग में प्रमुख प्रतिस्पर्धियों की बाजार हिस्सेदारी, वार्षिक वृद्धि दर और मूल्य निर्धारण शक्ति"
-        : lang === "gu"
-        ? "ઉદ્યોગમાં મુખ્ય સ્પર્ધકોનો બજાર હિસ્સો, વાર્ષિક વૃદ્ધિ દર અને કિંમત શક્તિ"
-        : `Market concentration, pricing power index, and digital penetration across ${region}`,
+      description: `Market concentration, pricing power index, and digital penetration across ${region}`,
       data: [
         { firm: company, market_share: "34.2%", yoy_growth: "+4.1%", pricing_power: "100 (Index Base)", digital_mix: "14.2%", nps: "+48" },
         { firm: "Venture-Backed Digital Challenger A", market_share: "22.8%", yoy_growth: "+32.4%", pricing_power: "88 (-12%)", digital_mix: "86.5%", nps: "+58" },

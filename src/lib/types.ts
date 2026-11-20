@@ -127,7 +127,7 @@ export type CaseStatus =
   | "published"
   | "archived";
 export type CaseVisibility = "private" | "sbs_only" | "public";
-export type CaseLanguage = "en" | "hi" | "gu";
+export type CaseLanguage = "en" | "hi" | "gu"; // 'hi' | 'gu' retained for legacy database compatibility; all generation is English only
 
 export type CaseDomain =
   | "Marketing"

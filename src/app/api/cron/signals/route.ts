@@ -187,6 +187,7 @@ async function handleSignalsCron(req: NextRequest) {
                 role: "user",
                 content: `You are an executive business case study director at Stanford GSB.
 Evaluate this Indian business news story for teaching case study potential.
+Write in clear, professional English only. Use Indian business context, INR figures and Indian examples where relevant. Names of Indian people, places and companies stay as they are.
 Score from 1.0 to 10.0 (high score means rich decision dilemma, capital trade-offs, regulatory pressure, or operational conflict).
 Provide a single concise 1-line pedagogical reason.
 
