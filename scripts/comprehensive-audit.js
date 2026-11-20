@@ -433,8 +433,8 @@ async function runAudit() {
     record('Trending', 'Trending Suite', 'FAIL', err.message);
   }
 
-  // 8. STUDENT MODE: ANSWERS, AUTOSAVE, EVALUATION, CERTIFICATE & PORTFOLIO
-  console.log('\n--- 8. Student Mode: Answers, Grading, Certificate & Portfolio ---');
+  // 8. STUDENT MODE: ANSWERS, AUTOSAVE, EVALUATION & PORTFOLIO
+  console.log('\n--- 8. Student Mode: Answers, Grading & Portfolio ---');
   try {
     // 8.1 Write answer with autosave
     const autosaveRes = await fetch(`${BASE_URL}/api/answers`, {
@@ -524,19 +524,18 @@ async function runAudit() {
       record('Student Mode', 'Student Sees Marks After Publishing', 'FAIL', 'Student could not retrieve published grade');
     }
 
-    // 8.7 Dean Certificate Generation
+    // 8.7 Decommissioned Route (HTTP 404)
     const certRes = await fetch(`${BASE_URL}/api/portfolio/usr-student-1/certificate/case-001`);
-    const certType = certRes.headers.get('content-type');
-    if (certRes.status === 200 && certType?.includes('application/pdf')) {
-      record('Student Mode', 'Dean-Signed Certificate PDF', 'PASS', 'Landscape Dean-signed certificate PDF generated with security verification hash');
+    if (certRes.status === 404) {
+      record('Student Mode', 'Decommissioned Routes Return 404', 'PASS', 'Certificate generation route safely decommissioned and returns 404');
     } else {
-      record('Student Mode', 'Dean-Signed Certificate PDF', 'FAIL', `Status ${certRes.status}`);
+      record('Student Mode', 'Decommissioned Routes Return 404', 'FAIL', `Status ${certRes.status}`);
     }
 
     // 8.8 Portfolio & Public Link Toggle
     const portfolioRes = await fetch(`${BASE_URL}/portfolio/usr-student-1`);
     if (portfolioRes.status === 200) {
-      record('Student Mode', 'Portfolio & Public Link Toggle', 'PASS', 'Public portfolio rendered with Dean certificate, completed cases and share toggle');
+      record('Student Mode', 'Portfolio & Public Link Toggle', 'PASS', 'Public portfolio rendered with completed cases and share toggle');
       capture(`${BASE_URL}/portfolio/usr-student-1`, 'portfolio_audit_desktop.png', 1440, 900);
     } else {
       const shot = capture(`${BASE_URL}/portfolio/usr-student-1`, 'fail_portfolio.png');

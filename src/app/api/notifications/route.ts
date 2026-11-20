@@ -204,17 +204,6 @@ export async function GET(req: NextRequest) {
           priority: "medium",
         });
       }
-
-      notifications.push({
-        id: "notif-cert-ready",
-        category: "academic",
-        title: "Dean's Certificate of Case Mastery",
-        message: "You have verified course completion. Download your tamper-evident Dean-signed certificate in your portfolio.",
-        href: "/portfolio",
-        timestamp: now,
-        unread: false,
-        priority: "low",
-      });
     }
 
     return NextResponse.json({

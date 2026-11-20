@@ -16,7 +16,7 @@ async function inspectReference() {
       'case', 'curate', 'flash', 'hypothetical', 'signal', 'library', 'trending', 
       'analytics', 'co', 'po', 'rubric', 'grading', 'socratic', 'cold-call', 
       'board', 'poll', 'pod', 'audio', 'export', 'pdf', 'docx', 'approval', 
-      'review', 'certificate', 'portfolio', 'pricing', 'alumni', 'subscription',
+      'review', 'portfolio', 'pricing', 'alumni', 'subscription',
       'guide', 'assistant', 'tokens', 'budget'
     ];
     console.log('\n--- KEYWORD OCCURRENCES ---');

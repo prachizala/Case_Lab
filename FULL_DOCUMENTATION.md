@@ -61,7 +61,7 @@ ANTHROPIC_API_KEY="sk-ant-api03-..."
 Migrations are stored in `/supabase/migrations`:
 - `00001_initial_schema.sql`: Base tables (`profiles`, `departments`, `courses`, `cases`, `usage_log`), RLS policies, helper functions.
 - `00002_library_approval_versions.sql`: Reviewer flag (`is_reviewer`), `case_versions`, `collections`, `collection_cases`, student department RLS.
-- `00003_student_experience_rubrics_grades.sql`: Rubric criteria, student answers with immutability, two-tier AI grading, and portfolio certificates.
+- `00003_student_experience_rubrics_grades.sql`: Rubric criteria, student answers with immutability, and two-tier AI grading.
 - `00004_outcomes_signals_analytics.sql`: NAAC/NBA outcomes (`CO`/`PO`), `case_outcomes`, rubric outcome mapping, `signals` radar, and faculty watch industries.
 - `00005_live_classroom_integrity_reflections.sql`: Live Socratic classroom sessions, digital 3-board plan, executive audio briefs, academic integrity reports, and alumni practitioner reflections.
 - `00006_subscriptions_audit_dpdp.sql`: Alumni subscriptions, audit logs, DPDP Act 2023 compliance endpoints, and quota tracking.
@@ -273,12 +273,12 @@ You can sign in with any of the following seeded institutional accounts:
 ### 4. Student Answers Directory (`/my-answers`)
 - Comprehensive overview of all case analyses submitted by the student.
 - Filterable by status (`Draft`, `Submitted & Under Review`, `Graded & Certified`).
-- Direct access to published faculty commendations, criterion breakdown, and certificate downloads.
+- Direct access to published faculty commendations and criterion breakdown.
 
-### 5. Verified Academic Portfolio & Certificate Engine (`/portfolio`)
+### 5. Verified Academic Portfolio Engine (`/portfolio`)
 - **Academic GPA & Metrics**: Aggregates average analytical score across all graded cases.
 - **Shareable Public Profile Toggle**: Students can toggle public visibility on or off. When enabled, a public URL (`/portfolio/[studentId]`) allows employers and recruiters to verify the student's case study portfolio. When toggled off, unauthorized external access is blocked.
-- **Landscape Certificate Generator**: Generates high-resolution, institutional landscape PDF certificates (`/api/portfolio/[studentId]/certificate/[caseId]`) featuring double navy/gold borders, verified credential seal, completion date, case citation, honors designation, and Shanti Business School (SBS) Dean's signature.
+- **Decommissioned Certificates**: Certificate PDF generation has been fully decommissioned from the UI/API layers; academic records are showcased directly on-screen.
 - **Lifetime Archive Export**: Students and alumni can download their entire portfolio and analysis archives anytime as a bundled JSON transcript (`/api/student/export-all`).
 
 ---
@@ -365,12 +365,12 @@ You can sign in with any of the following seeded institutional accounts:
 ## 💳 Alumni Continuing Education, Razorpay Billing & DPDP Act 2023
 
 ### 1. Alumni Access Gating & Free Lifetime Work Retention
-- **Perpetual Free Access**: Graduated students (`role: alumni`) **never** lose access to their personal academic work. All submitted answers, graded evaluations, and Dean-signed certificate PDFs remain 100% free and permanently downloadable anytime.
+- **Perpetual Free Access**: Graduated students (`role: alumni`) **never** lose access to their personal academic work. All submitted answers and graded evaluations remain 100% free and permanently downloadable anytime.
 - **Paid Continuing Education Unlocks**: An active subscription unlocks:
   - Full Shanti Business School (SBS) Case Library (`/library`) and Trending Cases (`/trending`).
   - Newly published faculty cases and real-signal market challenges.
   - Live shareable public portfolio URL (`/portfolio/[studentId]`).
-- **Access Gating**: Expired alumni or alumni without an active subscription lose access to the curriculum library and trending directory with a clear paywall notice, but retain full access to `/my-answers`, `/portfolio`, certificate downloads, and DPDP data exports.
+- **Access Gating**: Expired alumni or alumni without an active subscription lose access to the curriculum library and trending directory with a clear paywall notice, but retain full access to `/my-answers`, `/portfolio`, and DPDP data exports.
 
 ### 2. Razorpay Subscriptions (TEST Mode)
 - **Continuing Education Plans**:
@@ -462,7 +462,7 @@ npm run seed
 - [x] **PostgreSQL Row Level Security (RLS)**: Cryptographically prevents cross-student answer reading and restricts unapproved cases.
 - [x] **Audit Logging Ledger**: Immutable audit entries logged for role modifications, approvals, grade overrides, and data subject actions.
 - [x] **Cryptographic Payment Verification**: HMAC-SHA256 signature verification active on order completion and webhook endpoints; invalid signatures rejected with HTTP 400.
-- [x] **Alumni Perpetual Work Access**: Graduated students permanently keep free download access to their portfolio, answers, and certificates regardless of subscription status.
+- [x] **Alumni Perpetual Work Access**: Graduated students permanently keep free download access to their portfolio and answers regardless of subscription status.
 - [x] **DPDP Act 2023 Compliance**: Mandatory registration consent checkbox, machine-readable JSON data export (`/api/user/data-export`), and permanent account erasure (`/api/user/data-delete`).
 - [x] **Institutional Token Budget Alerts**: Real-time quota calculation with automatic 80% warning banner across faculty workspaces.
 - [x] **Document Extraction & Audio Synthesizer**: Native server-side parsing for PDF/DOCX and client-side speech synthesis audio briefing ("CasePod").
@@ -483,7 +483,7 @@ npm run seed
 
 ### 2. Cohort Graduation Runner (`/admin` tab $\rightarrow$ Cohort Graduation Runner)
 - **Bulk Degree Conferral**: Select entire cohorts (e.g. "MBA Class of 2026", "MSx Class of 2026") with multi-select checkboxes and department filters.
-- **Alumni Transition Safeguards**: Automatically transitions user roles to `alumni` while strictly preserving perpetual, free access to all past submissions, transcripts, and Dean-signed certificate downloads.
+- **Alumni Transition Safeguards**: Automatically transitions user roles to `alumni` while strictly preserving perpetual, free access to all past submissions and transcripts.
 - **Audit Logging**: Each graduation records an indelible `user_graduation` event with administrative attribution.
 
 ### 3. Unified In-App Notification Center (`src/components/NotificationDropdown.tsx`)
@@ -491,7 +491,7 @@ npm run seed
 - **Persona-Driven Alerts**:
   - **Admin**: AI token budget warnings ($\ge 80\%$) and pending affiliate approvals.
   - **Faculty**: Peer curriculum reviews pending and student submissions awaiting final marks.
-  - **Alumni**: 15-day subscription renewal reminders and certificate availability.
+  - **Alumni**: 15-day subscription renewal reminders and course notifications.
   - **Student**: Official published faculty grades and academic milestone announcements.
 - **Categorized Tabs & Action Routing**: Filter by Action Required, Academic, or Billing; click-through navigation and individual dismissal.
 
@@ -535,7 +535,7 @@ npm run seed
 | **Submitted answer cannot be edited** | ✅ | Once submitted, answers transition to immutable state; edit attempts return explicit lock error. |
 | **AI grading returns marks within rubric max** | ✅ | AI criteria marks are strictly clamped between `0` and `criterion.max_marks`; handles malformed LLM outputs safely. |
 | **Student does not see marks until faculty publishes** | ✅ | Grade queries return `null` for students while `is_published: false`; visible immediately upon faculty publishing. |
-| **Certificate PDF generates with correct name, case and date** | ✅ | Server-side PDF generator produces verified landscape certificates with student name, case citation, score, and date. |
+| **Certificate route decommissioned & portfolio renders** | ✅ | Certificate endpoints safely return 404; student portfolio renders evaluated submissions without certificate dependency. |
 | **Public portfolio link works only when toggled on** | ✅ | `/portfolio/[studentId]` returns academic achievements only when `portfolio_public: true`; blocked when toggled off. |
 | **Analytics numbers match the database** | ✅ | Analytics telemetry (6 cases, 2 pending reviews, 86% cohort avg, weak topics) matches live database records. |
 | **CO/PO table updates after grading** | ✅ | Outcome attainment matrix recalibrates dynamically as faculty publishes new grades. |
@@ -551,13 +551,13 @@ npm run seed
 | **Alumni Practitioner Reflections & Community Upvotes** | ✅ | Verified alumni submit real-world corporate reflections with practical takeaways; community upvotes persist. |
 | **Test payment succeeds & sets subscription; failed does not** | ✅ | Valid HMAC-SHA256 signature activates subscription; simulated failure or invalid hash leaves subscription inactive. |
 | **Webhook with a wrong signature is rejected** | ✅ | Razorpay webhook cryptographically checks signature; mismatch returns HTTP 400 bad request. |
-| **Expired alumni lose library access but can download own work** | ✅ | Expired alumni are blocked from `/library` and `/cases/[id]`, but retain 100% free access to answers, portfolio, and certificates. |
+| **Expired alumni lose library access but can download own work** | ✅ | Expired alumni are blocked from `/library` and `/cases/[id]`, but retain 100% free access to answers, portfolio, and past records. |
 | **Data export and delete both work (DPDP Act 2023)** | ✅ | `/api/user/data-export` outputs machine-readable JSON; `/api/user/data-delete` permanently erases user records. |
 | **Audit log records role change, approval, and grade override** | ✅ | Immutable ledger records `role_change`, `case_approval`, and `grade_override` with full actor and target telemetry. |
 | **Budget warning appears at 80% usage** | ✅ | Institutional AI token telemetry computes consumption (84%); triggers quota alert banners across faculty workspaces. |
 | **Production checklist completed in README** | ✅ | Full deployment guide for Vercel + Supabase and verified production readiness checklist published in `README.md`. |
 | **Admin Audit & Compliance Ledger filter and export** | ✅ | Admin ledger allows filtering by 9 action categories, free-text search, and CSV/JSON export. |
-| **Batch Cohort Graduation Runner with Alumni safeguards** | ✅ | Bulk graduation of student cohorts with permanent answer/certificate retention and catalog gating. |
+| **Batch Cohort Graduation Runner with Alumni safeguards** | ✅ | Bulk graduation of student cohorts with permanent answer retention and catalog gating. |
 | **Unified Institutional Notification Center** | ✅ | Live notifications across Admin, Faculty, Student, and Alumni personas with unread badges and action routing. |
 | **Interactive Financial Sensitivity & DCF Modeler** | ✅ | Dynamic valuation model with WACC/growth sliders, 3x3 heatmap, and one-click student draft insertion. |
 

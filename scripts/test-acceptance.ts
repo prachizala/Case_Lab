@@ -654,71 +654,24 @@ async function runAcceptanceVerification() {
     allPassed = false;
   }
 
-  // 17. Certificate PDF generates with correct name, case and date
-  console.log("\nTEST 17: Certificate PDF Generation (Name, Case, Score & Date)");
+  // 17. Certificate Decommissioning & Portfolio Integrity
+  console.log("\nTEST 17: Certificate Decommissioning & Portfolio Integrity");
   const certStudent = mockStore.getProfile(student1Id)!;
-  const certCase = mockStore.getCase(testCaseForStudent)!;
-  const certCompletionDate = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const certRouteExists = fs.existsSync(
+    path.join(process.cwd(), "src/app/api/portfolio/[studentId]/certificate/[caseId]/route.ts")
+  );
+  const certRouteDecommissioned = !certRouteExists;
 
-  const certDoc = new jsPDF({
-    orientation: "landscape",
-    unit: "mm",
-    format: "a4",
-  });
+  const portfolioAnswers = mockStore.getAnswersForStudent(student1Id);
+  const gradedPortfolioCases = portfolioAnswers.filter(
+    (a) => a.status === "submitted" && a.grade && a.grade.final_marks !== null
+  );
 
-  const cPageW = certDoc.internal.pageSize.getWidth();
-  const cPageH = certDoc.internal.pageSize.getHeight();
-
-  // Border & Badges
-  certDoc.setDrawColor(10, 17, 40);
-  certDoc.setLineWidth(3);
-  certDoc.rect(12, 12, cPageW - 24, cPageH - 24);
-
-  certDoc.setDrawColor(212, 175, 55);
-  certDoc.setLineWidth(1.2);
-  certDoc.rect(16, 16, cPageW - 32, cPageH - 32);
-
-  // Institutional text & recipient details
-  certDoc.setFontSize(14);
-  certDoc.setTextColor(10, 17, 40);
-  certDoc.text("SHANTI BUSINESS SCHOOL (SBS)", cPageW / 2, 42, { align: "center" });
-
-  certDoc.setFontSize(22);
-  certDoc.setTextColor(212, 175, 55);
-  certDoc.text("CERTIFICATE OF CASE COMPLETION", cPageW / 2, 64, { align: "center" });
-
-  certDoc.setFontSize(20);
-  certDoc.setTextColor(10, 17, 40);
-  certDoc.text(certStudent.name.toUpperCase(), cPageW / 2, 90, { align: "center" });
-
-  certDoc.setFontSize(13);
-  certDoc.text(certCase.title, cPageW / 2, 114, { align: "center" });
-
-  certDoc.setFontSize(11);
-  certDoc.setTextColor(212, 175, 55);
-  certDoc.text(`Analytical Score: 88 / 100   •   Date: ${certCompletionDate}`, cPageW / 2, 134, { align: "center" });
-
-  certDoc.setFontSize(9.5);
-  certDoc.setTextColor(10, 17, 40);
-  certDoc.text("Dean of Academic Affairs, SBS", 72.5, 167, { align: "center" });
-
-  const certBytes = new Uint8Array(certDoc.output("arraybuffer"));
-  const isCertValidPdf =
-    certBytes.length > 1000 &&
-    String.fromCharCode(...certBytes.slice(0, 4)) === "%PDF";
-
-  if (isCertValidPdf) {
-    console.log(`  ✅ PASS: Landscape Certificate PDF rendered (${certBytes.length} bytes, valid %PDF signature).`);
-    console.log(`     - Recipient: "${certStudent.name.toUpperCase()}"`);
-    console.log(`     - Case Study: "${certCase.title}"`);
-    console.log(`     - Date: ${certCompletionDate}`);
-    console.log("     - Authority: Dean of Academic Affairs, Shanti Business School (SBS)");
+  if (certRouteDecommissioned && gradedPortfolioCases.length > 0) {
+    console.log("  ✅ PASS: Certificate route decommissioned (route file removed, endpoint 404).");
+    console.log(`  ✅ PASS: Portfolio renders graded cases cleanly without certificates (${gradedPortfolioCases.length} evaluated submissions).`);
   } else {
-    console.error("  ❌ FAIL: Certificate PDF generation failed.");
+    console.error("  ❌ FAIL: Certificate decommissioning verification failed.");
     allPassed = false;
   }
 
@@ -1447,7 +1400,7 @@ async function runAcceptanceVerification() {
   ) {
     console.log("  ✅ PASS: Batch Cohort Graduation executed successfully:");
     console.log(`     - Graduated Student: "${postGradProfile.name}" (${postGradProfile.email}) -> Role: "${postGradProfile.role}"`);
-    console.log(`     - Perpetual Free Access: Student submissions and certificates retained (${studentAnswersAfterGrad.length} submissions)`);
+    console.log(`     - Perpetual Free Access: Student submissions retained (${studentAnswersAfterGrad.length} submissions)`);
     console.log(`     - Catalog Gating Active: Library/Trending access restricted pending subscription: "${canAccessTrendingWithoutSub.reason}"`);
   } else {
     console.error("  ❌ FAIL: Cohort graduation runner verification failed.");

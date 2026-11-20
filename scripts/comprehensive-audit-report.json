@@ -246,16 +246,16 @@
   },
   {
     "category": "Student Mode",
-    "feature": "Dean-Signed Certificate PDF",
+    "feature": "Decommissioned Route Returns 404",
     "status": "PASS",
-    "note": "Landscape Dean-signed certificate PDF generated with security verification hash",
+    "note": "Certificate generation route safely decommissioned and returns 404",
     "screenshot": null
   },
   {
     "category": "Student Mode",
     "feature": "Portfolio & Public Link Toggle",
     "status": "PASS",
-    "note": "Public portfolio rendered with Dean certificate, completed cases and share toggle",
+    "note": "Public portfolio rendered with completed cases and share toggle",
     "screenshot": null
   },
   {

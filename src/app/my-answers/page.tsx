@@ -250,17 +250,6 @@ export default function MyAnswersPage() {
                     </span>
 
                     <div className="flex items-center gap-2">
-                      {isGraded && (
-                        <a
-                          href={`/api/portfolio/${currentUser?.id || ans.student_id}/certificate/${ans.case_id}`}
-                          download
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-accent text-xs font-semibold hover:bg-primary-soft"
-                        >
-                          <Award className="w-3.5 h-3.5 text-accent" />
-                          <span>Certificate (PDF)</span>
-                        </a>
-                      )}
-
                       <Link
                         href={`/cases/${ans.case_id}`}
                         className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text text-xs font-semibold hover:shadow-sm transition-all"

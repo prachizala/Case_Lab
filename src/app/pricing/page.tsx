@@ -289,7 +289,7 @@ export default function PricingPage() {
                   {COLLEGE_NAME_WITH_SHORT} Student License — ₹0 Free Forever While Enrolled
                 </h3>
                 <p className="text-xs text-white/80 leading-relaxed">
-                  Every matriculated student with an active @{ALLOWED_EMAIL_DOMAIN} account receives full, unrestricted access to their departmental curriculum case studies, interactive Socratic classroom voting, auto-saving answer composer, Dean-signed graduation certificates, and lifetime permanent archive downloads.
+                  Every matriculated student with an active @{ALLOWED_EMAIL_DOMAIN} account receives full, unrestricted access to their departmental curriculum case studies, interactive Socratic classroom voting, auto-saving answer composer, and lifetime permanent archive downloads.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-3">
                   <div className="flex items-center gap-2 text-xs text-white/90">
@@ -298,11 +298,11 @@ export default function PricingPage() {
                   </div>
                   <div className="flex items-center gap-2 text-xs text-white/90">
                     <Check className="w-3.5 h-3.5 text-on-primary" />
-                    <span>Always download your answers & certificates free</span>
+                    <span>Always download your answers free</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-white/90">
                     <Check className="w-3.5 h-3.5 text-on-primary" />
-                    <span>Dean-signed landscape credential PDFs</span>
+                    <span>Verified academic portfolio showcase</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-white/90">
                     <Check className="w-3.5 h-3.5 text-on-primary" />
@@ -333,12 +333,12 @@ export default function PricingPage() {
               </h2>
             </div>
             <span className="text-xs text-muted hidden sm:inline">
-              Alumni always keep lifetime free access to past work & certificates
+              Alumni always keep lifetime free access to past work
             </span>
           </div>
 
           <p className="text-xs text-muted">
-            Graduated students retain permanent, lifetime free access to download all their past submissions, Dean certificates, and DPDP records. A continuing education subscription unlocks the live curriculum library, newly published business cases, trending signals, and a shareable public portfolio link.
+            Graduated students retain permanent, lifetime free access to download all their past submissions and DPDP records. A continuing education subscription unlocks the live curriculum library, newly published business cases, trending signals, and a shareable public portfolio link.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch pt-2">

@@ -1997,15 +1997,6 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                     </span>
                   </div>
                 </div>
-
-                <a
-                  href={`/api/portfolio/${currentUser?.id || "usr-student-1"}/certificate/${caseId}`}
-                  download
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-sm"
-                >
-                  <Award className="w-4 h-4 text-accent-text" />
-                  <span>Download Certificate (PDF)</span>
-                </a>
               </div>
 
               {studentGrade.faculty_comment && (
@@ -2040,7 +2031,7 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
               </div>
 
               <div className="text-xs text-muted italic">
-                This answer has been submitted and locked. You can review and download certificates anytime in your Portfolio.
+                This answer has been submitted and locked. You can review your submissions and faculty evaluations anytime in your Portfolio.
               </div>
             </div>
           ) : (

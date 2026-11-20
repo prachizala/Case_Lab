@@ -450,20 +450,6 @@ export const SAMPLE_GRADE = {
   is_published: true,
 };
 
-export const SAMPLE_CERTIFICATE = {
-  id: "00000000-0000-0000-0000-000000000901",
-  certificate_id: "CERT-SBS-2026-0001",
-  student_id: "00000000-0000-0000-0000-000000000003",
-  case_id: "00000000-0000-0000-0000-000000000501",
-  title: "Executive Case Analysis Mastery: Omnichannel Strategy",
-  score: 88.0,
-  metadata: {
-    course: "MKTG-502: Omnichannel Retailing & Consumer Economics",
-    evaluator: "Ms. Reena Paswan",
-    honors: "First Class with Distinction",
-  },
-};
-
 export const OUTCOMES = [
   { id: "00000000-0000-0000-0000-000000000401", code: "CO1", name: "Strategic Business Problem Solving", description: "Formulate hypothesis-driven solutions to ambiguous real-world business challenges.", type: "course" },
   { id: "00000000-0000-0000-0000-000000000402", code: "CO2", name: "Quantitative Financial Rigor", description: "Apply unit economics, capital budgeting, and DCF modeling to enterprise choices.", type: "course" },
@@ -604,7 +590,6 @@ export async function runSeed() {
     console.log(`   ✓ 1 Case Rubric (Case: Titan Company Ltd) with 4 weighted criteria`);
     console.log(`   ✓ 1 Student Answer submitted by Zala Prachi`);
     console.log(`   ✓ 1 Published Grade (Final Score: 88.0/100, AI Suggestions + Faculty Feedback)`);
-    console.log(`   ✓ 1 Verified Credential Certificate (ID: CERT-SBS-2026-0001)`);
     console.log(`   ✓ 4 Curricular Learning Outcomes (CO1, CO2, PO1, PO3)`);
     console.log("\n✅ Standalone seed blueprint is completely valid and idempotent.");
     return;
@@ -800,25 +785,7 @@ export async function runSeed() {
   if (grdErr) console.warn("  Grade error:", grdErr.message);
   else console.log("  ✓ Grade published (Final Marks: 88.0/100).");
 
-  // 8. Certificates
-  console.log("\n🎓 Seeding Issued Student Certificate...");
-  const { error: certErr } = await supabase.from("certificates").upsert(
-    {
-      id: SAMPLE_CERTIFICATE.id,
-      certificate_id: SAMPLE_CERTIFICATE.certificate_id,
-      student_id: SAMPLE_CERTIFICATE.student_id,
-      case_id: SAMPLE_CERTIFICATE.case_id,
-      title: SAMPLE_CERTIFICATE.title,
-      score: SAMPLE_CERTIFICATE.score,
-      metadata: SAMPLE_CERTIFICATE.metadata,
-      issued_at: new Date().toISOString(),
-    },
-    { onConflict: "certificate_id" }
-  );
-  if (certErr) console.warn("  Certificate error:", certErr.message);
-  else console.log("  ✓ Certificate issued: CERT-SBS-2026-0001.");
-
-  // 9. Outcomes
+  // 8. Outcomes
   console.log("\n📊 Seeding Learning Outcomes (CO/PO)...");
   for (const outcome of OUTCOMES) {
     const { error: outErr } = await supabase.from("outcomes").upsert(outcome, { onConflict: "code" });

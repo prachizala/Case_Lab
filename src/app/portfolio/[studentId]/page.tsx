@@ -14,7 +14,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
-  Download,
   Building,
   GraduationCap,
   Calendar,
@@ -234,14 +233,10 @@ export default function PublicPortfolioPage({
                     {c.industry} • Level: {c.level}
                   </span>
 
-                  <a
-                    href={`/api/portfolio/${studentId}/certificate/${c.caseId}`}
-                    download
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text text-xs font-semibold hover:shadow-sm"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download Official Certificate (PDF)</span>
-                  </a>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-primary-soft text-text text-xs font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                    <span>Verified Submission</span>
+                  </span>
                 </div>
               </div>
             ))}

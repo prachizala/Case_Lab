@@ -306,7 +306,7 @@ async function runAudit() {
     record('Trending', 'Trending Signals Suite', 'FAIL', err.message);
   }
 
-  // 8. STUDENT MODE: ANSWERS, GRADING, CERTIFICATE & PORTFOLIO
+  // 8. STUDENT MODE: ANSWERS, GRADING & PORTFOLIO
   console.log('\n--- 8. Student Learning & Evaluation ---');
   try {
     const answersRes = await fetch(`${BASE_URL}/my-answers`);
@@ -319,7 +319,7 @@ async function runAudit() {
 
     const portfolioRes = await fetch(`${BASE_URL}/portfolio/usr-student-1`);
     if (portfolioRes.status === 200) {
-      record('Student Mode', 'Student Analytical Portfolio (/portfolio/[id])', 'PASS', 'Portfolio loads with case submissions, badges and Dean certificate');
+      record('Student Mode', 'Student Analytical Portfolio (/portfolio/[id])', 'PASS', 'Portfolio loads with case submissions and evaluations');
       capture(`${BASE_URL}/portfolio/usr-student-1`, 'portfolio_desktop.png', 1440, 900);
     } else {
       record('Student Mode', 'Student Analytical Portfolio (/portfolio/[id])', 'FAIL', `Status ${portfolioRes.status}`);

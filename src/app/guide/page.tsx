@@ -334,10 +334,10 @@ export default function FacilitatorGuidePage() {
                     <div className="p-4 rounded-xl border border-success/30 bg-success/10 space-y-1">
                       <div className="flex items-center gap-2 text-xs font-bold text-success">
                         <span className="w-5 h-5 rounded-full bg-success text-white flex items-center justify-center text-[10px]">3</span>
-                        <span>Instructor Publication & Certificate Generation</span>
+                        <span>Instructor Publication & Final Evaluation</span>
                       </div>
                       <p className="text-xs text-muted pl-7">
-                        The faculty member reviews the evaluation, adjusts criteria points if necessary, writes custom commendation comments, and publishes. An official PDF certificate of completion is automatically generated.
+                        The faculty member reviews the evaluation, adjusts criteria points if necessary, writes custom commendation comments, and publishes. The verified evaluation is finalized in the student's portfolio.
                       </p>
                     </div>
                   </div>

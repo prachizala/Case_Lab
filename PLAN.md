@@ -89,7 +89,7 @@ This document specifies the end-to-end plan to transition **SBS CaseLab** (Shant
 | **Approval Authority** | Only Admin could approve cases in `/api/cases/[id]/workflow`. | Assigned Faculty Reviewers approve cases; Admin can reassign. | Refactor workflow endpoint to authorize the assigned reviewer for that round, or institutional Admin. |
 | **Student Case Creation** | Previously toggled via `STUDENT_CASE_GENERATION`. | Both students and faculty can create cases; students never see answer keys. | Allow case authoring for active students while strictly scrubbing Answer Keys, Teaching Notes, and Marking Rubrics on server for any student request. |
 | **Registration Status** | Created accounts were auto-approved in dev/demo mode. | Registration must create accounts in `pending` status (`REQUIRE_ADMIN_APPROVAL=true`). | Unify signup flow to create `access_status: "pending"`; Admin explicitly approves with Asia/Kolkata date calculations. |
-| **Legacy Features** | Student answers, AI grading, Rubrics, Certificates, CO/PO NBA analytics. | Keep code intact but hidden behind feature flags. | Wrap legacy navigation links and routes in `FEATURE_STUDENT_ANSWERS`, `FEATURE_CERTIFICATES`, `FEATURE_PORTFOLIO`, `FEATURE_OBE_ANALYTICS` (all defaulting to `false`). |
+| **Legacy Features** | Student answers, AI grading, Rubrics, CO/PO NBA analytics. | Keep code intact but hidden behind feature flags. | Wrap legacy navigation links and routes in `FEATURE_STUDENT_ANSWERS`, `FEATURE_PORTFOLIO`, `FEATURE_OBE_ANALYTICS` (all defaulting to `false`). |
 
 ---
 

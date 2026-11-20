@@ -143,7 +143,7 @@
     "category": "Student Mode",
     "feature": "Student Analytical Portfolio (/portfolio/[id])",
     "status": "PASS",
-    "note": "Portfolio loads with case submissions, badges and Dean certificate",
+    "note": "Portfolio loads with case submissions, badges and evaluations",
     "screenshot": null
   },
   {

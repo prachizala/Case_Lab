@@ -448,7 +448,7 @@ export default function AdminPage() {
       return;
     }
     const confirmGrad = confirm(
-      `Confer ${COLLEGE_SHORT} Alumni status upon ${selectedStudentIds.length} candidate(s) for "${selectedCohort}"?\n\nThis will transition candidate accounts to Alumni status while preserving all lifetime answers and certificates.`
+      `Confer ${COLLEGE_SHORT} Alumni status upon ${selectedStudentIds.length} candidate(s) for "${selectedCohort}"?\n\nThis will transition candidate accounts to Alumni status while preserving all lifetime answers and submissions.`
     );
     if (!confirmGrad) return;
 
@@ -2776,7 +2776,7 @@ export default function AdminPage() {
                     Cohort Graduation Runner
                   </h3>
                   <p className="text-xs text-muted mt-1">
-                    Select enrolled students to confer {COLLEGE_SHORT} Alumni credentials. Graduated students retain permanent free access to all past submissions, transcripts, and Dean certificates.
+                    Select enrolled students to confer {COLLEGE_SHORT} Alumni credentials. Graduated students retain permanent free access to all past submissions and academic transcripts.
                   </p>
                 </div>
 

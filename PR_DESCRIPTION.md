@@ -16,7 +16,7 @@ This pull request addresses 4 critical security, privacy, and compliance issues 
 
 ### 2. Active DPDP Act 2023 Consent & Statutory Rights (Step 2)
 - **Active Choice Architecture**: The signup consent checkbox is unchecked by default; the submit button remains disabled until explicitly ticked.
-- **Plain-Language Legal Disclosure**: Clear disclosure detailing data collected (name, email, role, answers, grades, certificates), educational processing purposes, access controls, and links to the Privacy Policy.
+- **Plain-Language Legal Disclosure**: Clear disclosure detailing data collected (name, email, role, answers, grades), educational processing purposes, access controls, and links to the Privacy Policy.
 - **Server Enforcement & Audit Versioning**: Added server validation rejecting registrations without explicit consent; added tracking for `consent_version` (`2023.1`), `policy_version` (`v1.2`), and timestamp `dpdp_consent_at`.
 - **Consent Withdrawal & Erasure**: Enabled statutory consent withdrawal at `/api/user/consent-withdraw` alongside existing data export and irreversible deletion.
 - **Legal Advisory Note**: Annotated `README.md` that statutory disclosures should receive final sign-off from college legal counsel.

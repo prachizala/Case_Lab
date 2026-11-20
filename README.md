@@ -40,7 +40,7 @@
 
 - 🏛️ **For Deans & Administrators**: Institutional oversight, review & approve curriculum cases, monitor token usage quotas, manage user access, export OBE curriculum attainment data, and enforce DPDP Act 2023 regulatory privacy rights.
 - 👨‍🏫 **For Faculty**: Generate comprehensive 5-page case studies with realistic financial exhibits, teaching notes, and board plans in seconds using generative AI; submit cases to the review queue; track student mastery; and map rubrics to NAAC/NBA program outcomes.
-- 🎓 **For Students**: Solve interactive real-world dilemmas, receive instant AI rubric grading, build a verified analytical portfolio, and earn downloadable certificates.
+- 🎓 **For Students**: Solve interactive real-world dilemmas, receive instant AI rubric grading, and build a verified analytical portfolio.
 
 ---
 
@@ -95,7 +95,7 @@
   - **Tier 1 (Instant AI Evaluation)**: Detailed criterion-level scoring, feedback, and improvement suggestions generated automatically.
   - **Tier 2 (Faculty Moderation & Release)**: Faculty can override, annotate, and finalize grades before publishing to students.
 - **Submission Integrity Tracking**: Analyzes drafting duration, paste frequency, and editing patterns for academic integrity audits.
-- **Analytical Portfolio & Certificates**: Public or private portfolio showcase featuring earned credentials and printable PDF Certificates of Mastery.
+- **Analytical Portfolio**: Public or private portfolio showcase featuring earned credentials and verified case evaluations.
 
 ### 6. 📊 NAAC / NBA Curriculum Accreditation (`/analytics`)
 - **Outcome-Based Education (OBE)**: Maps case evaluation rubrics to Course Outcomes (`CO1`–`CO5`) and Program Outcomes (`PO1`–`PO5`).
@@ -157,7 +157,7 @@ graph TD
 
 - **Frontend Framework**: [Next.js 15](https://nextjs.org/) (App Router, Server Actions, Server Components)
 - **UI Library & Styling**: [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [Lucide React](https://lucide.dev/)
-- **Document Export**: `jspdf` (PDF reports & certificates), `docx` (Word case study export)
+- **Document Export**: `jspdf` (PDF case study reports), `docx` (Word case study export)
 - **Document Ingestion**: `mammoth` (Word document parsing), `pdf-parse` (PDF text extraction)
 - **Authentication & Database**: [Supabase](https://supabase.com/) (SSR Auth, PostgreSQL with Row-Level Security)
 - **AI Synthesis**: [Anthropic Claude SDK](https://www.anthropic.com/) (`@anthropic-ai/sdk`)
@@ -238,7 +238,6 @@ Open your browser and visit:
 | `ENROLLMENT_REGEX` | No | `"^SBS\\/[0-9]{4}\\/[0-9]{4}$"` | Validation regex for student enrollment numbers (e.g. `SBS/2024/0001`) |
 | `EMPLOYEE_ID_REGEX` | No | `"^SBS\\/FAC\\/[0-9]{3,4}$"` | Validation regex for faculty employee IDs (e.g. `SBS/FAC/101`) |
 | `FEATURE_STUDENT_ANSWERS` | No | `"false"` | Flag preserving student case answering workspace |
-| `FEATURE_CERTIFICATES` | No | `"false"` | Flag preserving student PDF certificate generation |
 | `FEATURE_PORTFOLIO` | No | `"false"` | Flag preserving student analytical portfolio |
 | `FEATURE_OBE_ANALYTICS` | No | `"false"` | Flag preserving NAAC / NBA OBE accreditation matrix |
 | `PAYMENTS_ENABLED` | No | `"false"` | Flag gating commercial alumni subscriptions and repository monetization |
@@ -314,7 +313,7 @@ Case_Study/
 │   │   ├── create/         # Generative AI Case Studio & exhibit editor
 │   │   ├── dashboard/      # Role-based dashboard (Admin/Faculty/Student)
 │   │   ├── library/        # Searchable repository and custom collections
-│   │   ├── portfolio/      # Student analytical showcase & certificates
+│   │   ├── portfolio/      # Student analytical showcase & evaluations
 │   │   ├── pricing/        # Alumni continuing education subscriptions
 │   │   └── review-queue/   # Peer-review queue for curriculum approval
 │   ├── components/         # Reusable UI component library & layout wrappers
@@ -533,11 +532,16 @@ npm run seed
 - [x] **PostgreSQL Row Level Security (RLS)**: Cryptographically prevents cross-student answer reading and restricts unapproved cases.
 - [x] **Audit Logging Ledger**: Immutable audit entries logged for role modifications, approvals, grade overrides, and data subject actions.
 - [x] **Cryptographic Payment Verification**: HMAC-SHA256 signature verification active on order completion and webhook endpoints; invalid signatures rejected with HTTP 400.
-- [x] **Alumni Perpetual Work Access**: Graduated students permanently keep free download access to their portfolio, answers, and certificates regardless of subscription status.
+- [x] **Alumni Perpetual Work Access**: Graduated students permanently keep free download access to their portfolio and answers regardless of subscription status.
 - [x] **DPDP Act 2023 Compliance**: Mandatory registration consent checkbox, machine-readable JSON data export (`/api/user/data-export`), and permanent account erasure (`/api/user/data-delete`).
 - [x] **Institutional Token Budget Alerts**: Real-time quota calculation with automatic 80% warning banner across faculty workspaces.
 - [x] **Document Extraction & Audio Synthesizer**: Native server-side parsing for PDF/DOCX and client-side speech synthesis audio briefing ("CasePod").
 - [x] **English-Only Curriculum Standard**: Verified strict English generation with authentic Indian business context (INR figures, statutory compliance, and domestic industrial hubs).
+
+---
+
+### ⚠️ Deprecated Schema Notices
+- **`certificates` table (Deprecated)**: The `certificates` database table and certificate generation feature are deprecated and decommissioned from all UI routes, API endpoints, notifications, and export handlers. The table remains in the database schema unused to preserve historical data integrity and backward compatibility without destructive migration changes.
 
 ---
 

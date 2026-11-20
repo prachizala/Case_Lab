@@ -127,7 +127,7 @@ export default function StudentPortfolioPage() {
               Academic Credentials & Case Portfolio
             </h1>
             <p className="text-sm text-muted mt-1">
-              Verified analytical case solutions, faculty evaluations, and downloadable completion certificates.
+              Verified analytical case solutions, faculty evaluations, and academic records.
             </p>
           </div>
 
@@ -136,7 +136,7 @@ export default function StudentPortfolioPage() {
               href="/api/student/export-all"
               download
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-surface text-text text-xs font-semibold hover:border-accent hover:text-accent transition-all shadow-sm"
-              title="Download permanent academic bundle of all answers and certificates (available anytime, including for alumni)"
+              title="Download permanent academic bundle of all answers and evaluations (available anytime, including for alumni)"
             >
               <Download className="w-4 h-4 text-accent" />
               <span>Download Archive</span>
@@ -217,7 +217,7 @@ export default function StudentPortfolioPage() {
           </div>
 
           {/* METRIC STRIP */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-border text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border text-center">
             <div>
               <span className="block text-[10px] uppercase font-bold text-muted">Cases Evaluated</span>
               <span className="font-serif text-2xl font-bold text-text">
@@ -236,20 +236,14 @@ export default function StudentPortfolioPage() {
                 {highHonorsCount}
               </span>
             </div>
-            <div>
-              <span className="block text-[10px] uppercase font-bold text-muted">Certificates Issued</span>
-              <span className="font-serif text-2xl font-bold text-text">
-                {gradedCases.length}
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* GRADED CASES & CERTIFICATES DIRECTORY */}
+        {/* GRADED CASES & EVALUATIONS DIRECTORY */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-serif font-bold text-xl text-text">
-              Completed Case Studies & Verified Credentials
+              Completed Case Studies & Evaluations
             </h3>
             <span className="text-xs text-muted">
               {gradedCases.length} Accredited Submission{gradedCases.length === 1 ? "" : "s"}
@@ -260,7 +254,7 @@ export default function StudentPortfolioPage() {
             <div className="p-12 rounded-2xl border border-border bg-surface shadow-sm">
               <StateLoading
                 title="Loading Academic Portfolio..."
-                subtitle="Verifying completed case studies and generating credential seals."
+                subtitle="Verifying completed case studies and evaluations."
               />
             </div>
           ) : error ? (
@@ -275,7 +269,7 @@ export default function StudentPortfolioPage() {
             <div className="p-12 rounded-2xl border border-border bg-surface shadow-sm">
               <StateEmpty
                 title="No Completed Case Studies Yet"
-                description="Once faculty grades and publishes your case analysis, your verified credentials and downloadable completion certificates will appear here."
+                description="Once faculty grades and publishes your case analysis, your verified credentials and evaluations will appear here."
                 actionText="Explore Case Library"
                 actionHref="/library"
               />
@@ -325,16 +319,14 @@ export default function StudentPortfolioPage() {
                         Published {new Date(item.grade?.published_at || item.updated_at).toLocaleDateString()}
                       </span>
 
-                      {/* Download PDF Certificate Button */}
-                      <a
-                        href={`/api/portfolio/${profile?.id}/certificate/${item.case_id}`}
-                        download
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs hover:shadow-sm transition-all"
-                        title={`Download official branded ${COLLEGE_SHORT} Certificate (PDF)`}
+                      <Link
+                        href={`/cases/${item.case_id}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-border hover:border-accent text-accent font-serif font-bold text-xs hover:shadow-sm transition-all"
+                        title="View case analysis"
                       >
-                        <Award className="w-3.5 h-3.5 text-accent-text" />
-                        <span>Download Certificate (PDF)</span>
-                      </a>
+                        <span>View Analysis</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
                     </div>
                   </div>
                 );

@@ -217,7 +217,7 @@ export default function PrivacyPage() {
                   <span>Right to Access & Portability (Sec 11)</span>
                 </div>
                 <p className="text-xs text-muted leading-relaxed">
-                  Download a comprehensive, machine-readable JSON export of your complete profile, submitted answers, AI grading feedback, certificate ledger, subscription history, and audit logs.
+                  Download a comprehensive, machine-readable JSON export of your complete profile, submitted answers, AI grading feedback, subscription history, and audit logs.
                 </p>
               </div>
 
@@ -278,7 +278,7 @@ export default function PrivacyPage() {
                   <span>Right to Erasure (Sec 12)</span>
                 </div>
                 <p className="text-xs text-text leading-relaxed">
-                  Permanently delete your user profile, all case submissions, AI evaluations, certificates, and billing records from databases and memory caches. This is irreversible.
+                  Permanently delete your user profile, all case submissions, AI evaluations, and billing records from databases and memory caches. This is irreversible.
                 </p>
               </div>
 
@@ -375,7 +375,7 @@ export default function PrivacyPage() {
               </div>
 
               <p className="text-xs text-muted leading-relaxed">
-                Under Section 12 of the DPDP Act 2023, confirming this request will immediately and permanently erase your account, login credentials, submitted case answers, Dean's certificates, and active subscription. This cannot be undone.
+                Under Section 12 of the DPDP Act 2023, confirming this request will immediately and permanently erase your account, login credentials, submitted case answers, and active subscription. This cannot be undone.
               </p>
 
               <div className="pt-4 flex items-center justify-end gap-3">

@@ -129,7 +129,7 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
       id: "nav-portfolio",
       title: "Academic Portfolio",
       category: "Navigation",
-      description: "Verified case credentials and honors certificates",
+      description: "Verified case credentials and completed evaluations",
       href: "/portfolio",
       icon: Briefcase,
       roleRequirement: ["student"],
