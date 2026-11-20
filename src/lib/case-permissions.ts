@@ -4,23 +4,30 @@ import { CECasePack } from "./casepack/schema";
 
 /**
  * Checks whether student case generation is permitted via environment variable.
- * Default is strictly FALSE.
+ * Default is TRUE (students can generate cases freely).
+ * Can be explicitly disabled by setting STUDENT_CASE_GENERATION=false.
  */
 export function isStudentCaseGenerationEnabled(): boolean {
-  return process.env.STUDENT_CASE_GENERATION === "true";
+  return process.env.STUDENT_CASE_GENERATION !== "false";
 }
 
 /**
  * Retrieves the maximum number of cases a student may generate per day.
- * Default is 3 cases per day.
+ * Default is 0 (0 means unlimited case generation).
+ * Can be configured via env STUDENT_GENERATION_LIMIT (e.g. "3").
  */
 export function getStudentDailyGenerationLimit(): number {
-  const parsed = parseInt(process.env.STUDENT_GENERATION_LIMIT || "3", 10);
-  return isNaN(parsed) || parsed < 1 ? 3 : parsed;
+  const envVal = process.env.STUDENT_GENERATION_LIMIT;
+  if (envVal !== undefined && envVal !== "") {
+    const parsed = parseInt(envVal, 10);
+    return isNaN(parsed) || parsed < 0 ? 0 : parsed;
+  }
+  return 0; // 0 = unlimited by default
 }
 
 /**
  * Checks role-based permission to initiate case generation.
+ * Faculty, admin, and students can generate cases freely.
  */
 export function checkCaseGenerationAccess(userRole: string): {
   allowed: boolean;
@@ -39,7 +46,7 @@ export function checkCaseGenerationAccess(userRole: string): {
     return {
       allowed: false,
       status: 403,
-      error: "Students are restricted from generating case packs. Contact your course faculty or administrator.",
+      error: "Students are restricted from generating case packs by institutional policy.",
       code: "STUDENT_GENERATION_DISABLED",
     };
   }
@@ -53,7 +60,9 @@ export function checkCaseGenerationAccess(userRole: string): {
 }
 
 /**
- * Checks student daily generation rate limit (default 3 / day).
+ * Checks student daily generation rate limit.
+ * By default, STUDENT_GENERATION_LIMIT=0 (unlimited).
+ * If a positive limit is explicitly configured, rate limiting is enforced.
  */
 export function checkStudentDailyLimit(userId: string): {
   allowed: boolean;
@@ -63,6 +72,14 @@ export function checkStudentDailyLimit(userId: string): {
 } {
   const limit = getStudentDailyGenerationLimit();
   const count = mockStore.getUserDailyUsageCount(userId);
+  if (limit === 0) {
+    return {
+      allowed: true,
+      count,
+      limit: 0,
+      remaining: 999999,
+    };
+  }
   const remaining = Math.max(0, limit - count);
   return {
     allowed: count < limit,

@@ -4,9 +4,11 @@ import { checkRateLimit, recordGenerationUsage } from "@/lib/rate-limit";
 import { mockStore } from "@/lib/mock-db";
 import { CaseBloomsLevel, CaseDifficulty, CaseDomain, CaseFormat, CaseStudy, CaseTargetAudience, CaseTone, CaseType } from "@/lib/types";
 import { authenticateUser } from "@/lib/session";
+import { checkAccess } from "@/lib/access-control";
 import {
   checkCaseGenerationAccess,
   checkStudentDailyLimit,
+  getStudentDailyGenerationLimit,
   sanitizeCaseStudyForStudent,
 } from "@/lib/case-permissions";
 
@@ -18,7 +20,20 @@ export async function POST(req: NextRequest) {
       return errorResponse || NextResponse.json({ error: "Forbidden. Please sign in to generate case studies." }, { status: 403 });
     }
 
-    // Role-based case generation check (STUDENT_CASE_GENERATION flag)
+    // Check account status: inactive or expired accounts cannot generate cases
+    const accountAccess = checkAccess(user);
+    if (!accountAccess.allowed || !accountAccess.canCreate) {
+      return NextResponse.json(
+        {
+          error: accountAccess.reason || "Account access is restricted. Expired or inactive accounts cannot generate cases.",
+          error_code: accountAccess.status === "expired" ? "ACCOUNT_EXPIRED" : accountAccess.status === "inactive" ? "ACCOUNT_INACTIVE" : "ACCESS_DENIED",
+          status: accountAccess.status,
+        },
+        { status: 403 }
+      );
+    }
+
+    // Role-based case generation check (students, faculty, admin allowed)
     const access = checkCaseGenerationAccess(user.role);
     if (!access.allowed) {
       return NextResponse.json(
@@ -27,7 +42,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Student daily limit check (STUDENT_GENERATION_LIMIT, default 3/day)
+    // Student daily limit check (STUDENT_GENERATION_LIMIT; default 0 = unlimited)
     if (user.role === "student") {
       const studentDaily = checkStudentDailyLimit(user.id);
       if (!studentDaily.allowed) {
@@ -111,30 +126,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2b. Monthly generation quota check per user (enforced strictly by server)
-    const quota = mockStore.checkUserGenerationQuota(userId);
-    if (!quota.allowed) {
-      const isExternal = quota.user_type === "external";
-      return NextResponse.json(
-        {
-          error: isExternal
-            ? "Free generation limit reached (3 of 3 used this month). Paid plans coming soon."
-            : `Monthly fair-use case generation limit reached (${quota.used}/${quota.limit}). Resets next month.`,
-          error_code: quota.error_code || (isExternal ? "LIMIT_REACHED" : "FAIR_USE_LIMIT_REACHED"),
-          quota: {
-            allowed: false,
-            used: quota.used,
-            limit: quota.limit,
-            remaining: quota.remaining,
-            user_type: quota.user_type,
-            reset_at: quota.reset_at,
+    // 2b. Monthly generation quota check per user (students with default limit 0 are unlimited)
+    let quota = mockStore.checkUserGenerationQuota(userId);
+    if (user.role !== "student" || getStudentDailyGenerationLimit() > 0) {
+      if (!quota.allowed) {
+        const isExternal = quota.user_type === "external";
+        return NextResponse.json(
+          {
+            error: isExternal
+              ? "Free generation limit reached (3 of 3 used this month). Paid plans coming soon."
+              : `Monthly fair-use case generation limit reached (${quota.used}/${quota.limit}). Resets next month.`,
+            error_code: quota.error_code || (isExternal ? "LIMIT_REACHED" : "FAIR_USE_LIMIT_REACHED"),
+            quota: {
+              allowed: false,
+              used: quota.used,
+              limit: quota.limit,
+              remaining: quota.remaining,
+              user_type: quota.user_type,
+              reset_at: quota.reset_at,
+            },
           },
-        },
-        { status: 403 }
-      );
+          { status: 403 }
+        );
+      }
     }
 
-    // 2b. Institutional token budget check
+    // 2c. Institutional token budget check
     const tokenBudget = mockStore.getTokenBudgetInfo();
     if (tokenBudget.is_blocked) {
       return NextResponse.json(
@@ -146,21 +163,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2c. Rate limit check (10 generations per user per hour)
-    const rateLimit = await checkRateLimit(userId);
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded. You have reached the maximum of 10 case generations per hour. Please wait before requesting another case study.",
-          rateLimit: {
-            allowed: false,
-            count: rateLimit.count,
-            limit: rateLimit.limit,
-            resetMinutes: rateLimit.resetMinutes,
+    // 2d. Rate limit check (10 generations per user per hour; bypassed for students when unlimited)
+    let rateLimit = { count: 0, limit: 10, remaining: 10, resetMinutes: 60, allowed: true };
+    if (user.role !== "student" || getStudentDailyGenerationLimit() > 0) {
+      const rlResult = await checkRateLimit(userId);
+      rateLimit = rlResult;
+      if (!rlResult.allowed) {
+        return NextResponse.json(
+          {
+            error: "Rate limit exceeded. You have reached the maximum of 10 case generations per hour. Please wait before requesting another case study.",
+            rateLimit: {
+              allowed: false,
+              count: rlResult.count,
+              limit: rlResult.limit,
+              resetMinutes: rlResult.resetMinutes,
+            },
           },
-        },
-        { status: 429 }
-      );
+          { status: 429 }
+        );
+      }
     }
 
     // 3. Validate input parameters

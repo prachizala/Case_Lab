@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mockStore } from "@/lib/mock-db";
 import { CaseStudy } from "@/lib/types";
 import { authenticateUser } from "@/lib/session";
+import { sanitizeCaseStudyForStudent } from "@/lib/case-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -42,21 +43,7 @@ export async function GET(
   // Academic confidentiality safeguard: strictly strip answer key, teaching note, quality/checks from student response
   let caseToReturn = { ...foundCase };
   if (user.role === "student") {
-    if (caseToReturn.content) {
-      const sanitizedContent = { ...caseToReturn.content } as Record<string, unknown>;
-      delete sanitizedContent.teaching_note;
-      delete sanitizedContent.teaching_notes;
-      delete sanitizedContent.answers;
-      delete sanitizedContent.answer_key;
-      delete sanitizedContent.model_answers;
-      delete sanitizedContent.solution_keys;
-      delete sanitizedContent.pedagogical_checks;
-      delete sanitizedContent.rubrics;
-      delete sanitizedContent.rubric;
-      delete sanitizedContent.quality;
-      delete sanitizedContent.validation;
-      caseToReturn.content = sanitizedContent as any;
-    }
+    caseToReturn = sanitizeCaseStudyForStudent(foundCase);
   }
 
   return NextResponse.json({ caseStudy: caseToReturn });

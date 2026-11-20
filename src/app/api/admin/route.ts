@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mockStore } from "@/lib/mock-db";
 import { UserRole, UserPlan } from "@/lib/types";
 import { authenticateUser } from "@/lib/session";
+import { isStudentCaseGenerationEnabled, getStudentDailyGenerationLimit } from "@/lib/case-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -92,8 +93,8 @@ export async function GET(req: NextRequest) {
     platformSettings: mockStore.getPlatformSettings(),
     allowedDomains: mockStore.getAllowedDomains(),
     studentCaseGeneration: {
-      enabled: process.env.STUDENT_CASE_GENERATION === "true",
-      dailyLimit: parseInt(process.env.STUDENT_GENERATION_LIMIT || "3", 10) || 3,
+      enabled: isStudentCaseGenerationEnabled(),
+      dailyLimit: getStudentDailyGenerationLimit(),
     },
     usersByDepartment,
     usersByCourse,

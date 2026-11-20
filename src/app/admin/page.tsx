@@ -170,8 +170,8 @@ export default function AdminPage() {
   const [savingSettings, setSavingSettings] = useState<boolean>(false);
   const [domainUpdating, setDomainUpdating] = useState<boolean>(false);
   const [studentGenPolicy, setStudentGenPolicy] = useState<{ enabled: boolean; dailyLimit: number }>({
-    enabled: false,
-    dailyLimit: 3,
+    enabled: true,
+    dailyLimit: 0,
   });
 
   // Audit Logs State
@@ -3140,22 +3140,22 @@ export default function AdminPage() {
                       <p className="text-[11px] text-muted">Allow students to generate practice cases</p>
                     </div>
                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold ${studentGenPolicy.enabled ? "bg-success/15 text-success border border-success/30" : "bg-muted/15 text-muted border border-border"}`}>
-                      {studentGenPolicy.enabled ? "ENABLED (true)" : "DISABLED (false - Default)"}
+                      {studentGenPolicy.enabled ? "ENABLED (true - Default)" : "DISABLED (false)"}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
                     <div>
                       <p className="font-semibold text-text font-mono">STUDENT_GENERATION_LIMIT</p>
-                      <p className="text-[11px] text-muted">Daily cap for student practice generations</p>
+                      <p className="text-[11px] text-muted">Daily cap for student practice generations (0 = unlimited)</p>
                     </div>
                     <span className="font-mono font-bold text-text bg-surface px-2.5 py-1 rounded-lg border border-border">
-                      {studentGenPolicy.dailyLimit} cases / day / student
+                      {studentGenPolicy.dailyLimit === 0 ? "Unlimited (0 - Default)" : `${studentGenPolicy.dailyLimit} cases / day / student`}
                     </span>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/20 text-text text-[11px] leading-relaxed">
-                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. To modify these values, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=true</code> and <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> in your server environment variables (e.g., Vercel Project Settings or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">.env.local</code>) and redeploy.
+                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. By default, students can generate freely with no daily per-user cap (<code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=0</code>). To impose limits or disable generation, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=false</code> in your server environment variables and redeploy.
                   </div>
                 </div>
               </div>
@@ -3481,22 +3481,22 @@ export default function AdminPage() {
                       <p className="text-[11px] text-muted">Allow students to generate practice cases</p>
                     </div>
                     <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono font-bold ${studentGenPolicy.enabled ? "bg-success/15 text-success border border-success/30" : "bg-muted/15 text-muted border border-border"}`}>
-                      {studentGenPolicy.enabled ? "ENABLED (true)" : "DISABLED (false - Default)"}
+                      {studentGenPolicy.enabled ? "ENABLED (true - Default)" : "DISABLED (false)"}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 rounded-xl bg-primary-soft/50 border border-border">
                     <div>
                       <p className="font-semibold text-text font-mono">STUDENT_GENERATION_LIMIT</p>
-                      <p className="text-[11px] text-muted">Daily cap for student practice generations</p>
+                      <p className="text-[11px] text-muted">Daily cap for student practice generations (0 = unlimited)</p>
                     </div>
                     <span className="font-mono font-bold text-text bg-surface px-2.5 py-1 rounded-lg border border-border">
-                      {studentGenPolicy.dailyLimit} cases / day / student
+                      {studentGenPolicy.dailyLimit === 0 ? "Unlimited (0 - Default)" : `${studentGenPolicy.dailyLimit} cases / day / student`}
                     </span>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-warning/10 border border-warning/20 text-text text-[11px] leading-relaxed">
-                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. To modify these values, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=true</code> and <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> in your server environment variables (e.g., Vercel Project Settings or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">.env.local</code>) and redeploy.
+                    <strong className="text-warning">Environment Configuration Note:</strong> This policy is strictly read-only in the Admin Dashboard to maintain institutional curriculum governance. By default, students can generate freely with no daily per-user cap (<code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=0</code>). To impose limits or disable generation, set <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_GENERATION_LIMIT=3</code> or <code className="px-1 py-0.5 rounded bg-surface border border-border font-mono text-[10px]">STUDENT_CASE_GENERATION=false</code> in your server environment variables and redeploy.
                   </div>
                 </div>
               </div>

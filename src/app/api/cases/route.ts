@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mockStore } from "@/lib/mock-db";
 import { CaseStudy } from "@/lib/types";
 import { authenticateUser } from "@/lib/session";
+import { sanitizeCaseStudyForStudent } from "@/lib/case-permissions";
 
 export async function GET(req: NextRequest) {
   const { user, errorResponse } = await authenticateUser(req);
@@ -138,19 +139,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (user.role === "student") {
-    cases = cases.map((c) => {
-      if (c.content) {
-        const sanitizedContent = { ...c.content } as Record<string, unknown>;
-        delete sanitizedContent.teaching_note;
-        delete sanitizedContent.teaching_notes;
-        delete sanitizedContent.answers;
-        delete sanitizedContent.answer_key;
-        delete sanitizedContent.quality;
-        delete sanitizedContent.validation;
-        return { ...c, content: sanitizedContent as any };
-      }
-      return c;
-    });
+    cases = cases.map((c) => sanitizeCaseStudyForStudent(c));
   }
 
   return NextResponse.json(

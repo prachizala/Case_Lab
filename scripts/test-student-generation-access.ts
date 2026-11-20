@@ -43,12 +43,12 @@ async function runStudentAccessTests() {
   const procEnv = process.env as Record<string, string | undefined>;
 
   // --------------------------------------------------------------------------
-  // TEST 1: Default Environment (STUDENT_CASE_GENERATION=false)
+  // TEST 1: Default Environment (STUDENT_CASE_GENERATION default = true)
   // --------------------------------------------------------------------------
-  console.log("TEST 1: Default Role Restrictions (STUDENT_CASE_GENERATION=false)");
+  console.log("TEST 1: Default Role Permissions (Free Student Generation Enabled by Default)");
   delete procEnv.STUDENT_CASE_GENERATION;
 
-  assert(isStudentCaseGenerationEnabled() === false, `Default state is disabled (false)`);
+  assert(isStudentCaseGenerationEnabled() === true, `Default state is enabled (true)`);
 
   const facultyAccess = checkCaseGenerationAccess("faculty");
   assert(facultyAccess.allowed === true, `Faculty is allowed to generate cases`);
@@ -57,23 +57,22 @@ async function runStudentAccessTests() {
   assert(adminAccess.allowed === true, `Admin is allowed to generate cases`);
 
   const studentAccessDefault = checkCaseGenerationAccess("student");
-  assert(studentAccessDefault.allowed === false, `Student is strictly blocked by default (allowed = false)`);
-  assert(studentAccessDefault.status === 403, `Returns HTTP 403 status`);
-  assert(
-    Boolean(studentAccessDefault.error?.includes("Students are restricted")),
-    `Provides clear institutional error message`
-  );
+  assert(studentAccessDefault.allowed === true, `Student is allowed to generate cases freely by default (allowed = true)`);
 
   // --------------------------------------------------------------------------
-  // TEST 2: Student Case Generation Enabled (STUDENT_CASE_GENERATION=true)
+  // TEST 2: Configurable Flag (STUDENT_CASE_GENERATION=false)
   // --------------------------------------------------------------------------
-  console.log("\nTEST 2: Configurable Flag (STUDENT_CASE_GENERATION=true)");
+  console.log("\nTEST 2: Configurable Flag (STUDENT_CASE_GENERATION=false)");
+  procEnv.STUDENT_CASE_GENERATION = "false";
+
+  assert(isStudentCaseGenerationEnabled() === false, `Flag "false" correctly disables student generation`);
+
+  const studentAccessDisabled = checkCaseGenerationAccess("student");
+  assert(studentAccessDisabled.allowed === false, `Student access blocked when flag is set to false`);
+  assert(studentAccessDisabled.status === 403, `Returns HTTP 403 status`);
+
+  // Restore to default true for remainder of suite
   procEnv.STUDENT_CASE_GENERATION = "true";
-
-  assert(isStudentCaseGenerationEnabled() === true, `Flag correctly enables student generation`);
-
-  const studentAccessEnabled = checkCaseGenerationAccess("student");
-  assert(studentAccessEnabled.allowed === true, `Student access granted when flag is set to true`);
 
   // --------------------------------------------------------------------------
   // TEST 3: Server-Side Stripping of Answers, Teaching Notes & Checks
@@ -222,11 +221,16 @@ async function runStudentAccessTests() {
   assert(foundOther === undefined, `Student practice case is NOT visible in public library to other students`);
 
   // --------------------------------------------------------------------------
-  // TEST 5: Student Daily Rate Limiting (STUDENT_GENERATION_LIMIT)
+  // TEST 5: Student Daily Rate Limiting (Default 0 = Unlimited, Configurable Cap)
   // --------------------------------------------------------------------------
-  console.log("\nTEST 5: Student Daily Rate Limiting (Default 3/Day)");
+  console.log("\nTEST 5: Student Daily Rate Limiting (Default 0 = Unlimited, Configurable Cap)");
+  delete procEnv.STUDENT_GENERATION_LIMIT;
+  assert(getStudentDailyGenerationLimit() === 0, `Default student generation limit is 0 (unlimited)`);
+  const unlimitedCheck = checkStudentDailyLimit("student-unlimited-test");
+  assert(unlimitedCheck.allowed === true, `When limit is 0, checkStudentDailyLimit returns allowed: true`);
+
   procEnv.STUDENT_GENERATION_LIMIT = "3";
-  assert(getStudentDailyGenerationLimit() === 3, `Student daily limit is 3`);
+  assert(getStudentDailyGenerationLimit() === 3, `Configured student daily limit is 3`);
 
   const studentTestId = `usr-test-student-${Date.now()}`;
   // Ensure fresh usage

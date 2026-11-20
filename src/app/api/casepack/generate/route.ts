@@ -5,9 +5,11 @@ import { checkRateLimit, recordGenerationUsage } from "@/lib/rate-limit";
 import { mockStore } from "@/lib/mock-db";
 import { generateCECasePack, GenerateCasePackInput } from "@/lib/casepack/generate";
 import { CaseStudy } from "@/lib/types";
+import { checkAccess } from "@/lib/access-control";
 import {
   checkCaseGenerationAccess,
   checkStudentDailyLimit,
+  getStudentDailyGenerationLimit,
   sanitizeCasePackForStudent,
   sanitizeCaseStudyForStudent,
 } from "@/lib/case-permissions";
@@ -51,7 +53,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Role-based case generation check (STUDENT_CASE_GENERATION flag)
+    // Check account status: inactive or expired accounts cannot generate cases
+    const accountAccess = checkAccess(user);
+    if (!accountAccess.allowed || !accountAccess.canCreate) {
+      return NextResponse.json(
+        {
+          error: accountAccess.reason || "Account access is restricted. Expired or inactive accounts cannot generate cases.",
+          error_code: accountAccess.status === "expired" ? "ACCOUNT_EXPIRED" : accountAccess.status === "inactive" ? "ACCOUNT_INACTIVE" : "ACCESS_DENIED",
+          status: accountAccess.status,
+        },
+        { status: 403 }
+      );
+    }
+
+    // Role-based case generation check (students, faculty, admin allowed)
     const access = checkCaseGenerationAccess(user.role);
     if (!access.allowed) {
       return NextResponse.json(
@@ -60,7 +75,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Student daily limit check (STUDENT_GENERATION_LIMIT, default 3/day)
+    // Student daily limit check (STUDENT_GENERATION_LIMIT; default 0 = unlimited)
     if (user.role === "student") {
       const studentDaily = checkStudentDailyLimit(user.id);
       if (!studentDaily.allowed) {
@@ -77,31 +92,47 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Rate Limiting Check (10 generations per user per hour)
-    const rateLimit = await checkRateLimit(user.id);
-    if (!rateLimit.allowed) {
+    // 2. Institutional token budget check
+    const tokenBudget = mockStore.getTokenBudgetInfo();
+    if (tokenBudget.is_blocked) {
       return NextResponse.json(
         {
-          error: `Hourly generation rate limit reached (${rateLimit.count}/${rateLimit.limit}). Please try again in ${rateLimit.resetMinutes} minutes.`,
-          error_code: "RATE_LIMIT_EXCEEDED",
-          limit: rateLimit.limit,
-          remaining: rateLimit.remaining,
+          error: `Institutional AI token budget is fully exhausted (100%). Generation is temporarily suspended until monthly reset or budget expansion.`,
+          budget: tokenBudget,
         },
         { status: 429 }
       );
     }
 
-    // 3. User Monthly Quota Check
-    const quota = mockStore.checkUserGenerationQuota(user.id);
-    if (!quota.allowed) {
-      return NextResponse.json(
-        {
-          error: `Monthly fair-use case generation limit reached (${quota.used}/${quota.limit}). Resets next month.`,
-          error_code: "FAIR_USE_LIMIT_REACHED",
-          quota,
-        },
-        { status: 403 }
-      );
+    // 3. Rate Limiting Check (hourly limit; for students with default 0, per-user limit is unlimited)
+    if (user.role !== "student" || getStudentDailyGenerationLimit() > 0) {
+      const rateLimit = await checkRateLimit(user.id);
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: `Hourly generation rate limit reached (${rateLimit.count}/${rateLimit.limit}). Please try again in ${rateLimit.resetMinutes} minutes.`,
+            error_code: "RATE_LIMIT_EXCEEDED",
+            limit: rateLimit.limit,
+            remaining: rateLimit.remaining,
+          },
+          { status: 429 }
+        );
+      }
+    }
+
+    // 4. User Monthly Quota Check (bypassed for students when unlimited)
+    if (user.role !== "student" || getStudentDailyGenerationLimit() > 0) {
+      const quota = mockStore.checkUserGenerationQuota(user.id);
+      if (!quota.allowed) {
+        return NextResponse.json(
+          {
+            error: `Monthly fair-use case generation limit reached (${quota.used}/${quota.limit}). Resets next month.`,
+            error_code: "FAIR_USE_LIMIT_REACHED",
+            quota,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // 4. Validate Request Payload with Zod
