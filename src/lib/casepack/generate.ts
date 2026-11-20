@@ -13,7 +13,7 @@ import {
 } from "@/config/casepack/departments";
 
 export interface GenerateCasePackInput {
-  department: "finance" | "hr" | "marketing";
+  department: string;
   subject?: string;
   topics?: string[];
   concepts?: string[];
@@ -290,6 +290,174 @@ function generateSimulatedCasePack(input: GenerateCasePackInput): CECasePack {
           "₹32.5 crore outstanding OEM receivables",
           "₹16 crore high-pressure die-casting equipment capex",
           "82% factoring advance rate with 1.25% fee"
+        ],
+      },
+    };
+  }
+
+  // Domain simulation for non-core domains (IT, Supply Chain, Strategy, Analytics, Operations)
+  if (input.department !== "hr" && input.department !== "marketing") {
+    const domainTitle = profile.name;
+    const defaultTopic = input.topics?.length
+      ? input.topics[0]
+      : profile.units[0]?.topics[0] || `${domainTitle} Strategy`;
+    return {
+      status: "draft",
+      meta: {
+        department: input.department,
+        subject: input.subject || `${domainTitle} Management`,
+        topic: input.topics?.length ? input.topics : profile.units.flatMap((u) => u.topics).slice(0, 3),
+        concepts: input.concepts?.length
+          ? input.concepts
+          : ["Strategic Alignment", "Operational Efficiency", "Stakeholder Trade-offs"],
+        course_code: input.examMetadata?.course_code || profile.exam_metadata_defaults.course_code,
+        ce_no: input.examMetadata?.ce_no || profile.exam_metadata_defaults.ce_no,
+        set: input.examMetadata?.set || profile.exam_metadata_defaults.set,
+        level,
+        language: lang,
+        industry: input.industry || "Enterprise Technology & Industrial Operations",
+        geography: input.geography || "Pune & Hyderabad Industrial Corridor, India",
+        length: input.length || "standard",
+        max_marks: maxMarks,
+      },
+      case: {
+        title: `${domainTitle} Transformation and Operational Strategy at Indovance Enterprises`,
+        word_count: isShort ? 650 : 1250,
+        sections: [
+          {
+            heading: "Executive Background & Strategic Context",
+            paragraphs: [
+              `Indovance Enterprises, headquartered in Pune, operates across diverse commercial sectors with 1,200 employees. Facing rapid acceleration and evolving market pressures in ${domainTitle}, the leadership team initiated a comprehensive operational review.`,
+              `Senior executive Vikram Malhotra observed that while core revenues remained stable at ₹180 crore, emerging competitors were achieving 25% higher efficiency through focused ${defaultTopic} methodologies.`,
+            ],
+          },
+          {
+            heading: `The ${domainTitle} Dilemma & Operational Crossroads`,
+            paragraphs: [
+              `The executive committee found itself divided over resource prioritization between immediate modernization and long-term capability building. Traditional legacy practices clashed with the mandate for modern ${domainTitle} standards.`,
+              `Cross-functional friction between dispatch teams, operational heads, and finance leaders delayed execution by over four months, prompting urgent board-level intervention.`,
+            ],
+          },
+          {
+            heading: "Strategic Trade-offs and Recommended Interventions",
+            paragraphs: [
+              `The management team formulated two competing proposals: a phased rollout minimizing operational downtime versus an accelerated full-scale overhaul backed by external advisors.`,
+              `Evaluating these paths requires systematic alignment with core curricular principles of ${defaultTopic} and rigorous risk governance.`,
+            ],
+          },
+        ],
+        data_tables: [
+          {
+            title: `Table 1: Indovance Key ${domainTitle} Operating Metrics (FY2023–FY2025)`,
+            columns: ["Metric / Operational Dimension", "FY2023", "FY2024", "FY2025 (Projected)"],
+            rows: [
+              ["Operational Efficiency Index (%)", "72.4%", "68.1%", "84.5%"],
+              ["Resource Allocation (₹ Crore)", "14.2", "18.6", "26.0"],
+              ["Process Cycle Time (Days)", "28.5", "34.0", "19.5"],
+              ["Incident / Discrepancy Rate (%)", "4.8%", "6.2%", "1.8%"],
+            ],
+          },
+        ],
+      },
+      questions: [
+        {
+          id: "Q1",
+          bloom_verb: "Apply & Analyze",
+          text: `Critically evaluate the core managerial dilemma facing Indovance Enterprises within the context of ${defaultTopic}. Propose an evidence-based roadmap addressing both operational feasibility and strategic risk.`,
+          concepts: [defaultTopic, "Operational Governance", "Root Cause Analysis"],
+          marks: marksPerQ,
+          co: "CO1",
+          k_level: "K4",
+        },
+        ...(numQ > 1
+          ? [
+              {
+                id: "Q2",
+                bloom_verb: "Evaluate & Create",
+                text: `Formulate a quantitative and qualitative appraisal of the resource allocation trade-offs in Table 1. How should executive leadership mitigate organizational resistance during implementation?`,
+                concepts: [defaultTopic, "Resource Allocation", "Change Management"],
+                marks: marksPerQ,
+                co: "CO2",
+                k_level: "K5",
+              },
+            ]
+          : []),
+      ],
+      answers: [
+        {
+          question_id: "Q1",
+          introduction: `Indovance Enterprises' primary vulnerability stems from operational fragmentation and deferred adoption of ${defaultTopic}. The following analysis establishes a multi-stakeholder diagnostic.`,
+          sections: [
+            {
+              heading: `1. Diagnostic Assessment of ${domainTitle} Operations`,
+              points: [
+                `Process cycle times expanded due to siloed communication across functional units.`,
+                `Underinvestment in standardized ${defaultTopic} tools created avoidable administrative overhead.`,
+              ],
+              evaluation: [
+                `Implementing a centralized operating model will reduce process variance by 30%.`,
+                `Cross-functional governance aligns Middle Management with executive milestones.`,
+              ],
+              limitation: "Short-term transition friction during the initial 90-day deployment window.",
+              overall: `Essential strategic realignment required to preserve competitive advantage in ${domainTitle}.`,
+            },
+          ],
+          conclusion: `By instituting a phased governance model with rigorous KPIs, Indovance successfully balances technical execution with stakeholder alignment, establishing sustainable leadership in ${domainTitle}.`,
+          word_count: 480,
+        },
+        ...(numQ > 1
+          ? [
+              {
+                question_id: "Q2",
+                introduction: `The quantitative trade-offs in Table 1 demonstrate a clear transition curve between upfront capital expenditure and long-term cycle time compression.`,
+                sections: [
+                  {
+                    heading: "1. Empirical Appraisal of Capital Allocation",
+                    points: [
+                      "FY24 process cycle time spiked to 34.0 days as transitional training took effect.",
+                      "Projected FY25 performance of 19.5 days delivers a 42% operational productivity lift.",
+                    ],
+                    evaluation: [
+                      "The ₹26.0 crore FY25 resource commitment is justified by projected annual efficiency savings.",
+                      "Incident rate compression from 6.2% to 1.8% protects enterprise margins and brand reputation.",
+                    ],
+                    limitation: "Requires sustained compliance discipline across distributed facilities.",
+                    overall: "Strong commercial justification with attractive internal rate of return.",
+                  },
+                ],
+                conclusion: `Executive leadership must combine bi-weekly steering committee reviews with performance-linked incentives to guarantee lasting organizational adoption.`,
+                word_count: 510,
+              },
+            ]
+          : []),
+      ],
+      teaching_notes: {
+        synopsis: `This case examines strategic decision-making and operational trade-offs in ${domainTitle} at Indovance Enterprises, focusing on ${defaultTopic}.`,
+        objectives: [
+          `Analyze complex managerial crossroads in ${domainTitle}.`,
+          `Apply ${defaultTopic} principles to resolve operational friction.`,
+          "Evaluate quantitative operating metrics to formulate executive recommendations.",
+        ],
+        teaching_approach: "Socratic classroom debate followed by small-group quantitative appraisal of Table 1.",
+        frameworks: profile.frameworks,
+        common_mistakes: [
+          "Focusing exclusively on technical implementation while ignoring stakeholder resistance.",
+          "Failing to link the quantitative metrics in Table 1 to the recommended strategic timeline.",
+        ],
+        marking_scheme: [
+          { criterion: "Thorough diagnostic rigor and identification of organizational root causes", marks: Math.round(maxMarks * 0.4) },
+          { criterion: `Correct application of ${domainTitle} conceptual frameworks and quantitative data`, marks: Math.round(maxMarks * 0.4) },
+          { criterion: "Practical, phased implementation roadmap with measurable milestones", marks: maxMarks - 2 * Math.round(maxMarks * 0.4) },
+        ],
+      },
+      quality: {
+        facts_to_verify: [
+          "₹180 crore annual enterprise revenue figure",
+          "Table 1 operational cycle time trends",
+        ],
+        illustrative_figures: [
+          "Process cycle time reduction from 34.0 to 19.5 days",
+          "₹26 crore projected FY25 capital commitment",
         ],
       },
     };

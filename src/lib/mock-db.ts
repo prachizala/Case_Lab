@@ -858,6 +858,116 @@ export const initialCases: CaseStudy[] = [
       verify_facts_flag: true,
       figures_disclaimer: "All specific financial figures are illustrative pedagogical models for case analysis."
     }
+  },
+  {
+    id: "case-008",
+    author_id: "usr-faculty-1",
+    author_name: "Faculty",
+    title: "Cloud Migration and Cybersecurity Governance at Tech Mahindra",
+    status: "approved",
+    visibility: "sbs_only",
+    type: "full",
+    format: "real_signal",
+    domain: "IT",
+    difficulty: "Intermediate",
+    tags: ["IT", "Cloud", "Cybersecurity", "Digital Transformation", "ERP"],
+    industry: "EdTech & Enterprise SaaS",
+    function: "Enterprise Architecture & IT Governance",
+    course_id: "course-5",
+    course_name: "Business Model Innovation in AI & Cloud",
+    department_id: "dept-2",
+    level: "MBA / Advanced",
+    language: "en",
+    complexity: 7,
+    version: 1,
+    reviewer_id: "usr-admin-1",
+    created_at: new Date(Date.now() - 3600000 * 30).toISOString(),
+    content: {
+      title: "Cloud Migration and Cybersecurity Governance at Tech Mahindra",
+      summary: "Balancing enterprise multi-cloud resilience with zero-trust security postures and compliance mandates across European banking clients.",
+      background: "Enterprise IT service provider managing legacy on-prem core banking systems for Tier-1 financial institutions.",
+      challenge: "Transitioning 450 legacy client apps to hybrid clouds without violating EU GDPR data residency or triggering SLA penalties.",
+      key_data: [
+        { metric: "Hybrid Cloud Migration Pace", value: "62% Completed", period: "FY26", notes: "Target 90% by end of FY27" },
+        { metric: "Security Incident MTTR", value: "14 minutes", period: "2026", notes: "Zero-trust SOC operational efficiency" }
+      ],
+      decision_point: "Should the Chief Information Security Officer mandate full single-vendor hyperscaler consolidation or retain costly multi-cloud redundancies?",
+      discussion_questions: [
+        "What are the operational trade-offs of single-cloud vs multi-cloud enterprise architectures?",
+        "How can zero-trust access architecture mitigate third-party software supply chain vulnerabilities?"
+      ],
+      teaching_note: {
+        objectives: [
+          "Evaluate enterprise cloud governance frameworks.",
+          "Assess financial and operational risks in complex IT transitions."
+        ],
+        class_flow: [
+          { phase: "Cloud Architecture Audit", duration_minutes: 20, activity: "Dissecting multi-cloud vs single-vendor risk." },
+          { phase: "Cybersecurity Governance", duration_minutes: 30, activity: "Mapping Zero Trust access policies." },
+          { phase: "Executive Action Plan", duration_minutes: 30, activity: "Authoring board-level IT risk recommendations." }
+        ],
+        frameworks: [
+          { name: "Zero Trust Architecture (NIST SP 800-207)", application: "Perimeterless enterprise security design.", key_takeaway: "Never trust, always verify." }
+        ]
+      },
+      verify_facts_flag: true,
+      figures_disclaimer: "Illustrative pedagogical model."
+    }
+  },
+  {
+    id: "case-009",
+    author_id: "usr-faculty-1",
+    author_name: "Faculty",
+    title: "Predictive Customer Churn and Algorithmic Dynamic Pricing at JioCinema",
+    status: "approved",
+    visibility: "public",
+    type: "full",
+    format: "real_signal",
+    domain: "Analytics",
+    difficulty: "Advanced",
+    tags: ["Analytics", "A/B Testing", "Machine Learning", "Customer Churn", "OTT"],
+    industry: "Fintech & Banking",
+    function: "Customer Analytics & Enterprise AI",
+    course_id: "course-1",
+    course_name: "Corporate Valuation & Capital Markets",
+    department_id: "dept-1",
+    level: "MBA / Advanced",
+    language: "en",
+    complexity: 8,
+    version: 1,
+    reviewer_id: "usr-admin-1",
+    created_at: new Date(Date.now() - 3600000 * 20).toISOString(),
+    content: {
+      title: "Predictive Customer Churn and Algorithmic Dynamic Pricing at JioCinema",
+      summary: "Leveraging machine learning models and high-frequency behavioral telemetry to optimize sports streaming monetization and retention.",
+      background: "JioCinema scaled to 32 million concurrent viewers during IPL cricket broadcasts, shifting to subscription tier paywalls.",
+      challenge: "Post-tournament subscriber retention plummeted by 42% as sports-only viewers canceled ad-free tiers.",
+      key_data: [
+        { metric: "Post-Tournament 30-Day Churn", value: "42.5%", period: "FY26", notes: "Sports-focused cohort" },
+        { metric: "A/B Test Dynamic Offer Lift", value: "+18.2%", period: "Q2 2026", notes: "Personalized bundle recommendation" }
+      ],
+      decision_point: "Should the Head of Data Analytics deploy automated algorithmic price discounting based on viewing intensity or invest in proprietary vernacular entertainment content?",
+      discussion_questions: [
+        "How do predictive churn models differentiate between transient event-driven viewers and core subscribers?",
+        "Evaluate the ethical and brand implications of algorithmic price discrimination in subscription streaming."
+      ],
+      teaching_note: {
+        objectives: [
+          "Formulate data-driven customer retention interventions.",
+          "Design robust A/B testing methodologies for subscription pricing."
+        ],
+        class_flow: [
+          { phase: "Telemetry & Cohort Diagnosis", duration_minutes: 20, activity: "Analyzing post-tournament subscriber decay curves." },
+          { phase: "Pricing Model Experimentation", duration_minutes: 30, activity: "Authoring hypothesis-driven A/B test variations." },
+          { phase: "Ethical & Strategic Synthesis", duration_minutes: 30, activity: "Evaluating algorithmic pricing boundaries." }
+        ],
+        frameworks: [
+          { name: "CLV vs CAC Optimization Matrix", application: "Balancing acquisition incentives against retention lifetime value.", key_takeaway: "Algorithmic pricing must not cannibalize high-willingness-to-pay segments." }
+        ]
+      },
+      verify_facts_flag: true,
+      figures_disclaimer: "Illustrative pedagogical model."
+    }
   }
 ];
 

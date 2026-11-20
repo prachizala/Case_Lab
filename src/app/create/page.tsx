@@ -71,16 +71,14 @@ import {
   Download,
   Copy,
   Lock,
+  Landmark,
+  TrendingUp,
+  Users,
+  Truck,
+  BarChart3,
+  Cog,
 } from "lucide-react";
-
-const DOMAINS: CaseDomain[] = [
-  "Marketing",
-  "Finance",
-  "Operations",
-  "Strategy",
-  "HR",
-  "Analytics",
-];
+import { DOMAINS, getDomainByName, getTopicsForDomain, DOMAIN_NAMES, DomainConfig } from "@/config/domains";
 
 const DIFFICULTIES: CaseDifficulty[] = ["Beginner", "Intermediate", "Advanced"];
 
@@ -145,6 +143,29 @@ const SUGGESTED_OBJECTIVES = [
   "Formulate a 100-day executive restructuring roadmap for the board of directors.",
 ];
 
+function getDomainIcon(name: string) {
+  switch (name) {
+    case "Finance":
+      return Landmark;
+    case "Marketing":
+      return TrendingUp;
+    case "HR":
+      return Users;
+    case "IT":
+      return Cpu;
+    case "Supply Chain":
+      return Truck;
+    case "Strategy":
+      return Target;
+    case "Analytics":
+      return BarChart3;
+    case "Operations":
+      return Cog;
+    default:
+      return Layers;
+  }
+}
+
 function CreateCaseContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -165,7 +186,7 @@ function CreateCaseContent() {
   const [keywordInput, setKeywordInput] = useState<string>("");
 
   // CE Case Pack Configuration State
-  const [department, setDepartment] = useState<"finance" | "hr" | "marketing">("finance");
+  const [department, setDepartment] = useState<string>("finance");
   const [selectedTopics, setSelectedTopics] = useState<string[]>([
     "Factoring (Recourse vs. Non-Recourse)",
     "Forfaiting & Export Receivables Financing",
@@ -228,9 +249,13 @@ function CreateCaseContent() {
   };
 
   // Phase 2: Domain, Difficulty, Audience
-  const [domain, setDomain] = useState<CaseDomain>("Strategy");
+  const [domain, setDomain] = useState<CaseDomain>("Finance");
   const [difficulty, setDifficulty] = useState<CaseDifficulty>("Intermediate");
   const [targetAudience, setTargetAudience] = useState<CaseTargetAudience>("MBA");
+
+  const currentDomainConfig = useMemo(() => {
+    return getDomainByName(domain) || DOMAINS[0];
+  }, [domain]);
 
   // Phase 2: Enterprise & Dilemma Fields
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("tata-motors-ev");
@@ -683,37 +708,48 @@ function CreateCaseContent() {
     setSignalsModalOpen(false);
   };
 
-  // CE Case Pack Handlers
-  const handleDepartmentChange = (dept: "finance" | "hr" | "marketing") => {
-    setDepartment(dept);
-    if (dept === "finance") {
-      setSelectedTopics([
-        "Factoring (Recourse vs. Non-Recourse)",
-        "Forfaiting & Export Receivables Financing",
-        "Leasing (Operating vs. Financial / Lease vs. Buy)",
-        "Hire Purchase Financing & Asset Ownership",
-        "Credit Rating Mechanisms & Sovereign/Corporate Methodologies",
-      ]);
+  // Domain & Curricular Handlers (Single Source of Truth)
+  const handleDomainSelect = (chosenDomainName: CaseDomain) => {
+    setDomain(chosenDomainName);
+    const dConfig = getDomainByName(chosenDomainName);
+    if (!dConfig) return;
+    setDepartment(dConfig.id);
+
+    // Initial selected topics from unit 1
+    const unit1Topics = dConfig.units[0]?.topics || [];
+    setSelectedTopics(unit1Topics.slice(0, 5));
+
+    if (chosenDomainName === "Finance") {
       setIndustry("Industrial Machinery & Manufacturing");
-      setDomain("Finance");
-    } else if (dept === "hr") {
-      setSelectedTopics([
-        "Workforce Planning & Headcount Forecasting",
-        "OKR Frameworks & KPI Cascading",
-        "Executive Compensation & ESOP Design",
-        "Attrition Analysis & Retention Interventions",
-      ]);
+      setFunctionalFocus("Strategic Finance & Capital Allocation");
+    } else if (chosenDomainName === "HR") {
       setIndustry("Modern Retail & Omnichannel Commerce");
-      setDomain("HR");
-    } else if (dept === "marketing") {
-      setSelectedTopics([
-        "Market Segmentation & Target Persona Selection",
-        "Value Proposition Design & Customer Job-to-be-Done",
-        "Value-Based vs. Cost-Plus Pricing Strategies",
-        "D2C vs. Modern Trade Distribution Channel Conflicts",
-      ]);
+      setFunctionalFocus("Enterprise Leadership & Governance");
+    } else if (chosenDomainName === "Marketing") {
       setIndustry("Organic Consumer Goods & FMCG");
-      setDomain("Marketing");
+      setFunctionalFocus("Disruptive Marketing & Brand Positioning");
+    } else if (chosenDomainName === "IT") {
+      setIndustry("EdTech & Enterprise SaaS");
+      setFunctionalFocus("AI Integration & Product Strategy");
+    } else if (chosenDomainName === "Supply Chain") {
+      setIndustry("Agri-Tech & Supply Chains");
+      setFunctionalFocus("Operations & Supply Chain Resilience");
+    } else if (chosenDomainName === "Strategy") {
+      setIndustry("Automotive & Electric Vehicles");
+      setFunctionalFocus("Mergers, Acquisitions & Alliances");
+    } else if (chosenDomainName === "Analytics") {
+      setIndustry("Fintech & Banking");
+      setFunctionalFocus("AI Integration & Product Strategy");
+    } else if (chosenDomainName === "Operations") {
+      setIndustry("Textiles & Manufacturing");
+      setFunctionalFocus("Operations & Supply Chain Resilience");
+    }
+  };
+
+  const handleDepartmentChange = (dept: string) => {
+    const dConfig = getDomainByName(dept);
+    if (dConfig) {
+      handleDomainSelect(dConfig.name);
     }
   };
 
@@ -721,6 +757,16 @@ function CreateCaseContent() {
     setSelectedTopics((prev) =>
       prev.includes(topic) ? (prev.length > 1 ? prev.filter((t) => t !== topic) : prev) : [...prev, topic]
     );
+  };
+
+  const handleToggleUnitTopics = (unitTopics: string[]) => {
+    const allSelected = unitTopics.every((t) => selectedTopics.includes(t));
+    if (allSelected) {
+      const remaining = selectedTopics.filter((t) => !unitTopics.includes(t));
+      setSelectedTopics(remaining.length > 0 ? remaining : [unitTopics[0]]);
+    } else {
+      setSelectedTopics((prev) => Array.from(new Set([...prev, ...unitTopics])));
+    }
   };
 
   const handleRerunChecks = () => {
@@ -1360,32 +1406,51 @@ function CreateCaseContent() {
               {/* CE Case Pack Department & Syllabus Configuration */}
               {type === "ce_pack" && (
                 <div className="mt-3 p-4 rounded-xl border border-primary/20 bg-primary-soft/30 dark:bg-primary-soft/10 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
+                  <div className="space-y-3 pb-3 border-b border-border/60">
                     <div>
                       <span className="text-xs font-bold text-text block">
-                        Department & Syllabus Alignment
+                        Academic Domain & Syllabus Alignment
                       </span>
                       <p className="text-xs text-muted">
-                        Select department to load syllabus units, frameworks, and pedagogical rules.
+                        Select one of the 8 business domains to configure syllabus units, frameworks, and pedagogical rules.
                       </p>
                     </div>
 
-                    {/* Department Selector */}
-                    <div className="inline-flex p-1 bg-surface rounded-xl border border-border shrink-0">
-                      {(["finance", "hr", "marketing"] as const).map((d) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => handleDepartmentChange(d)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
-                            department === d
-                              ? "bg-primary text-white shadow-xs"
-                              : "text-muted hover:text-text font-medium"
-                          }`}
-                        >
-                          {d.toUpperCase()}
-                        </button>
-                      ))}
+                    {/* 8 Business Domains Grid Selector */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      {DOMAINS.map((d) => {
+                        const IconComponent = getDomainIcon(d.name);
+                        const isSelected = domain === d.name;
+                        return (
+                          <button
+                            key={d.id}
+                            type="button"
+                            onClick={() => handleDomainSelect(d.name)}
+                            className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                              isSelected
+                                ? "bg-primary text-white border-primary shadow-xs ring-1 ring-primary"
+                                : "bg-surface border-border hover:border-accent/60 text-text hover:bg-surface/80"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between w-full mb-1">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : "text-accent"}`} />
+                                <span className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-text"}`}>
+                                  {d.name}
+                                </span>
+                              </div>
+                              {isSelected && (
+                                <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-1">
+                                  <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                                </span>
+                              )}
+                            </div>
+                            <p className={`text-[10px] leading-snug line-clamp-2 ${isSelected ? "text-white/85 font-medium" : "text-muted"}`}>
+                              {d.shortDescription}
+                            </p>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -1789,26 +1854,98 @@ function CreateCaseContent() {
                 <span className="text-xs text-muted font-medium">Step 2 of 5</span>
               </div>
 
-              {/* Domain Chips */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-text block">
-                  Academic Domain Focus
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {DOMAINS.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDomain(d)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                        domain === d
-                          ? "bg-primary text-on-primary border-primary shadow-sm"
-                          : "bg-surface border-border text-text hover:border-accent"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
+              {/* 8 Business Domains Selector */}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-text block">
+                    Academic Domain Focus
+                  </label>
+                  <p className="text-[11px] text-muted">
+                    Choose from the 8 core business disciplines. Topics adjust dynamically.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {DOMAINS.map((d) => {
+                    const IconComponent = getDomainIcon(d.name);
+                    const isSelected = domain === d.name;
+                    return (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => handleDomainSelect(d.name)}
+                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? "bg-primary text-white border-primary shadow-xs ring-1 ring-primary"
+                            : "bg-surface border-border hover:border-accent/60 text-text hover:bg-surface/80"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : "text-accent"}`} />
+                            <span className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-text"}`}>
+                              {d.name}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-1">
+                              <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-[10px] leading-snug line-clamp-2 ${isSelected ? "text-white/85 font-medium" : "text-muted"}`}>
+                          {d.shortDescription}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Topics Grouped by Unit */}
+                <div className="pt-1 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-text">
+                      Curricular Topics ({domain}) — {selectedTopics.length} selected
+                    </span>
+                  </div>
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {currentDomainConfig?.units.map((unit) => (
+                      <div key={unit.unit} className="p-2.5 rounded-lg border border-border/80 bg-surface/60 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[11px] font-bold text-text">
+                            {unit.title}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleUnitTopics(unit.topics)}
+                            className="text-[10px] font-semibold text-accent hover:underline"
+                          >
+                            {unit.topics.every((t) => selectedTopics.includes(t)) ? "Deselect Unit" : "Select Unit"}
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {unit.topics.map((t) => {
+                            const isSelected = selectedTopics.includes(t);
+                            return (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => handleToggleTopic(t)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
+                                  isSelected
+                                    ? "bg-accent/15 border-accent text-accent font-semibold"
+                                    : "bg-surface border-border text-muted hover:text-text hover:border-accent/40"
+                                }`}
+                              >
+                                {isSelected && <span className="mr-1">✓</span>}
+                                {t}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 

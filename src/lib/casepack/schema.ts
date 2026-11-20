@@ -8,7 +8,7 @@ import { z } from "zod";
  */
 
 export const CasePackMetaSchema = z.object({
-  department: z.enum(["finance", "hr", "marketing"]),
+  department: z.string().min(1, "Department/Domain is required"),
   subject: z.string().min(1, "Subject is required"),
   topic: z.array(z.string()).min(1, "At least one topic is required"),
   concepts: z.array(z.string()).min(1, "At least one concept is required"),

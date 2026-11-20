@@ -51,12 +51,16 @@ export async function GET(req: NextRequest) {
   }
 
   if (domain && domain !== "all") {
-    cases = cases.filter(
-      (c) =>
-        (c.domain && c.domain.toLowerCase() === domain.toLowerCase()) ||
-        c.industry.toLowerCase().includes(domain.toLowerCase()) ||
-        c.function.toLowerCase().includes(domain.toLowerCase())
-    );
+    if (domain.toLowerCase() === "unassigned") {
+      cases = cases.filter((c) => !c.domain || c.domain.toLowerCase() === "unassigned");
+    } else {
+      cases = cases.filter(
+        (c) =>
+          (c.domain && c.domain.toLowerCase() === domain.toLowerCase()) ||
+          c.industry.toLowerCase().includes(domain.toLowerCase()) ||
+          c.function.toLowerCase().includes(domain.toLowerCase())
+      );
+    }
   }
 
   // Filter by Status

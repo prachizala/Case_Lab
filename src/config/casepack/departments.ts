@@ -8,6 +8,8 @@
  * Editable by administrative curriculum directors.
  */
 
+import { getDomainByName } from "@/config/domains";
+
 export interface TopicUnit {
   unit: number;
   title: string;
@@ -25,7 +27,7 @@ export interface ExamMetadataDefaults {
 }
 
 export interface DepartmentProfile {
-  id: "finance" | "hr" | "marketing";
+  id: string;
   name: string;
   code: string;
   units: TopicUnit[];
@@ -355,9 +357,86 @@ export const DEPARTMENT_PROFILES: Record<"finance" | "hr" | "marketing", Departm
   marketing: MARKETING_DEPARTMENT_PROFILE,
 };
 
-export function getDepartmentProfile(departmentId: string): DepartmentProfile {
-  const normalized = departmentId.toLowerCase().trim() as "finance" | "hr" | "marketing";
-  return DEPARTMENT_PROFILES[normalized] || FINANCE_DEPARTMENT_PROFILE;
+/**
+ * Creates a generic department profile for non-core domains (IT, Supply Chain, Strategy, Analytics, Operations)
+ * using the domain name and its configured curricular topics.
+ */
+export function createGenericDomainProfile(domainNameOrId: string, customTopics?: string[]): DepartmentProfile {
+  const dConfig = getDomainByName(domainNameOrId);
+  const domainName = dConfig?.name || domainNameOrId;
+  const isQuantitative = ["analytics", "operations", "supply chain", "supply-chain"].includes(
+    domainNameOrId.toLowerCase().trim()
+  );
+
+  const units: TopicUnit[] = dConfig?.units.map((u) => ({
+    unit: u.unit,
+    title: u.title,
+    topics: u.topics,
+    quantitative: isQuantitative,
+  })) || [
+    {
+      unit: 1,
+      title: `${domainName} Curricular Foundation`,
+      topics: customTopics && customTopics.length > 0 ? customTopics : ["Strategic Assessment", "Process Optimization"],
+      quantitative: isQuantitative,
+    },
+  ];
+
+  const code = (domainName.replace(/[^a-zA-Z]/g, "").slice(0, 3) || "GEN").toUpperCase();
+
+  return {
+    id: dConfig?.id || domainNameOrId.toLowerCase().replace(/\s+/g, "-"),
+    name: domainName,
+    code,
+    quantitative: isQuantitative,
+    units,
+    frameworks: [
+      `${domainName} Decision Framework & Operational Diagnosis`,
+      "Root Cause Analysis & Stakeholder Impact Modeling",
+      "Strategic Risk Management & Resource Allocation",
+      "Implementation Roadmap & Governance Architecture",
+    ],
+    case_requirements: [
+      `Real-world managerial dilemma set in Indian/global industry context focusing on ${domainName}.`,
+      "Empirical operational data, operational timeline, and clear organizational friction.",
+      "Clear decision crossroads requiring executive trade-off evaluation.",
+    ],
+    question_patterns: [
+      `Diagnose the core strategic breakdown facing the enterprise in its ${domainName} domain.`,
+      "Formulate two mutually exclusive action roadmaps and justify the recommended trajectory.",
+    ],
+    answer_patterns: [
+      "Executive Problem Diagnosis & Root Cause Identification.",
+      "Methodological Analysis using domain concepts.",
+      "Strategic Recommendations with implementation timeline.",
+    ],
+    validators: [
+      "schema_valid",
+      "word_count_bounds",
+      "concept_coverage",
+      "bloom_verbs",
+      "no_placeholders",
+    ],
+    exam_metadata_defaults: {
+      course_code: `${code}-501`,
+      ce_no: "CE-1",
+      set: "A",
+      maximum_marks: 40,
+      marks_per_question: 20,
+      date: "Fall 2026",
+    },
+    isQuantitativeTopic: (_topic: string): boolean => isQuantitative,
+  };
+}
+
+export function getDepartmentProfile(departmentId: string, customTopics?: string[]): DepartmentProfile {
+  const normalized = departmentId.toLowerCase().trim();
+  if (normalized === "finance") return FINANCE_DEPARTMENT_PROFILE;
+  if (normalized === "hr") return HR_DEPARTMENT_PROFILE;
+  if (normalized === "marketing") return MARKETING_DEPARTMENT_PROFILE;
+
+  // Use generic domain profile for the other 5 domains
+  return createGenericDomainProfile(departmentId, customTopics);
 }
 
 export function getAllDepartmentProfiles(): DepartmentProfile[] {

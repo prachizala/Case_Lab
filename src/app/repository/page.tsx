@@ -8,6 +8,7 @@ import { StateEmpty } from "@/components/StateEmpty";
 import { StateLoading } from "@/components/StateLoading";
 import { StateError } from "@/components/StateError";
 import { Profile } from "@/lib/types";
+import { DOMAINS } from "@/config/domains";
 import { COLLEGE_NAME_WITH_SHORT, COLLEGE_SHORT } from "@/config/college";
 import {
   Search,
@@ -89,6 +90,7 @@ export default function RepositoryCatalogPage() {
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
+  const [selectedDomain, setSelectedDomain] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -133,6 +135,7 @@ export default function RepositoryCatalogPage() {
       const params = new URLSearchParams();
       if (searchQuery.trim()) params.set("q", searchQuery.trim());
       if (selectedDept !== "all") params.set("department_id", selectedDept);
+      if (selectedDomain !== "all") params.set("domain", selectedDomain);
       if (selectedCourse !== "all") params.set("course_id", selectedCourse);
       if (selectedCategory !== "all") params.set("category_id", selectedCategory);
       if (selectedType !== "all") params.set("case_type", selectedType);
@@ -158,6 +161,7 @@ export default function RepositoryCatalogPage() {
   }, [
     searchQuery,
     selectedDept,
+    selectedDomain,
     selectedCourse,
     selectedCategory,
     selectedType,
@@ -255,7 +259,7 @@ export default function RepositoryCatalogPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2 text-xs">
             {/* Department */}
             <div>
               <label className="text-[10px] uppercase font-bold text-muted mb-1 block">
@@ -272,6 +276,26 @@ export default function RepositoryCatalogPage() {
                     {d.name}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Domain */}
+            <div>
+              <label className="text-[10px] uppercase font-bold text-muted mb-1 block">
+                Domain
+              </label>
+              <select
+                value={selectedDomain}
+                onChange={(e) => setSelectedDomain(e.target.value)}
+                className="w-full p-2 rounded-lg border border-border bg-background text-text text-xs focus:ring-1 focus:ring-accent"
+              >
+                <option value="all">All Domains</option>
+                {DOMAINS.map((d) => (
+                  <option key={d.id} value={d.name}>
+                    {d.name}
+                  </option>
+                ))}
+                <option value="unassigned">Unassigned</option>
               </select>
             </div>
 

@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
     const departmentId = searchParams.get("department_id") || searchParams.get("department");
     const courseId = searchParams.get("course_id") || searchParams.get("course");
     const categoryId = searchParams.get("category_id") || searchParams.get("category");
+    const domain = searchParams.get("domain");
     const caseType = searchParams.get("case_type") || searchParams.get("type");
     const keyword = searchParams.get("keyword") || searchParams.get("keywords")?.toLowerCase();
     const year = searchParams.get("year");
@@ -65,6 +66,19 @@ export async function GET(req: NextRequest) {
         // Filter by Case Type if specified
         if (caseType && caseType !== "all" && foundCase.type !== caseType) {
           return null;
+        }
+
+        // Filter by Domain if specified
+        if (domain && domain !== "all") {
+          if (domain.toLowerCase() === "unassigned") {
+            if (foundCase.domain && foundCase.domain.toLowerCase() !== "unassigned") {
+              return null;
+            }
+          } else {
+            if (!foundCase.domain || foundCase.domain.toLowerCase() !== domain.toLowerCase()) {
+              return null;
+            }
+          }
         }
 
         // Filter: "Only cases with teaching notes" (Only faculty and admin can use this filter)

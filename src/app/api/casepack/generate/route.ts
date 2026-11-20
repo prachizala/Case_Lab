@@ -13,7 +13,7 @@ import {
 } from "@/lib/case-permissions";
 
 const RequestBodySchema = z.object({
-  department: z.enum(["finance", "hr", "marketing"]),
+  department: z.string().min(1, "Department or domain is required"),
   subject: z.string().optional(),
   topics: z.array(z.string()).optional(),
   concepts: z.array(z.string()).optional(),

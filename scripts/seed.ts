@@ -207,6 +207,7 @@ export const CASES = [
     status: "approved",
     type: "full",
     format: "real_signal",
+    domain: "Marketing",
     industry: "Retail & Consumer Goods",
     function: "Strategy & Marketing",
     language: "en",
@@ -233,6 +234,7 @@ export const CASES = [
     status: "approved",
     type: "full",
     format: "real_signal",
+    domain: "IT",
     industry: "Information Technology",
     function: "Technology Strategy",
     language: "en",
@@ -254,6 +256,7 @@ export const CASES = [
     status: "approved",
     type: "flash",
     format: "real_signal",
+    domain: "Supply Chain",
     industry: "E-Commerce & Logistics",
     function: "Operations & Unit Economics",
     language: "en",
@@ -275,6 +278,7 @@ export const CASES = [
     status: "in_review",
     type: "full",
     format: "real_signal",
+    domain: "HR",
     industry: "Banking & Financial Services",
     function: "Finance & Organizational Behavior",
     language: "en",
@@ -296,6 +300,7 @@ export const CASES = [
     status: "draft",
     type: "full",
     format: "real_signal",
+    domain: "Finance",
     industry: "Telecommunications",
     function: "Corporate Finance",
     language: "en",
@@ -316,6 +321,7 @@ export const CASES = [
     status: "draft",
     type: "flash",
     format: "real_signal",
+    domain: "Strategy",
     industry: "Beauty & Fashion Retail",
     function: "Marketing & Strategy",
     language: "en",
@@ -327,6 +333,50 @@ export const CASES = [
       protagonist: { name: "Falguni Nayar", title: "Founder & CEO", org: "FSN E-Commerce Ventures (Nykaa)" },
       learning_objectives: [
         "Analyze Customer Acquisition Cost (CAC) vs Lifetime Value (LTV) in niche digital commerce."
+      ]
+    }
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000507",
+    title: "Swiggy Dynamic Bundling & Algorithmic Delivery Fleet Predictive Analytics",
+    status: "approved",
+    type: "full",
+    format: "real_signal",
+    domain: "Analytics",
+    industry: "Quick Commerce & Food Delivery",
+    function: "Business Intelligence & Machine Learning",
+    language: "en",
+    complexity: 8,
+    author_id: "00000000-0000-0000-0000-000000000002",
+    course_id: "00000000-0000-0000-0000-000000000104",
+    content: {
+      synopsis: "How predictive dispatch models and real-time order batching reduced rider idle times by 22% during peak dinner hours.",
+      protagonist: { name: "Sriharsha Majety", title: "Group CEO", org: "Swiggy Ltd" },
+      learning_objectives: [
+        "Formulate predictive regression models for multi-restaurant delivery batching.",
+        "Evaluate customer retention elasticity across dynamic surge fees."
+      ]
+    }
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000508",
+    title: "Maruti Suzuki Manesar: Lean Six Sigma & JIT Assembly Line Optimization",
+    status: "approved",
+    type: "full",
+    format: "real_signal",
+    domain: "Operations",
+    industry: "Automotive & Manufacturing",
+    function: "Lean Manufacturing & Process Engineering",
+    language: "en",
+    complexity: 8,
+    author_id: "00000000-0000-0000-0000-000000000002",
+    course_id: "00000000-0000-0000-0000-000000000103",
+    content: {
+      synopsis: "Re-engineering assembly line tact time to accommodate dual-powertrain (ICE and Hybrid) production without increasing footprint.",
+      protagonist: { name: "Hisashi Takeuchi", title: "MD & CEO", org: "Maruti Suzuki India Ltd" },
+      learning_objectives: [
+        "Apply SMED and Kanban inventory replenishment on mixed-model automotive assembly lines.",
+        "Calculate OEE and bottleneck shifts in high-throughput manufacturing plants."
       ]
     }
   }
@@ -677,7 +727,7 @@ export async function runSeed() {
   }
 
   // 4. Cases
-  console.log("\n📝 Seeding 6 Cases (Authored by Ms. Reena Paswan)...");
+  console.log(`\n📝 Seeding ${CASES.length} Cases across Disciplines (Authored by Ms. Reena Paswan)...`);
   for (const c of CASES) {
     const { error } = await supabase.from("cases").upsert(
       {
@@ -688,6 +738,7 @@ export async function runSeed() {
         format: c.format,
         industry: c.industry,
         function: c.function,
+        domain: (c as any).domain || "Strategy",
         language: c.language,
         complexity: c.complexity,
         author_id: c.author_id,

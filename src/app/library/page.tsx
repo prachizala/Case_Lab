@@ -8,6 +8,7 @@ import { StateEmpty } from "@/components/StateEmpty";
 import { StateLoading } from "@/components/StateLoading";
 import { StateError } from "@/components/StateError";
 import { CaseStudy, CaseCollection, Profile } from "@/lib/types";
+import { DOMAINS } from "@/config/domains";
 import { COLLEGE_NAME_WITH_SHORT, COLLEGE_SHORT } from "@/config/college";
 import { getIndustryTintClass } from "@/config/theme";
 import {
@@ -647,14 +648,12 @@ export default function LibraryPage() {
                     className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-surface text-text focus:outline-none focus:border-accent"
                   >
                     <option value="all">All Domains</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Operations">Operations</option>
-                    <option value="Supply Chain">Supply Chain</option>
-                    <option value="HR">HR</option>
-                    <option value="Strategy">Strategy</option>
-                    <option value="Analytics">Analytics</option>
-                    <option value="Other">Other</option>
+                    {DOMAINS.map((d) => (
+                      <option key={d.id} value={d.name}>
+                        {d.name}
+                      </option>
+                    ))}
+                    <option value="unassigned">Unassigned</option>
                   </select>
                 </div>
 

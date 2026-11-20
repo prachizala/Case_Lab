@@ -129,16 +129,9 @@ export type CaseStatus =
 export type CaseVisibility = "private" | "sbs_only" | "public";
 export type CaseLanguage = "en" | "hi" | "gu"; // 'hi' | 'gu' retained for legacy database compatibility; all generation is English only
 
-export type CaseDomain =
-  | "Marketing"
-  | "Finance"
-  | "HR"
-  | "Supply Chain"
-  | "Operations"
-  | "Strategy"
-  | "Analytics"
-  | "Entrepreneurship"
-  | "Other";
+import { DomainName } from "@/config/domains";
+
+export type CaseDomain = DomainName;
 export type CaseDifficulty = "Beginner" | "Intermediate" | "Advanced";
 export type CaseTargetAudience = "Undergraduate" | "MBA" | "Executive";
 export type CaseTone = "Academic" | "Journalistic" | "Executive Briefing";
