@@ -577,6 +577,7 @@ export type AuditAction =
   | "case_unpublished"
   | "case_uploaded"
   | "case_downloaded"
+  | "download_denied"
   | "reviewer_reassigned"
   | "access_renewed"
   | "user_deactivated"

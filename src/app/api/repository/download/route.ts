@@ -58,13 +58,21 @@ export async function GET(req: NextRequest) {
       repoItem || { author_id: caseId ? mockStore.getCase(caseId)?.author_id : undefined }
     );
     if (!downloadCheck.allowed) {
+      mockStore.logAudit(
+        user.id,
+        user.email,
+        "download_denied",
+        itemId || caseId || "unknown",
+        "case",
+        { kind: requestedKind, reason: downloadCheck.reason }
+      );
       return NextResponse.json(
         {
           error: downloadCheck.reason || "Download unauthorized.",
           isPaidRequired: downloadCheck.isPaidRequired,
           priceInr: downloadCheck.priceInr,
         },
-        { status: 403 }
+        { status: downloadCheck.status || 403 }
       );
     }
 

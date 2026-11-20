@@ -173,6 +173,10 @@ export default function RepositoryCatalogPage() {
     currentUser?.role === "faculty" || currentUser?.role === "admin";
 
   const handleDownload = (itemId: string, kind: "pdf" | "docx") => {
+    if (currentUser?.role === "student") {
+      alert("Download will be available after purchase (coming soon).");
+      return;
+    }
     setIsDownloading(true);
     const url = `/api/repository/download?itemId=${encodeURIComponent(itemId)}&kind=${kind}`;
     window.open(url, "_blank");
@@ -486,14 +490,23 @@ export default function RepositoryCatalogPage() {
                       >
                         Inspect
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDownload(item.id, "pdf")}
-                        className="px-3 py-1.5 rounded-lg bg-accent text-accent-text text-xs font-semibold hover:bg-accent-hover transition-colors flex items-center gap-1.5"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                        <span>PDF</span>
-                      </button>
+                      {currentUser?.role === "student" ? (
+                        <span
+                          className="px-2.5 py-1.5 rounded-lg border border-border text-muted text-[11px] font-medium bg-surface/50 cursor-not-allowed"
+                          title="Download will be available after purchase (coming soon)"
+                        >
+                          Purchase to download
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleDownload(item.id, "pdf")}
+                          className="px-3 py-1.5 rounded-lg bg-accent text-accent-text text-xs font-semibold hover:bg-accent-hover transition-colors flex items-center gap-1.5"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>PDF</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -637,26 +650,32 @@ export default function RepositoryCatalogPage() {
                   <span>Open Full Interactive Case</span>
                 </Link>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    disabled={isDownloading}
-                    onClick={() => handleDownload(activeItem.id, "docx")}
-                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-border text-xs font-bold text-text hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Download DOCX</span>
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isDownloading}
-                    onClick={() => handleDownload(activeItem.id, "pdf")}
-                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-accent text-accent-text text-xs font-bold hover:bg-accent-hover transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Download PDF</span>
-                  </button>
-                </div>
+                {currentUser?.role === "student" ? (
+                  <div className="text-xs text-muted font-medium py-1.5 px-3 rounded-lg border border-border bg-surface/50 text-center">
+                    Download will be available after purchase (coming soon)
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      disabled={isDownloading}
+                      onClick={() => handleDownload(activeItem.id, "docx")}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-border text-xs font-bold text-text hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download DOCX</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isDownloading}
+                      onClick={() => handleDownload(activeItem.id, "pdf")}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-accent text-accent-text text-xs font-bold hover:bg-accent-hover transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download PDF</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -103,50 +103,90 @@ export function checkAccess(user: Partial<Profile> | null | undefined): AccessCh
 
 export interface DownloadCheckResult {
   allowed: boolean;
+  status: number;
   isPaidRequired: boolean;
   priceInr?: number | null;
   reason?: string;
 }
 
 /**
- * Repository Download Permissions & Commercialization Extension Point:
- * Determines whether a user is authorized to download a repository item.
- * Evaluates:
- * - Active institutional status (students/faculty/admin).
- * - Author self-download rights (perpetual even if expired).
- * - Commercial / Paid case download checks (when PAYMENTS_ENABLED / PAID_DOWNLOADS is true).
+ * Extension point for paid entitlements.
+ * In Phase 6 / future commercialization, this will check whether the student has purchased
+ * an individual case entitlement, institutional pass, or active download subscription.
+ * Currently returns false as payments are coming soon (PAYMENTS_ENABLED=false).
+ */
+export function hasPaidEntitlement(
+  _user: Partial<Profile> | null | undefined,
+  _caseOrItem?: any
+): boolean {
+  // PAYMENTS_ENABLED=false by default; payment providers will plug in here later
+  return false;
+}
+
+/**
+ * Universal Server-Side Case & Repository Download Gatekeeper:
+ * Enforces institutional download rules:
+ * - Admin, faculty, and faculty reviewers are allowed.
+ * - Students are NOT allowed to download cases/materials unless a paid entitlement exists.
+ * - Extension point `hasPaidEntitlement(user, caseOrItem)` returns false by default.
  */
 export function canDownload(
   user: Partial<Profile> | null | undefined,
-  item?: { author_id?: string; price_inr?: number | null; is_published?: boolean } | null
+  caseOrItem?: { author_id?: string; price_inr?: number | null; is_published?: boolean } | null
 ): DownloadCheckResult {
-  const access = checkAccess(user);
-
-  // Author can always download their own work, even if account has expired
-  if (user?.id && item?.author_id === user.id) {
-    return { allowed: true, isPaidRequired: false };
-  }
-
-  // If user account is expired, inactive, or unapproved, they cannot download general repository items
-  if (!access.allowed) {
+  if (!user || (!user.id && !user.email)) {
     return {
       allowed: false,
+      status: 401,
       isPaidRequired: false,
-      reason: access.reason || "Institutional access expired or inactive. Renew subscription to download repository items.",
+      reason: "Authentication required to download case materials.",
     };
   }
 
-  // Commercial / Paid Case Downloads Extension Point
-  const isPaidEnabled = process.env.PAYMENTS_ENABLED === "true" || process.env.PAID_DOWNLOADS === "true";
-  if (isPaidEnabled && item?.price_inr && item.price_inr > 0) {
+  // Account access validation: inactive or pending accounts cannot download
+  const access = checkAccess(user);
+  if (access.status === "pending" || access.status === "inactive") {
     return {
       allowed: false,
-      isPaidRequired: true,
-      priceInr: item.price_inr,
-      reason: `Paid case study (₹${item.price_inr}). Payment required or institutional subscription needed.`,
+      status: 403,
+      isPaidRequired: false,
+      reason: access.reason || "Institutional account is inactive or pending approval.",
     };
   }
 
-  // Default: Authorized active institutional members can download
-  return { allowed: true, isPaidRequired: false };
+  // Admin and faculty (including faculty reviewers) are unconditionally allowed
+  if (user.role === "admin" || user.role === "faculty") {
+    return {
+      allowed: true,
+      status: 200,
+      isPaidRequired: false,
+    };
+  }
+
+  // Students are NOT allowed to download without an active paid entitlement
+  if (user.role === "student") {
+    if (hasPaidEntitlement(user, caseOrItem)) {
+      return {
+        allowed: true,
+        status: 200,
+        isPaidRequired: false,
+      };
+    }
+
+    return {
+      allowed: false,
+      status: 403,
+      isPaidRequired: true,
+      priceInr: caseOrItem?.price_inr ?? null,
+      reason: "Download will be available after purchase (coming soon). Students can view and practice cases on screen.",
+    };
+  }
+
+  // Any other unauthorized role
+  return {
+    allowed: false,
+    status: 403,
+    isPaidRequired: false,
+    reason: "Access forbidden. Case downloads are restricted.",
+  };
 }

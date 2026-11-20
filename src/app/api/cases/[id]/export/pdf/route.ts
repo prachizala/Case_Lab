@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import { APP_NAME, COLLEGE_NAME, COLLEGE_SHORT } from "@/config/college";
 import { THEME_TOKENS, hexToRgb } from "@/config/theme";
 import { authenticateUser } from "@/lib/session";
+import { canDownload } from "@/lib/access-control";
 import { CECasePack } from "@/lib/casepack/schema";
 
 /**
@@ -36,11 +37,23 @@ export async function GET(
       return NextResponse.json({ error: "Case study not found." }, { status: 404 });
     }
 
-    // Students can only export approved cases
-    if (user.role === "student" && caseStudy.status !== "approved") {
+    // Universal download check: admin/faculty allowed; students require paid entitlement
+    const downloadAuth = canDownload(user, caseStudy);
+    if (!downloadAuth.allowed) {
+      mockStore.logAudit(
+        user.id,
+        user.email,
+        "download_denied",
+        caseStudy.id,
+        "case",
+        { format: "pdf", reason: downloadAuth.reason }
+      );
       return NextResponse.json(
-        { error: "Forbidden. Students may only export approved curriculum cases." },
-        { status: 403 }
+        {
+          error: downloadAuth.reason || "Download will be available after purchase (coming soon).",
+          error_code: "DOWNLOAD_FORBIDDEN",
+        },
+        { status: downloadAuth.status || 403 }
       );
     }
 

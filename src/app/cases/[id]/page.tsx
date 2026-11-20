@@ -1197,27 +1197,40 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
               </button>
             )}
 
-            {/* PDF Server-Side Export */}
-            <a
-              href={`/api/cases/${caseId}/export/pdf`}
-              download
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-accent-text text-xs font-semibold shadow-sm transition-all"
-              title={`Download ${COLLEGE_SHORT} branded PDF with key data table`}
-            >
-              <FileDown className="w-3.5 h-3.5" />
-              <span>Export PDF</span>
-            </a>
+            {/* Case Export Controls */}
+            {isStudent ? (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-surface/50 text-muted text-xs font-medium cursor-not-allowed"
+                title="Download will be available after purchase (coming soon)"
+              >
+                <FileDown className="w-3.5 h-3.5 opacity-40" />
+                <span>Download will be available after purchase (coming soon)</span>
+              </span>
+            ) : (
+              <>
+                {/* PDF Server-Side Export */}
+                <a
+                  href={`/api/cases/${caseId}/export/pdf`}
+                  download
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-accent-text text-xs font-semibold shadow-sm transition-all"
+                  title={`Download ${COLLEGE_SHORT} branded PDF with key data table`}
+                >
+                  <FileDown className="w-3.5 h-3.5" />
+                  <span>Export PDF</span>
+                </a>
 
-            {/* DOCX Server-Side Export */}
-            <a
-              href={`/api/cases/${caseId}/export/docx`}
-              download
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold text-text hover:border-accent hover:text-accent transition-colors"
-              title="Download editable Word Document (.docx)"
-            >
-              <FileDown className="w-3.5 h-3.5" />
-              <span>Export DOCX</span>
-            </a>
+                {/* DOCX Server-Side Export */}
+                <a
+                  href={`/api/cases/${caseId}/export/docx`}
+                  download
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs font-semibold text-text hover:border-accent hover:text-accent transition-colors"
+                  title="Download editable Word Document (.docx)"
+                >
+                  <FileDown className="w-3.5 h-3.5" />
+                  <span>Export DOCX</span>
+                </a>
+              </>
+            )}
 
             {/* Launch Live Socratic Room (Faculty & Admin) */}
             {isApproved && !isStudent && (

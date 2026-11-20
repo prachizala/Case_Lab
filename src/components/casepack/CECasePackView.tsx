@@ -168,66 +168,72 @@ export function CECasePackView({
             )}
 
             {showExportControls && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border bg-surface text-text hover:border-accent text-xs font-semibold transition-all shadow-sm"
+              isStudent ? (
+                <div
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface/50 text-muted text-xs font-medium cursor-not-allowed"
+                  title="Download will be available after purchase (coming soon)"
                 >
-                  <Download className="w-3.5 h-3.5 text-accent" />
-                  <span>Export Case Pack</span>
-                  <ChevronDown className="w-3 h-3 text-muted" />
-                </button>
+                  <Download className="w-3.5 h-3.5 opacity-40" />
+                  <span>Download will be available after purchase (coming soon)</span>
+                </div>
+              ) : (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border bg-surface text-text hover:border-accent text-xs font-semibold transition-all shadow-sm"
+                  >
+                    <Download className="w-3.5 h-3.5 text-accent" />
+                    <span>Export Case Pack</span>
+                    <ChevronDown className="w-3 h-3 text-muted" />
+                  </button>
 
-                {exportDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-surface p-1 shadow-xl z-50 text-xs">
-                    {!isStudent && (
-                      <>
-                        <div className="px-3 py-1.5 font-bold text-[10px] uppercase text-muted tracking-wider">
-                          Complete Case Pack (With Solutions)
-                        </div>
-                        <a
-                          href={caseId ? `/api/cases/${caseId}/export/docx?mode=full` : "#"}
-                          onClick={() => setExportDropdownOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
-                        >
-                          <FileDown className="w-3.5 h-3.5 text-accent" />
-                          <span>Full Case Pack (DOCX)</span>
-                        </a>
-                        <a
-                          href={caseId ? `/api/cases/${caseId}/export/pdf?mode=full` : "#"}
-                          onClick={() => setExportDropdownOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
-                        >
-                          <FileDown className="w-3.5 h-3.5 text-accent" />
-                          <span>Full Case Pack (PDF)</span>
-                        </a>
-                        <div className="my-1 border-t border-border" />
-                      </>
-                    )}
+                  {exportDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-surface p-1 shadow-xl z-50 text-xs">
+                      <div className="px-3 py-1.5 font-bold text-[10px] uppercase text-muted tracking-wider">
+                        Complete Case Pack (With Solutions)
+                      </div>
+                      <a
+                        href={caseId ? `/api/cases/${caseId}/export/docx?mode=full` : "#"}
+                        onClick={() => setExportDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
+                      >
+                        <FileDown className="w-3.5 h-3.5 text-accent" />
+                        <span>Full Case Pack (DOCX)</span>
+                      </a>
+                      <a
+                        href={caseId ? `/api/cases/${caseId}/export/pdf?mode=full` : "#"}
+                        onClick={() => setExportDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
+                      >
+                        <FileDown className="w-3.5 h-3.5 text-accent" />
+                        <span>Full Case Pack (PDF)</span>
+                      </a>
+                      <div className="my-1 border-t border-border" />
 
-                    <div className="px-3 py-1.5 font-bold text-[10px] uppercase text-muted tracking-wider">
-                      Student Case Handout
+                      <div className="px-3 py-1.5 font-bold text-[10px] uppercase text-muted tracking-wider">
+                        Student Case Handout
+                      </div>
+                      <a
+                        href={caseId ? `/api/cases/${caseId}/export/docx?mode=student` : "#"}
+                        onClick={() => setExportDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
+                      >
+                        <FileDown className="w-3.5 h-3.5 text-muted" />
+                        <span>Student Handout (DOCX)</span>
+                      </a>
+                      <a
+                        href={caseId ? `/api/cases/${caseId}/export/pdf?mode=student` : "#"}
+                        onClick={() => setExportDropdownOpen(false)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
+                      >
+                        <FileDown className="w-3.5 h-3.5 text-muted" />
+                        <span>Student Handout (PDF)</span>
+                      </a>
                     </div>
-                    <a
-                      href={caseId ? `/api/cases/${caseId}/export/docx?mode=student` : "#"}
-                      onClick={() => setExportDropdownOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
-                    >
-                      <FileDown className="w-3.5 h-3.5 text-muted" />
-                      <span>Student Handout (DOCX)</span>
-                    </a>
-                    <a
-                      href={caseId ? `/api/cases/${caseId}/export/pdf?mode=student` : "#"}
-                      onClick={() => setExportDropdownOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-soft text-text"
-                    >
-                      <FileDown className="w-3.5 h-3.5 text-muted" />
-                      <span>Student Handout (PDF)</span>
-                    </a>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )
             )}
           </div>
         </div>

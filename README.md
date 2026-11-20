@@ -273,6 +273,10 @@ The platform enforces exactly three core database roles:
 
 > **Reviewer Designation**: Reviewer is **NOT** a database role. It is a boolean administrative capability flag on faculty (`is_reviewer: true`), displayed in the interface as **"Faculty Member and Reviewer"**. Reviewers cannot be unassigned if they currently have pending assigned reviews.
 
+### Student Download Policy & Commercialization Deterrent Model
+- **Student Download Gating**: Students can generate cases freely and read, edit, and practice on screen across all 8 business domains. However, downloading or exporting cases (PDF, DOCX, JSON, or repository items) is strictly blocked unless an active paid entitlement exists (`canDownload(user, item)` returns HTTP 403; `PAYMENTS_ENABLED=false`).
+- **Deterrent Model Notice**: This security architecture blocks download routes and active UI download buttons. On-screen case content can still be viewed, copied, or photographed; therefore, this acts as an institutional deterrent rather than absolute DRM protection.
+
 ### Access Lifecycle & Expiration Gating
 - **Access Start Date**: Set automatically on the day of institutional admin approval (calculated in `Asia/Kolkata` timezone).
 - **Student Access End Date**: Calculated as `batch.end_date + 1 year` (e.g. Batch 2024–27 ends 30 June 2027; access extends through 30 June 2028). Students enjoy free platform access throughout their studies plus one full grace year.
@@ -285,7 +289,7 @@ The platform enforces exactly three core database roles:
 | **Administrator** | Dr. Neha Sharma | `admin@shantibschool.edu.in` | Dean / Institutional Governance | Case approval, user & role management, lookup lists, token budgets, DPDP compliance, audit logs |
 | **Faculty Member & Reviewer** | Ms. Reena Paswan | `reena.paswan@shantibschool.edu.in` | Department: BCA/IT • Course: BCA • Full-time | Case Studio authoring, teaching notes, peer review queue (`is_reviewer=true`) |
 | **Faculty Member & Reviewer** | Dr. Vikram Mehta | `vikram.mehta@shantibschool.edu.in` | Department: Finance • Course: PGDM • Full-time | Case authoring, financial exhibits, peer review queue (`is_reviewer=true`) |
-| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | BCA • Batch: 2024–27 • Roll: 01 • Enr: `SBS/2024/0001` | Case creation, submit for review, repository search, clean case downloads |
+| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | BCA • Batch: 2024–27 • Roll: 01 • Enr: `SBS/2024/0001` | Case creation, submit for review, repository search, on-screen practice (downloads require paid entitlement) |
 
 ---
 

@@ -254,20 +254,31 @@ export default function MyCasesPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <a
-                      href={`/api/cases/${c.id}/export/pdf`}
-                      className="px-2.5 py-1 rounded-lg border border-border hover:bg-surface-hover text-text-muted hover:text-text flex items-center gap-1 transition-colors"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>PDF</span>
-                    </a>
-                    <a
-                      href={`/api/cases/${c.id}/export/docx`}
-                      className="px-2.5 py-1 rounded-lg border border-border hover:bg-surface-hover text-text-muted hover:text-text flex items-center gap-1 transition-colors"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>DOCX</span>
-                    </a>
+                    {currentUser?.role === "student" ? (
+                      <span
+                        className="px-2.5 py-1 rounded-lg border border-border bg-surface/50 text-muted text-[11px] font-medium cursor-not-allowed"
+                        title="Download will be available after purchase (coming soon)"
+                      >
+                        Download available after purchase
+                      </span>
+                    ) : (
+                      <>
+                        <a
+                          href={`/api/cases/${c.id}/export/pdf`}
+                          className="px-2.5 py-1 rounded-lg border border-border hover:bg-surface-hover text-text-muted hover:text-text flex items-center gap-1 transition-colors"
+                        >
+                          <Download className="w-3 h-3" />
+                          <span>PDF</span>
+                        </a>
+                        <a
+                          href={`/api/cases/${c.id}/export/docx`}
+                          className="px-2.5 py-1 rounded-lg border border-border hover:bg-surface-hover text-text-muted hover:text-text flex items-center gap-1 transition-colors"
+                        >
+                          <Download className="w-3 h-3" />
+                          <span>DOCX</span>
+                        </a>
+                      </>
+                    )}
                     <Link
                       href={`/cases/${c.id}`}
                       className="px-3 py-1 rounded-lg bg-surface-hover text-text font-semibold hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-1"
