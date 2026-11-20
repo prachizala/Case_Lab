@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Lora, Noto_Sans_Devanagari, Noto_Sans_Gujarati } from "next/font/google";
+import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -12,20 +12,6 @@ const lora = Lora({
   subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
-});
-
-const notoSansDevanagari = Noto_Sans_Devanagari({
-  subsets: ["devanagari"],
-  variable: "--font-devanagari",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const notoSansGujarati = Noto_Sans_Gujarati({
-  subsets: ["gujarati"],
-  variable: "--font-gujarati",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
 });
 
 import { APP_NAME, COLLEGE_NAME_WITH_SHORT } from "@/config/college";
@@ -45,7 +31,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${lora.variable} ${notoSansDevanagari.variable} ${notoSansGujarati.variable}`}
+      className={`${inter.variable} ${lora.variable}`}
     >
       <head>
         <script

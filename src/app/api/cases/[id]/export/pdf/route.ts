@@ -1,31 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockStore } from "@/lib/mock-db";
 import { jsPDF } from "jspdf";
-import * as fs from "fs";
-import * as path from "path";
 import { APP_NAME, COLLEGE_NAME, COLLEGE_SHORT } from "@/config/college";
 import { THEME_TOKENS, hexToRgb } from "@/config/theme";
 import { authenticateUser } from "@/lib/session";
 import { CECasePack } from "@/lib/casepack/schema";
 
-// In-memory cache for Devanagari font base64
-let cachedDevanagariBase64: string | null = null;
-
-function getDevanagariFont(): string | null {
-  if (cachedDevanagariBase64) return cachedDevanagariBase64;
-  const fontPath = path.resolve(
-    process.cwd(),
-    "src/assets/fonts/NotoSansDevanagari-Regular.ttf"
-  );
-  if (fs.existsSync(fontPath)) {
-    try {
-      cachedDevanagariBase64 = fs.readFileSync(fontPath).toString("base64");
-      return cachedDevanagariBase64;
-    } catch (err) {
-      console.warn("Could not read custom font file:", err);
-    }
-  }
-  return null;
+/**
+ * Sanitizes and normalizes text strings for standard PDF Latin encoding (Helvetica).
+ * - Preserves standard punctuation: %, quotes, dashes.
+ * - Gracefully maps Indian Rupee symbol (₹ / U+20B9) to "Rs. " so it renders
+ *   cleanly in all PDF viewers without character corruption or missing glyphs.
+ */
+function sanitizePdfText(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/₹\s*/g, "Rs. ")
+    .replace(/\u20B9\s*/g, "Rs. ");
 }
 
 export async function GET(
@@ -69,19 +60,26 @@ export async function GET(
       format: "a4",
     });
 
-    // Check and load Unicode font from in-memory cache
-    let hasUnicodeFont = false;
-    const fontBase64 = getDevanagariFont();
-    if (fontBase64) {
-      try {
-        doc.addFileToVFS("NotoDevanagari.ttf", fontBase64);
-        doc.addFont("NotoDevanagari.ttf", "NotoDevanagari", "normal");
-        doc.setFont("NotoDevanagari");
-        hasUnicodeFont = true;
-      } catch (err) {
-        console.warn("Could not register custom font:", err);
+    // Use clean standard Latin font (Helvetica)
+    doc.setFont("helvetica", "normal");
+    doc.setLanguage("en");
+
+    // Intercept text and splitTextToSize to gracefully handle ₹ symbol in WinAnsi Latin
+    const originalText = doc.text.bind(doc);
+    (doc as any).text = (text: any, x: number, y: number, options?: any) => {
+      if (typeof text === "string") {
+        return originalText(sanitizePdfText(text), x, y, options);
       }
-    }
+      if (Array.isArray(text)) {
+        return originalText(text.map((t) => typeof t === "string" ? sanitizePdfText(t) : t), x, y, options);
+      }
+      return originalText(text, x, y, options);
+    };
+
+    const originalSplitTextToSize = doc.splitTextToSize.bind(doc);
+    (doc as any).splitTextToSize = (text: string, maxW: number, options?: any) => {
+      return originalSplitTextToSize(sanitizePdfText(text), maxW, options);
+    };
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 16;
@@ -464,7 +462,7 @@ export async function GET(
     doc.roundedRect(margin, y, contentWidth, 12, 2, 2, "F");
     doc.setFontSize(8);
     doc.setTextColor(...textRgb);
-    const metaText = `Type: ${caseStudy.type.toUpperCase()} CASE   |   Format: ${caseStudy.format.toUpperCase()}   |   Industry: ${caseStudy.industry}   |   Level: ${caseStudy.level}   |   Language: ${caseStudy.language.toUpperCase()}`;
+    const metaText = `Type: ${caseStudy.type.toUpperCase()} CASE   |   Format: ${caseStudy.format.toUpperCase()}   |   Industry: ${caseStudy.industry}   |   Level: ${caseStudy.level}`;
     doc.text(metaText, margin + 4, y + 7.5);
     y += 18;
 

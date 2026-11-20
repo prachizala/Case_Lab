@@ -717,8 +717,8 @@ export async function GET(
                       children: [
                         new Paragraph({
                           children: [
-                            new TextRun({ text: "Language: ", bold: true }),
-                            new TextRun(caseStudy.language.toUpperCase()),
+                            new TextRun({ text: "Status: ", bold: true }),
+                            new TextRun(caseStudy.status.toUpperCase()),
                           ],
                         }),
                       ],

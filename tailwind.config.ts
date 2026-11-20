@@ -140,8 +140,6 @@ const config: Config = {
       fontFamily: {
         serif: [
           "var(--font-serif)",
-          "var(--font-devanagari)",
-          "var(--font-gujarati)",
           "Cinzel",
           "Playfair Display",
           "Georgia",
@@ -151,8 +149,6 @@ const config: Config = {
         ],
         sans: [
           "var(--font-sans)",
-          "var(--font-devanagari)",
-          "var(--font-gujarati)",
           "Inter",
           "system-ui",
           "-apple-system",
