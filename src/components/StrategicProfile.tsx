@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { CaseBloomsLevel, CaseDifficulty, CaseDomain, CaseFormat, CaseLanguage, CaseTargetAudience, CaseTone, CaseType } from "@/lib/types";
+import { CaseBloomsLevel, CaseDifficulty, CaseDomain, CaseFormat, CaseTargetAudience, CaseTone, CaseType } from "@/lib/types";
 import {
   Compass,
   Gauge,
@@ -34,7 +34,6 @@ interface StrategicProfileProps {
   semester: string;
   level: string;
   contextRegion: string;
-  language: CaseLanguage;
   complexity: number;
   targetLength: "short" | "medium" | "comprehensive";
   sourceNotes: string;
@@ -59,7 +58,6 @@ export function StrategicProfile({
   semester,
   level,
   contextRegion,
-  language,
   complexity,
   targetLength,
   sourceNotes,
@@ -92,12 +90,6 @@ export function StrategicProfile({
       notesWordCount,
     };
   }, [type, targetLength, includeExhibitsCount, sourceNotes]);
-
-  const languageLabels: Record<CaseLanguage, string> = {
-    en: "English (Academic)",
-    hi: "Hindi (हिंदी)",
-    gu: "Gujarati (ગુજરાતી)",
-  };
 
   const typeLabels: Record<CaseType, string> = {
     short: "Short Case (~2 pp)",

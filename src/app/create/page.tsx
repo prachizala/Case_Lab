@@ -18,7 +18,6 @@ import {
   CaseDifficulty,
   CaseDomain,
   CaseFormat,
-  CaseLanguage,
   CaseSignal,
   CaseStudy,
   CaseTargetAudience,
@@ -302,10 +301,7 @@ function CreateCaseContent() {
   const [level, setLevel] = useState<string>("MBA / Intermediate");
   const [learningOutcomes, setLearningOutcomes] = useState<string>("");
 
-  // Step 4: Language
-  const [language, setLanguage] = useState<CaseLanguage>("en");
-
-  // Step 5: Complexity & Length
+  // Complexity & Length
   const [complexity, setComplexity] = useState<number>(7);
   const [targetLength, setTargetLength] = useState<"short" | "medium" | "comprehensive">("medium");
 
@@ -503,7 +499,7 @@ function CreateCaseContent() {
       learningObjectives,
       tone,
       bloomsLevel,
-      language,
+      language: "en",
       complexity,
       targetLength,
       sourceNotes,
@@ -801,7 +797,7 @@ function CreateCaseContent() {
           format,
           industry: activeIndustry,
           function: functionalFocus,
-          language,
+          language: "en",
           complexity,
           level,
           content: generatedCasePack,
@@ -982,7 +978,7 @@ function CreateCaseContent() {
         level,
         learningOutcomes,
         contextRegion: locationMarket,
-        language,
+        language: "en",
         complexity,
         targetLength,
         sourceNotes,
@@ -1165,7 +1161,7 @@ function CreateCaseContent() {
           includeExhibits,
           includeTeachingNote,
           bloomsLevel,
-          language,
+          language: "en",
         }),
       });
       const data = await res.json();
@@ -2177,7 +2173,6 @@ function CreateCaseContent() {
                   <div className="flex items-center justify-between text-[11px] text-muted">
                     <span>Paste press releases, annual reports, or executive interview transcripts:</span>
                     <VoiceDictationButton
-                      language={language}
                       onTranscript={(spokenText) => {
                         setSourceNotes((prev) => (prev ? `${prev} ${spokenText}` : spokenText));
                       }}
@@ -2570,8 +2565,7 @@ function CreateCaseContent() {
                       ? "Generate Short Case (~2 pp)"
                       : type === "research"
                       ? "Generate Case Research (Multi-Firm)"
-                      : "Generate Full Teaching Case"}{" "}
-                    ({language.toUpperCase()})
+                      : "Generate Full Teaching Case"}
                   </span>
                 </button>
               )}
@@ -2846,7 +2840,6 @@ function CreateCaseContent() {
               semester={semester}
               level={level}
               contextRegion={locationMarket}
-              language={language}
               complexity={complexity}
               targetLength={targetLength}
               sourceNotes={sourceNotes}

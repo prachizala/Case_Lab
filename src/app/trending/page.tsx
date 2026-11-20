@@ -448,10 +448,6 @@ export default function TrendingCasesPage() {
                                   <span>Real Signal</span>
                                 </span>
                               )}
-
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary-soft text-text">
-                                {c.language.toUpperCase()}
-                              </span>
                             </div>
 
                             {/* Free Badge */}

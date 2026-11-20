@@ -109,10 +109,10 @@ export default function HomePage() {
               <Compass className="w-5 h-5" />
             </div>
             <h3 className="font-serif text-lg font-bold text-text">
-              Multilingual Pedagogy
+              Executive Case Pedagogy
             </h3>
             <p className="text-xs text-muted leading-relaxed">
-              Native translation and formulation in English, Hindi (हिंदी), and Gujarati (ગુજરાતી) customized for regional Indian market contexts.
+              Calibrated to international case method standards (HBS/Ivey) and rooted in authentic Indian business, regulatory, and market contexts.
             </p>
           </div>
 

@@ -7,7 +7,7 @@ export default function CasesLoading() {
       <div className="max-w-6xl mx-auto py-8">
         <StateLoading
           title="Loading Case Library..."
-          subtitle="Cataloging executive cases, flash simulations, and multilingual curricula."
+          subtitle="Cataloging executive cases, flash simulations, and accredited curricula."
         />
       </div>
     </AppShell>

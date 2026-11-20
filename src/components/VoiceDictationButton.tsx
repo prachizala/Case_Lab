@@ -5,7 +5,6 @@ import { Mic, MicOff } from "lucide-react";
 
 interface VoiceDictationButtonProps {
   onTranscript: (text: string) => void;
-  language?: string;
 }
 
 // Minimal type definition for Web Speech API
@@ -33,7 +32,6 @@ interface SpeechRecognitionLike extends EventTarget {
 
 export function VoiceDictationButton({
   onTranscript,
-  language = "en-US",
 }: VoiceDictationButtonProps) {
   const [isListening, setIsListening] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -50,7 +48,7 @@ export function VoiceDictationButton({
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = false;
-      recognition.lang = language === "hi" ? "hi-IN" : language === "gu" ? "gu-IN" : "en-US";
+      recognition.lang = "en-IN";
 
       recognition.onresult = (event: SpeechRecognitionEventLike) => {
         const lastResult = event.results[Object.keys(event.results).length - 1];
@@ -70,7 +68,7 @@ export function VoiceDictationButton({
 
       recognitionRef.current = recognition;
     }
-  }, [language, onTranscript]);
+  }, [onTranscript]);
 
   const toggleListening = () => {
     if (!supported || !recognitionRef.current) {

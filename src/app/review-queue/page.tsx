@@ -698,10 +698,6 @@ export default function ReviewQueuePage() {
                         </span>
                       )}
 
-                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-muted/10 text-muted border border-border">
-                        {c.language.toUpperCase()}
-                      </span>
-
                       <span className="text-[11px] text-muted">
                         v{c.version || 1}
                       </span>

@@ -55,7 +55,6 @@ export default function LibraryPage() {
   const [search, setSearch] = useState("");
   const [domainFilter, setDomainFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [languageFilter, setLanguageFilter] = useState<string>("all");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [authorFilter, setAuthorFilter] = useState<string>("all");
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -105,7 +104,6 @@ export default function LibraryPage() {
       if (scope === "my-cases") params.set("scope", "my-cases");
       if (domainFilter !== "all") params.set("domain", domainFilter);
       if (typeFilter !== "all") params.set("type", typeFilter);
-      if (languageFilter !== "all") params.set("language", languageFilter);
       if (difficultyFilter !== "all") params.set("difficulty", difficultyFilter);
       if (authorFilter !== "all") params.set("author", authorFilter);
       if (activeTag) params.set("tag", activeTag);
@@ -145,7 +143,6 @@ export default function LibraryPage() {
     scope,
     domainFilter,
     typeFilter,
-    languageFilter,
     difficultyFilter,
     authorFilter,
     activeTag,
@@ -289,7 +286,6 @@ export default function LibraryPage() {
     setSearch("");
     setDomainFilter("all");
     setTypeFilter("all");
-    setLanguageFilter("all");
     setDifficultyFilter("all");
     setAuthorFilter("all");
     setActiveTag(null);
@@ -302,7 +298,6 @@ export default function LibraryPage() {
     search.trim() !== "" ||
     domainFilter !== "all" ||
     typeFilter !== "all" ||
-    languageFilter !== "all" ||
     difficultyFilter !== "all" ||
     authorFilter !== "all" ||
     activeTag !== null ||
@@ -639,8 +634,8 @@ export default function LibraryPage() {
                 )}
               </div>
 
-              {/* Filters Row: Domain, Type, Language, Difficulty, Author, Status */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1">
+              {/* Filters Row: Domain, Type, Difficulty, Author, Status */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-1">
                 {/* Domain Filter */}
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-muted mb-1">
@@ -678,23 +673,6 @@ export default function LibraryPage() {
                     <option value="full">Full Case Study</option>
                     <option value="research">Case Research</option>
                     <option value="flash">FlashCase (25-Min)</option>
-                  </select>
-                </div>
-
-                {/* Language Filter */}
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-muted mb-1">
-                    Language
-                  </label>
-                  <select
-                    value={languageFilter}
-                    onChange={(e) => setLanguageFilter(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border bg-surface text-text focus:outline-none focus:border-accent"
-                  >
-                    <option value="all">All Languages</option>
-                    <option value="en">English (EN)</option>
-                    <option value="hi">Hindi (हिन्दी)</option>
-                    <option value="gu">Gujarati (ગુજરાતી)</option>
                   </select>
                 </div>
 
@@ -883,9 +861,6 @@ export default function LibraryPage() {
                                 Real Signal
                               </span>
                             )}
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary-soft text-text">
-                              {c.language.toUpperCase()}
-                            </span>
                           </div>
 
                           {/* Status Stamp Badge */}
@@ -1125,10 +1100,6 @@ export default function LibraryPage() {
                         <span className="font-medium text-text">{c.industry}</span>
                         <span>•</span>
                         <span>Level {c.complexity}/10</span>
-                        <span>•</span>
-                        <span className="font-mono uppercase font-bold text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-text">
-                          {c.language}
-                        </span>
 
                         {c.tags && c.tags.length > 0 && (
                           <div className="flex flex-wrap items-center gap-1 pl-2 border-l border-border">

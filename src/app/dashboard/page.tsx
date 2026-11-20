@@ -446,7 +446,7 @@ export default function DashboardPage({
                   Generate a New Teaching Case Study
                 </h2>
                 <p className="text-xs md:text-sm text-muted leading-relaxed">
-                  Generate classroom simulations calibrated to Bloom&apos;s Taxonomy with the {AI_ENGINE_LABEL}. Includes executive summaries, 5 discussion questions, illustrative exhibit data, and teaching notes in English, Hindi, or Gujarati.
+                  Generate classroom simulations calibrated to Bloom&apos;s Taxonomy with the {AI_ENGINE_LABEL}. Includes executive summaries, 5 discussion questions, illustrative exhibit data, and comprehensive teaching notes.
                 </p>
               </div>
 
@@ -471,7 +471,7 @@ export default function DashboardPage({
                 {[
                   { step: "01", title: "Topic & Domain", desc: "Select from 7 business disciplines & protagonists" },
                   { step: "02", title: "Case Format", desc: "Short Case, Full Study, or Comparative Research" },
-                  { step: "03", title: "Language", desc: "English, Hindi (Devanagari), or Gujarati" },
+                  { step: "03", title: "Pedagogy", desc: "Calibrate complexity level & Bloom's taxonomy objectives" },
                   { step: "04", title: "AI Generation", desc: "Schema-validated quantitative & qualitative exhibits" },
                   { step: "05", title: "Faculty Review", desc: "Accredited peer approval & publication" },
                 ].map((st, i) => (
@@ -1012,7 +1012,7 @@ export default function DashboardPage({
                     {c.type === "flash" ? "FlashCase" : "Full Case"}
                   </span>
                   <span className="text-[11px] font-mono text-accent font-bold">
-                    L{c.complexity} • {c.language.toUpperCase()}
+                    Level {c.complexity}/10
                   </span>
                 </div>
 

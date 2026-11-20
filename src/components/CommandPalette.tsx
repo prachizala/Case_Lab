@@ -14,7 +14,6 @@ import {
   FileQuestion,
   Briefcase,
   ClipboardCheck,
-  Languages,
   X,
   ArrowRight,
   Command,
@@ -24,7 +23,7 @@ import { Profile, UserRole } from "@/lib/types";
 interface CommandItem {
   id: string;
   title: string;
-  category: "Navigation" | "Quick Action" | "Languages";
+  category: "Navigation" | "Quick Action";
   description?: string;
   href?: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -140,26 +139,10 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
       id: "act-new-case",
       title: "Generate a New Case Study",
       category: "Quick Action",
-      description: "Launch the AI Case Studio with custom pedagogical parameters (जनरेट केस / જનરેટ કેસ)",
+      description: "Launch the AI Case Studio with custom pedagogical parameters",
       href: "/create",
       icon: Sparkles,
       roleRequirement: ["admin", "faculty"],
-    },
-    {
-      id: "act-hindi-cases",
-      title: "Browse Cases in Hindi (हिन्दी)",
-      category: "Languages",
-      description: "Filter case library to Devanagari regional dossiers",
-      href: "/library?language=hi",
-      icon: Languages,
-    },
-    {
-      id: "act-gujarati-cases",
-      title: "Browse Cases in Gujarati (ગુજરાતી)",
-      category: "Languages",
-      description: "Filter case library to native Gujarati dossiers",
-      href: "/library?language=gu",
-      icon: Languages,
     },
   ];
 
@@ -251,7 +234,7 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
               setQuery(e.target.value);
               setSelectedIndex(0);
             }}
-            placeholder="Search pages, case dossiers, or quick actions (e.g., 'Generate', 'Hindi', 'Analytics')..."
+            placeholder="Search pages, case dossiers, or quick actions (e.g., 'Generate', 'Analytics')..."
             className="flex-1 bg-transparent text-sm text-text placeholder:text-muted focus:outline-hidden"
           />
           {query ? (
@@ -275,7 +258,7 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
             <div className="py-12 text-center text-muted space-y-1">
               <Command className="w-8 h-8 mx-auto opacity-30 mb-2" />
               <p className="text-sm font-medium">No results found for &ldquo;{query}&rdquo;</p>
-              <p className="text-xs text-muted/70">Try searching for a page name, domain, or language.</p>
+              <p className="text-xs text-muted/70">Try searching for a page name, domain, or topic.</p>
             </div>
           ) : (
             filteredItems.map((item, idx) => {

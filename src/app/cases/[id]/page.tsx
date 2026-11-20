@@ -928,7 +928,7 @@ ${activeContent.discussion_questions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
 **Institution:** ${COLLEGE_NAME_WITH_SHORT}  
 **Scope:** ${caseStudy.type.toUpperCase()} Case | **Format:** ${caseStudy.format.replace("_", " ")}  
 **Industry:** ${caseStudy.industry} | **Functional Focus:** ${caseStudy.function}  
-**Language:** ${caseStudy.language.toUpperCase()} | **Complexity:** Level ${caseStudy.complexity}/10  
+**Complexity:** Level ${caseStudy.complexity}/10  
 
 ---
 
@@ -1449,10 +1449,6 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
 
             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary-soft text-text">
               {caseStudy.format.replace("_", " ")}
-            </span>
-
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary-soft text-text border border-border">
-              Language: {caseStudy.language.toUpperCase()}
             </span>
 
             {caseStudy.version && (
