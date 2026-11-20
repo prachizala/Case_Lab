@@ -201,23 +201,6 @@ export default function LoginPage() {
                 <label className="font-semibold text-text">
                   Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-[11px] text-accent hover:underline flex items-center gap-1 font-sans cursor-pointer"
-                >
-                  {showPassword ? (
-                    <>
-                      <EyeOff className="w-3.5 h-3.5" />
-                      <span>Hide password</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>Show password</span>
-                    </>
-                  )}
-                </button>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-muted absolute left-3 top-2.5" />

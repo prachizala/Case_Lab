@@ -1250,7 +1250,7 @@ function CreateCaseContent() {
               return (
                 <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-surface border border-border text-xs shadow-2xs">
                   <Sparkles className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-muted">Aapke Paas:</span>
+                  <span className="text-muted">Quota:</span>
                   <span className="font-semibold text-text">
                     <strong className="text-accent font-bold text-sm">{remaining}</strong> cases remaining
                   </span>
@@ -1273,24 +1273,6 @@ function CreateCaseContent() {
                 </div>
               );
             })()}
-
-            {/* Preset Dev Testing Quick Switch (Guarded by Demo Persona Switcher) */}
-            {ENABLE_DEMO_PERSONA_SWITCHER && (
-              <div className="flex items-center gap-1.5 bg-surface px-2 py-1 rounded-xl border border-border/70 text-xs shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setSimulateBadJson(!simulateBadJson)}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-colors ${
-                    simulateBadJson
-                      ? "bg-danger text-accent-text"
-                      : "bg-surface hover:bg-muted/10 text-muted hover:text-text border border-border/60"
-                  }`}
-                  title="Test: AI returns bad JSON -> UI shows error & retry button"
-                >
-                  {simulateBadJson ? "Bad JSON: ON" : "Simulate Bad JSON"}
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
