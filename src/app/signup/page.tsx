@@ -34,7 +34,7 @@ import {
   FileText,
   ExternalLink,
 } from "lucide-react";
-import { Department, Course, AcademicBatch, FacultyType } from "@/lib/types";
+import { Department, Course, AcademicBatch } from "@/lib/types";
 
 function SignUpForm() {
   const router = useRouter();
@@ -66,7 +66,6 @@ function SignUpForm() {
 
   // Faculty specific fields
   const [departmentId, setDepartmentId] = useState("");
-  const [facultyTypeId, setFacultyTypeId] = useState("");
 
   // DPDP Consent / Terms & Conditions (Mandatory unchecked by default)
   const [dpdpConsent, setDpdpConsent] = useState(false);
@@ -76,7 +75,6 @@ function SignUpForm() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [batches, setBatches] = useState<AcademicBatch[]>([]);
-  const [facultyTypes, setFacultyTypes] = useState<FacultyType[]>([]);
 
   const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
@@ -143,7 +141,6 @@ function SignUpForm() {
             setDepartments(json.data.departments || []);
             setCourses(json.data.courses || []);
             setBatches(json.data.batches || []);
-            setFacultyTypes(json.data.facultyTypes || []);
             
             // Default course to PGDM (or first course)
             const targetCourse = (json.data.courses || []).find((c: any) =>
@@ -152,7 +149,6 @@ function SignUpForm() {
             if (targetCourse) setCourseId(targetCourse.id);
 
             if (json.data.departments?.length > 0) setDepartmentId(json.data.departments[0].id);
-            if (json.data.facultyTypes?.length > 0) setFacultyTypeId(json.data.facultyTypes[0].id);
           }
         }
       } catch (err) {
@@ -189,12 +185,17 @@ function SignUpForm() {
 
     // 4. Personal Email Check
     if (!personalEmail || !personalEmail.includes("@")) {
-      setError("A valid personal email address (e.g. Gmail/Outlook) is required for alumni access.");
+      setError("A valid personal Gmail address is required for alumni access.");
       return;
     }
 
     if (isSbsDomain(personalEmail)) {
       setError("Personal email must be an external address, not an official @shantibschool.edu.in address.");
+      return;
+    }
+
+    if (!/@(gmail\.com|googlemail\.com)$/i.test(personalEmail.trim())) {
+      setError("Please provide a valid Gmail address (@gmail.com).");
       return;
     }
 
@@ -224,15 +225,16 @@ function SignUpForm() {
         password,
         confirm_password: confirmPassword,
         dpdp_consent: true,
-        course_id: courseId,
       };
 
       if (userType === "student") {
+        payload.course_id = courseId;
         payload.batch_id = batchId;
         payload.roll_no = rollNo.trim() || null;
       } else {
         payload.department_id = departmentId;
-        payload.faculty_type_id = facultyTypeId;
+        payload.course_id = null;
+        payload.faculty_type_id = null;
       }
 
       const res = await fetch("/api/auth", {
@@ -433,7 +435,7 @@ function SignUpForm() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-text mb-1">
-                    Personal Email (Gmail / Yahoo / Outlook) <span className="text-red-500">*</span>
+                    Personal Email (Gmail) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -535,7 +537,7 @@ function SignUpForm() {
                 <div className="p-4 rounded-2xl bg-surface-hover/40 border border-border space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-text mb-1">
-                      Academic Department ("What do you teach?") <span className="text-red-500">*</span>
+                      Academic Department <span className="text-red-500">*</span>
                     </label>
                     <select
                       value={departmentId}
@@ -544,46 +546,10 @@ function SignUpForm() {
                     >
                       {departments.map((d) => (
                         <option key={d.id} value={d.id}>
-                          {d.name} ({d.code})
+                          {d.name}
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-text mb-1">
-                        Primary Course <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        value={courseId}
-                        onChange={(e) => setCourseId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                      >
-                        {courses.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-text mb-1">
-                        Faculty Appointment Type <span className="text-red-500">*</span>
-                      </label>
-                      <select
-                        value={facultyTypeId}
-                        onChange={(e) => setFacultyTypeId(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-border text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                      >
-                        {facultyTypes.map((ft) => (
-                          <option key={ft.id} value={ft.id}>
-                            {ft.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
                   </div>
                 </div>
               )}
