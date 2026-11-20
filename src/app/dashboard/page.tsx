@@ -334,7 +334,7 @@ export default function DashboardPage({
                 </span>
                 {(() => {
                   const used = user?.free_cases_used_this_month ?? user?.monthly_generations_used ?? 0;
-                  const limit = user?.monthly_generation_limit ?? (user?.user_type === "sbs_member" ? 30 : role === "admin" ? 100 : 50);
+                  const limit = user?.monthly_generation_limit ?? (role === "admin" ? 100 : role === "faculty" ? 15 : 10);
                   const remaining = Math.max(0, limit - used);
                   return (
                     <span className="px-2.5 py-1 rounded-full bg-white/12 border border-white/20 text-[11px] font-medium text-white shadow-2xs backdrop-blur-xs flex items-center gap-1.5">
@@ -433,7 +433,7 @@ export default function DashboardPage({
                   </div>
                   {(() => {
                     const used = user?.free_cases_used_this_month ?? user?.monthly_generations_used ?? 0;
-                    const limit = user?.monthly_generation_limit ?? (user?.user_type === "sbs_member" ? 30 : role === "admin" ? 100 : 50);
+                    const limit = user?.monthly_generation_limit ?? (role === "admin" ? 100 : role === "faculty" ? 15 : 10);
                     const remaining = Math.max(0, limit - used);
                     return (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-accent/15 border border-accent/25 text-accent text-[11px] font-bold">
@@ -512,7 +512,7 @@ export default function DashboardPage({
                 {cases.filter((c) => c.status === "approved").length} Approved
               </span>
             </div>
-            <p className="text-[11px] text-muted">Institutional repository</p>
+            <p className="text-[11px] text-muted">Institutional case library</p>
           </div>
 
           {/* Stat 2: Pending Approvals */}

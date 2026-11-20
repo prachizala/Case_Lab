@@ -72,23 +72,23 @@ export interface MockDatabase {
 export const initialDepartments: Department[] = [
   {
     id: "dept-1",
-    code: "STRAT",
-    name: "Management & Strategy",
-    description: "Enterprise strategy, corporate governance, academic accreditation and leadership.",
+    code: "PGDM",
+    name: "PGDM",
+    description: "Post Graduate Diploma in Management",
     created_at: new Date().toISOString(),
   },
   {
     id: "dept-2",
-    code: "ANALYTICS",
-    name: "Business Analytics / Marketing",
-    description: "Data-driven marketing, customer analytics, fintech and platform strategies.",
+    code: "BBA",
+    name: "BBA",
+    description: "Bachelor of Business Administration",
     created_at: new Date().toISOString(),
   },
   {
     id: "dept-3",
     code: "BCA",
-    name: "Computer Applications & Technology",
-    description: "Undergraduate computing, software engineering and digital business architectures.",
+    name: "BCA",
+    description: "Bachelor of Computer Applications",
     created_at: new Date().toISOString(),
   },
 ];
@@ -114,7 +114,7 @@ export const initialCourses: Course[] = [
   },
   {
     id: "course-3",
-    department_id: "dept-4",
+    department_id: "dept-3",
     dept: "BCA",
     code: "BCA",
     name: "BCA",
@@ -123,18 +123,18 @@ export const initialCourses: Course[] = [
   },
   {
     id: "course-4",
-    department_id: "dept-2",
-    dept: "STRAT",
-    code: "STRAT-101",
+    department_id: "dept-1",
+    dept: "PGDM",
+    code: "PGDM-101",
     name: "Strategic Leadership & Enterprise Architecture",
     semester: "Fall 2026",
     created_at: new Date().toISOString(),
   },
   {
     id: "course-5",
-    department_id: "dept-2",
-    dept: "STRAT",
-    code: "STRAT-204",
+    department_id: "dept-3",
+    dept: "BCA",
+    code: "BCA-204",
     name: "Business Model Innovation in AI & Cloud",
     semester: "Spring 2027",
     created_at: new Date().toISOString(),
@@ -142,8 +142,8 @@ export const initialCourses: Course[] = [
   {
     id: "course-6",
     department_id: "dept-2",
-    dept: "STRAT",
-    code: "STRAT-308",
+    dept: "BBA",
+    code: "BBA-308",
     name: "Cross-Border Negotiations & Alliance Management",
     semester: "Spring 2027",
     created_at: new Date().toISOString(),
@@ -260,7 +260,7 @@ export const initialProfiles: Profile[] = [
     is_reviewer: true,
     reviewer_since: "2024-01-01T00:00:00Z",
     plan: "institutional",
-    monthly_generation_limit: 50,
+    monthly_generation_limit: 15,
     monthly_generations_used: 8,
     sbs_eligible: true,
     is_approved: true,
@@ -286,7 +286,7 @@ export const initialProfiles: Profile[] = [
     is_reviewer: true,
     reviewer_since: "2024-01-01T00:00:00Z",
     plan: "institutional",
-    monthly_generation_limit: 50,
+    monthly_generation_limit: 15,
     monthly_generations_used: 4,
     sbs_eligible: true,
     is_approved: true,
@@ -312,6 +312,8 @@ export const initialProfiles: Profile[] = [
     course_id: "course-5",
     batch_id: "batch-2024-27",
     plan: "standard",
+    monthly_generation_limit: 10,
+    monthly_generations_used: 2,
     is_approved: true,
     access_status: "active",
     access_start: "2024-07-01T00:00:00Z",
@@ -343,7 +345,7 @@ export const initialProfiles: Profile[] = [
     role: "faculty",
     department_id: "dept-1",
     plan: "institutional",
-    monthly_generation_limit: 50,
+    monthly_generation_limit: 15,
     monthly_generations_used: 0,
     sbs_eligible: true,
     is_approved: false,
@@ -371,7 +373,7 @@ export const initialProfiles: Profile[] = [
     role: "faculty",
     department_id: "dept-3",
     plan: "institutional",
-    monthly_generation_limit: 50,
+    monthly_generation_limit: 15,
     monthly_generations_used: 0,
     sbs_eligible: true,
     is_approved: false,
@@ -1898,9 +1900,7 @@ class MockStore {
     return this.profiles.map((p) => {
       this.checkAndResetMonthlyQuota(p);
       const isSbs = isSbsDomain(p.email, this.allowed_domains) || p.user_type === "sbs_member";
-      const defaultLimit = isSbs
-        ? (p.role === "admin" ? 100 : this.platform_settings.sbs_fair_use_limit)
-        : this.platform_settings.external_free_limit;
+      const defaultLimit = p.role === "admin" ? 100 : p.role === "faculty" ? 15 : 10;
       return {
         ...p,
         user_type: p.user_type || (isSbs ? "sbs_member" : "external"),
@@ -1927,9 +1927,7 @@ class MockStore {
     if (!p) return undefined;
     this.checkAndResetMonthlyQuota(p);
     const isSbs = isSbsDomain(p.email, this.allowed_domains) || p.user_type === "sbs_member";
-    const defaultLimit = isSbs
-      ? (p.role === "admin" ? 100 : this.platform_settings.sbs_fair_use_limit)
-      : this.platform_settings.external_free_limit;
+    const defaultLimit = p.role === "admin" ? 100 : p.role === "faculty" ? 15 : 10;
     return {
       ...p,
       user_type: p.user_type || (isSbs ? "sbs_member" : "external"),
@@ -2313,9 +2311,7 @@ class MockStore {
       };
     }
 
-    const limit = p.monthly_generation_limit ?? (isSbs
-      ? (p.role === "admin" ? 100 : this.platform_settings.sbs_fair_use_limit)
-      : this.platform_settings.external_free_limit);
+    const limit = p.monthly_generation_limit ?? (p.role === "admin" ? 100 : p.role === "faculty" ? 15 : 10);
     const used = p.free_cases_used_this_month ?? p.monthly_generations_used ?? 0;
     const remaining = Math.max(0, limit - used);
     const allowed = used < limit;

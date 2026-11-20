@@ -14,6 +14,7 @@ import {
   FileQuestion,
   Briefcase,
   ClipboardCheck,
+  CreditCard,
   X,
   ArrowRight,
   Command,
@@ -57,12 +58,11 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
     },
     {
       id: "nav-create",
-      title: "Generate Case Studio",
+      title: "Generate / Curate Case",
       category: "Navigation",
       description: "Author and generate high-impact business cases",
       href: "/create",
       icon: Sparkles,
-      roleRequirement: ["admin", "faculty"],
     },
     {
       id: "nav-review-queue",
@@ -96,7 +96,6 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
       description: "NAAC/NBA CO/PO attainment matrix & student telemetry",
       href: "/analytics",
       icon: BarChart3,
-      roleRequirement: ["admin", "faculty"],
     },
     {
       id: "nav-guide",
@@ -105,7 +104,14 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
       description: "Pedagogical playbooks and Socratic assistant",
       href: "/guide",
       icon: GraduationCap,
-      roleRequirement: ["admin", "faculty"],
+    },
+    {
+      id: "nav-pricing",
+      title: "Go Prime",
+      category: "Navigation",
+      description: "Institutional licensing, alumni plans, and continuing education",
+      href: "/pricing",
+      icon: CreditCard,
     },
     {
       id: "nav-admin",

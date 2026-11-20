@@ -1245,7 +1245,7 @@ function CreateCaseContent() {
           <div className="flex items-center flex-wrap gap-2.5 shrink-0">
             {currentUser && (() => {
               const used = currentUser.free_cases_used_this_month ?? currentUser.monthly_generations_used ?? 0;
-              const limit = currentUser.monthly_generation_limit ?? (currentUser.user_type === "sbs_member" ? 30 : currentUser.role === "admin" ? 100 : 50);
+              const limit = currentUser.monthly_generation_limit ?? (currentUser.role === "admin" ? 100 : currentUser.role === "faculty" ? 15 : 10);
               const remaining = Math.max(0, limit - used);
               return (
                 <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-surface border border-border text-xs shadow-2xs">

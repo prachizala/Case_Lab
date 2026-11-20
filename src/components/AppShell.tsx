@@ -183,13 +183,12 @@ export function AppShell({ children }: AppShellProps) {
   // Faculty
   const facultyNav: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Generate Case", href: "/create", icon: Sparkles },
+    { label: "Curate Case", href: "/create", icon: Sparkles },
     { label: "Review Queue", href: "/review-queue", icon: ClipboardCheck },
-    { label: "Repository", href: "/repository", icon: BookOpen },
     { label: "Trending Cases", href: "/trending", icon: TrendingUp },
-    { label: "Case Library", href: "/library", icon: Layers, isSecondary: true },
+    { label: "Case Library", href: "/library", icon: Layers },
     { label: "Analytics", href: "/analytics", icon: BarChart3, isSecondary: true },
-    { label: "Pricing", href: "/pricing", icon: CreditCard, isSecondary: true },
+    { label: "Go Prime", href: "/pricing", icon: CreditCard, isSecondary: true },
     { label: "Facilitator Guide", href: "/guide", icon: GraduationCap, isSecondary: true },
   ];
 
@@ -197,22 +196,26 @@ export function AppShell({ children }: AppShellProps) {
   const adminNav: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "Admin Center", href: "/admin", icon: ShieldCheck },
-    { label: "Generate Case", href: "/create", icon: Sparkles },
+    { label: "Curate Case", href: "/create", icon: Sparkles },
     { label: "Review Queue", href: "/review-queue", icon: ClipboardCheck },
-    { label: "Repository", href: "/repository", icon: BookOpen },
+    { label: "Trending Cases", href: "/trending", icon: TrendingUp },
     { label: "Case Library", href: "/library", icon: Layers, isSecondary: true },
-    { label: "Trending Cases", href: "/trending", icon: TrendingUp, isSecondary: true },
     { label: "Analytics", href: "/analytics", icon: BarChart3, isSecondary: true },
+    { label: "Go Prime", href: "/pricing", icon: CreditCard, isSecondary: true },
     { label: "Facilitator Guide", href: "/guide", icon: GraduationCap, isSecondary: true },
   ];
 
   // Student
   const studentNav: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Repository", href: "/repository", icon: BookOpen },
-    { label: "Case Library", href: "/library", icon: Layers, isSecondary: true },
-    { label: "My Answers", href: "/my-answers", icon: FileQuestion },
-    { label: "Portfolio", href: "/portfolio", icon: Briefcase },
+    { label: "Generate Case", href: "/create", icon: Sparkles },
+    { label: "Trending Cases", href: "/trending", icon: TrendingUp },
+    { label: "Case Library", href: "/library", icon: Layers },
+    { label: "Analytics", href: "/analytics", icon: BarChart3, isSecondary: true },
+    { label: "Go Prime", href: "/pricing", icon: CreditCard, isSecondary: true },
+    { label: "Facilitator Guide", href: "/guide", icon: GraduationCap, isSecondary: true },
+    { label: "My Answers", href: "/my-answers", icon: FileQuestion, isSecondary: true },
+    { label: "Portfolio", href: "/portfolio", icon: Briefcase, isSecondary: true },
   ];
 
   const currentNav =
@@ -316,6 +319,8 @@ export function AppShell({ children }: AppShellProps) {
                   <span className="whitespace-nowrap inline 2xl:hidden">
                     {item.label === "Generate Case"
                       ? "Generate"
+                      : item.label === "Curate Case"
+                      ? "Curate"
                       : item.label === "Review Queue"
                       ? "Reviews"
                       : item.label === "Case Library"
@@ -324,6 +329,8 @@ export function AppShell({ children }: AppShellProps) {
                       ? "Admin"
                       : item.label === "Trending Cases"
                       ? "Trending"
+                      : item.label === "Go Prime"
+                      ? "Go Prime"
                       : item.label}
                   </span>
 
@@ -480,7 +487,7 @@ export function AppShell({ children }: AppShellProps) {
                     <div className="pt-1.5 text-[10px] text-muted flex items-center justify-between border-t border-border/40 mt-1.5">
                       <span>Monthly Generations:</span>
                       <span className="font-mono font-semibold text-text">
-                        {currentUser?.free_cases_used_this_month ?? 0} / {currentUser?.monthly_generation_limit ?? (currentUser?.user_type === "sbs_member" ? 30 : 3)}
+                        {currentUser?.free_cases_used_this_month ?? 0} / {currentUser?.monthly_generation_limit ?? (currentUser?.role === "admin" ? 100 : currentUser?.role === "faculty" ? 15 : 10)}
                       </span>
                     </div>
                   </div>

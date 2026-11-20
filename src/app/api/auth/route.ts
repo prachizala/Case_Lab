@@ -218,6 +218,8 @@ export async function POST(req: NextRequest) {
         otp_expires_at: null,
         free_cases_used_this_month: 0,
         free_cases_reset_at: getNextMonthResetKolkata(),
+        monthly_generation_limit: newRole === "faculty" ? 15 : newRole === "admin" ? 100 : 10,
+        monthly_generations_used: 0,
         plan: "standard",
         sbs_eligible: true,
         dpdp_consent: true,

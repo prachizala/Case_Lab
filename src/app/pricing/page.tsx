@@ -182,13 +182,13 @@ export default function PricingPage() {
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-soft text-text text-xs font-bold uppercase tracking-wider">
             <CreditCard className="w-3.5 h-3.5 text-accent" />
-            <span>{COLLEGE_NAME_WITH_SHORT} Licensing & Subscriptions</span>
+            <span>Go Prime</span>
           </div>
           <h1 className="font-serif text-3xl sm:text-4xl font-extrabold text-text">
-            Institutional Licensing & Alumni Plans
+            Go Prime
           </h1>
           <p className="text-sm text-muted">
-            Transparent academic access for matriculated students, continuing education for alumni, and institutional accreditation tiers.
+            Institutional licensing, alumni plans, and continuing education access.
           </p>
         </div>
 
