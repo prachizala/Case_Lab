@@ -443,7 +443,7 @@ export default function DashboardPage({
                   })()}
                 </div>
                 <h2 className="font-serif text-2xl md:text-3xl font-extrabold text-text tracking-tight">
-                  Generate a New Teaching Case Study
+                  {role === "student" ? "Generate a New Practice Case Study" : "Curate a New Teaching Case Study"}
                 </h2>
                 <p className="text-xs md:text-sm text-muted leading-relaxed">
                   Generate classroom simulations calibrated to Bloom&apos;s Taxonomy with the {AI_ENGINE_LABEL}. Includes executive summaries, 5 discussion questions, illustrative exhibit data, and comprehensive teaching notes.
@@ -456,7 +456,7 @@ export default function DashboardPage({
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-extrabold text-sm shadow-md hover:shadow-lg transition-all"
                 >
                   <Sparkles className="w-4 h-4 text-accent-text" />
-                  <span>Open Generate Studio</span>
+                  <span>{role === "student" ? "Open Generate Studio" : "Open Curate Studio"}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -911,13 +911,13 @@ export default function DashboardPage({
                     <div className="pt-3 border-t border-border flex items-center justify-between text-[11px]">
                       <span className="text-muted">{sig.source}</span>
 
-                      {/* "CREATE CASE FROM THIS" BUTTON */}
+                      {/* "CURATE / GENERATE CASE FROM THIS" BUTTON */}
                       <Link
                         href={createUrl}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text text-xs font-serif font-bold shadow-sm transition-all"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-accent-text" />
-                        <span>Create case from this</span>
+                        <span>{role === "student" ? "Generate case from this" : "Curate case from this"}</span>
                       </Link>
                     </div>
                   </div>

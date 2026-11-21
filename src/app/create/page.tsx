@@ -1235,7 +1235,7 @@ function CreateCaseContent() {
               <span>{AI_ENGINE_LABEL}</span>
             </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold text-text tracking-tight">
-              Generate Case Studio
+              {currentUser?.role === "student" ? "Generate Case Studio" : "Curate Case Studio"}
             </h1>
             <p className="text-xs text-muted mt-0.5">
               Author curriculum-aligned business cases and synchronized classroom teaching notes.
