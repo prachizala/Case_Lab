@@ -13,6 +13,7 @@ import {
   Building,
   Target,
   FileSpreadsheet,
+  FileText,
   Cpu,
 } from "lucide-react";
 
@@ -75,6 +76,7 @@ export function StrategicProfile({
   const metrics = useMemo(() => {
     const isShort = type === "short" || type === "flash";
     const isResearch = type === "research";
+    const estPages = isShort ? "2-3 Pages" : targetLength === "short" ? "5 Pages" : "10 Pages";
     const baseWords = isResearch ? 5200 : isShort ? 1600 : targetLength === "short" ? 2400 : targetLength === "comprehensive" ? 4800 : 3600;
     const estDuration = isResearch ? "90 mins" : isShort ? "30 mins" : "80 mins";
     const baseTokens = isResearch ? 5200 : isShort ? 1600 : 3800;
@@ -83,6 +85,7 @@ export function StrategicProfile({
     const notesWordCount = sourceNotes ? sourceNotes.trim().split(/\s+/).filter(Boolean).length : 0;
 
     return {
+      estPages,
       targetWords: baseWords,
       estDuration,
       estTokens,
@@ -115,10 +118,6 @@ export function StrategicProfile({
               Live configuration overview
             </p>
           </div>
-        </div>
-
-        <div className="px-2.5 py-1 rounded-full bg-primary-soft border border-border text-xs font-medium text-text">
-          Draft Spec
         </div>
       </div>
 
@@ -182,19 +181,19 @@ export function StrategicProfile({
 
         <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
           <span className="text-muted font-medium shrink-0 flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-muted" /> Class Time:
+            <FileText className="w-3.5 h-3.5 text-muted" /> Target Length:
           </span>
           <span className="font-semibold text-text text-right">
-            {metrics.estDuration} <span className="text-muted font-normal">(~{metrics.targetWords.toLocaleString()} words)</span>
+            {metrics.estPages}
           </span>
         </div>
 
         <div className="flex items-start justify-between py-1.5 border-b border-border/50 gap-2">
           <span className="text-muted font-medium shrink-0 flex items-center gap-1">
-            <Cpu className="w-3.5 h-3.5 text-muted" /> AI Estimate:
+            <Clock className="w-3.5 h-3.5 text-muted" /> Est. Time:
           </span>
           <span className="font-mono font-bold text-text text-right">
-            ~{metrics.estTokens.toLocaleString()} tokens <span className="text-muted font-sans font-normal text-[11px]">(~{metrics.estSeconds}s)</span>
+            ~{metrics.estSeconds} seconds
           </span>
         </div>
 

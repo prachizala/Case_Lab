@@ -219,7 +219,7 @@ export const initialCaseCategories: CaseCategory[] = [
 
 export const initialCaseTypes: CaseTypeItem[] = [
   { id: "type-ce-pack", name: "CE Case Pack", description: "Structured teaching case with Bloom questions and solution key", is_active: true },
-  { id: "type-full", name: "Full Case Study", description: "Comprehensive Harvard/Ivey standard institutional case", is_active: true },
+  { id: "type-full", name: "Full Case Study", description: "Comprehensive institutional teaching case", is_active: true },
   { id: "type-short", name: "Short Case", description: "Rapid boardroom crisis drill", is_active: true },
   { id: "type-flash", name: "Flash Case", description: "Single decision-point operational problem", is_active: true },
 ];

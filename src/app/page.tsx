@@ -112,7 +112,7 @@ export default function HomePage() {
               Executive Case Pedagogy
             </h3>
             <p className="text-xs text-muted leading-relaxed">
-              Calibrated to international case method standards (HBS/Ivey) and rooted in authentic Indian business, regulatory, and market contexts.
+              Calibrated to rigorous case method standards and rooted in authentic Indian business, regulatory, and market contexts.
             </p>
           </div>
 

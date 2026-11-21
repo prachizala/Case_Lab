@@ -1229,16 +1229,11 @@ function CreateCaseContent() {
         {/* Page Title & Compact Usage Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border pb-4">
           <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted uppercase tracking-wider mb-0.5">
-              <span>{COLLEGE_SHORT} Curriculum Studio</span>
-              <span>•</span>
-              <span>{AI_ENGINE_LABEL}</span>
-            </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold text-text tracking-tight">
               Curate Case Studio
             </h1>
-            <p className="text-xs text-muted mt-0.5">
-              Author curriculum-aligned business cases and synchronized classroom teaching notes.
+            <p className="text-xs text-muted mt-1">
+              Choose a format and domain to curate your case.
             </p>
           </div>
 
@@ -1318,7 +1313,6 @@ function CreateCaseContent() {
                     Case Format & Department
                   </h3>
                 </div>
-                <span className="text-xs text-muted font-medium">Step 1 of 5</span>
               </div>
 
               {/* Case Type 4-Way Selector */}
@@ -1331,14 +1325,14 @@ function CreateCaseContent() {
                     {
                       id: "ce_pack" as CaseType,
                       title: "CE Case Pack",
-                      badge: "Case + Solutions",
+                      badge: "",
                       desc: "Comprehensive Teaching Case + Analysis Questions + Model Solutions & Discussion Notes.",
                     },
                     {
                       id: "full" as CaseType,
                       title: "Full Case Study",
                       badge: "8-10 Pages",
-                      desc: "Comprehensive Harvard/Ivey standard. Deep institutional context, multi-stage teaching note.",
+                      desc: "Comprehensive institutional case. Deep business context, exhibit data, and multi-stage teaching note.",
                     },
                     {
                       id: "short" as CaseType,
@@ -1367,15 +1361,17 @@ function CreateCaseContent() {
                         <span className={`font-bold text-xs ${type === ct.id ? "text-white" : "text-text"}`}>
                           {ct.title}
                         </span>
-                        <span
-                          className={`text-[11px] px-2 py-0.5 rounded font-medium border ${
-                            type === ct.id
-                              ? "bg-white/15 text-white border-white/40"
-                              : "bg-primary-soft/40 text-muted border-border/80"
-                          }`}
-                        >
-                          {ct.badge}
-                        </span>
+                        {ct.badge && (
+                          <span
+                            className={`text-[11px] px-2 py-0.5 rounded font-medium border ${
+                              type === ct.id
+                                ? "bg-white/15 text-white border-white/40"
+                                : "bg-primary-soft/40 text-muted border-border/80"
+                            }`}
+                          >
+                            {ct.badge}
+                          </span>
+                        )}
                       </div>
                       <p className={`text-[11px] leading-relaxed ${type === ct.id ? "text-white/80" : "text-muted"}`}>
                         {ct.desc}
@@ -1757,7 +1753,7 @@ function CreateCaseContent() {
                       }`}
                     >
                       <div className="font-bold">10 Pages (~4,500 words)</div>
-                      <div className="text-[10px] opacity-80">Comprehensive executive/Ivey-length study</div>
+                      <div className="text-[10px] opacity-80">Comprehensive executive-length case study</div>
                     </button>
                   </div>
                 </div>
@@ -1833,7 +1829,6 @@ function CreateCaseContent() {
                     Domain, Difficulty & Primary Entity
                   </h3>
                 </div>
-                <span className="text-xs text-muted font-medium">Step 2 of 5</span>
               </div>
 
               {/* 8 Business Domains Selector */}
@@ -2242,7 +2237,6 @@ function CreateCaseContent() {
                     Source Material & Macro Signals
                   </h3>
                 </div>
-                <span className="text-xs text-muted font-medium">Step 3 of 5</span>
               </div>
 
               {/* 3 Source Tabs */}
@@ -2390,7 +2384,6 @@ function CreateCaseContent() {
                     Tone, Exhibits & Bloom&apos;s Level
                   </h3>
                 </div>
-                <span className="text-xs text-muted font-medium">Step 4 of 5</span>
               </div>
 
               {/* Tone Selection */}
