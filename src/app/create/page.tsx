@@ -1326,25 +1326,21 @@ function CreateCaseContent() {
                       id: "ce_pack" as CaseType,
                       title: "CE Case Pack",
                       badge: "",
-                      desc: "Comprehensive Teaching Case + Analysis Questions + Model Solutions & Discussion Notes.",
                     },
                     {
                       id: "full" as CaseType,
                       title: "Full Case Study",
                       badge: "8-10 Pages",
-                      desc: "Comprehensive institutional case. Deep business context, exhibit data, and multi-stage teaching note.",
                     },
                     {
                       id: "short" as CaseType,
                       title: "Short Case",
                       badge: "~2-3 Pages",
-                      desc: "Rapid boardroom crisis drill (20-30 min class). High-intensity operational tension.",
                     },
                     {
                       id: "flash" as CaseType,
                       title: "Flash Case",
                       badge: "1-2 Pages",
-                      desc: "Micro-case simulation designed for quick classroom debate and instant decision-making.",
                     },
                   ].map((ct) => (
                     <button
@@ -1353,11 +1349,11 @@ function CreateCaseContent() {
                       onClick={() => setType(ct.id)}
                       className={`p-3.5 rounded-xl border text-left transition-all relative ${
                         type === ct.id
-                          ? "bg-primary text-white border-primary shadow-md"
-                          : "bg-surface border-border text-text hover:border-primary/50"
+                          ? "bg-accent text-white border-accent shadow-md ring-1 ring-accent"
+                          : "bg-surface border-border text-text hover:border-accent/60"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1.5 gap-1.5">
+                      <div className="flex items-center justify-between gap-1.5">
                         <span className={`font-bold text-xs ${type === ct.id ? "text-white" : "text-text"}`}>
                           {ct.title}
                         </span>
@@ -1365,7 +1361,7 @@ function CreateCaseContent() {
                           <span
                             className={`text-[11px] px-2 py-0.5 rounded font-medium border ${
                               type === ct.id
-                                ? "bg-white/15 text-white border-white/40"
+                                ? "bg-white/20 text-white border-white/40"
                                 : "bg-primary-soft/40 text-muted border-border/80"
                             }`}
                           >
@@ -1373,9 +1369,6 @@ function CreateCaseContent() {
                           </span>
                         )}
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${type === ct.id ? "text-white/80" : "text-muted"}`}>
-                        {ct.desc}
-                      </p>
                     </button>
                   ))}
                 </div>
@@ -1383,15 +1376,12 @@ function CreateCaseContent() {
 
               {/* CE Case Pack Department & Syllabus Configuration */}
               {type === "ce_pack" && (
-                <div className="mt-3 p-4 rounded-xl border border-primary/20 bg-primary-soft/30 dark:bg-primary-soft/10 space-y-4">
+                <div className="mt-3 p-4 rounded-xl border border-border bg-surface/50 dark:bg-surface/20 space-y-4">
                   <div className="space-y-3 pb-3 border-b border-border/60">
                     <div>
                       <span className="text-xs font-bold text-text block">
                         Academic Domain & Syllabus Alignment
                       </span>
-                      <p className="text-xs text-muted">
-                        Select one of the 8 business domains to configure syllabus units, frameworks, and pedagogical rules.
-                      </p>
                     </div>
 
                     {/* 8 Business Domains Grid Selector */}
@@ -1404,28 +1394,23 @@ function CreateCaseContent() {
                             key={d.id}
                             type="button"
                             onClick={() => handleDomainSelect(d.name)}
-                            className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                            className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                               isSelected
-                                ? "bg-primary text-white border-primary shadow-xs ring-1 ring-primary"
+                                ? "bg-accent text-white border-accent shadow-md ring-1 ring-accent"
                                 : "bg-surface border-border hover:border-accent/60 text-text hover:bg-surface/80"
                             }`}
                           >
-                            <div className="flex items-center justify-between w-full mb-1">
-                              <div className="flex items-center gap-1.5 min-w-0">
-                                <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : "text-accent"}`} />
-                                <span className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-text"}`}>
-                                  {d.name}
-                                </span>
-                              </div>
-                              {isSelected && (
-                                <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-1">
-                                  <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-                                </span>
-                              )}
+                            <div className="flex items-center gap-2 min-w-0">
+                              <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : "text-accent"}`} />
+                              <span className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-text"}`}>
+                                {d.name}
+                              </span>
                             </div>
-                            <p className={`text-[10px] leading-snug line-clamp-2 ${isSelected ? "text-white/85 font-medium" : "text-muted"}`}>
-                              {d.shortDescription}
-                            </p>
+                            {isSelected && (
+                              <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-1">
+                                <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -1624,13 +1609,13 @@ function CreateCaseContent() {
                       : "Plausibly anonymized enterprise scenario for pure analytical inquiry."}
                   </span>
                 </div>
-                <div className="inline-flex p-1 bg-primary-soft rounded-xl border border-border shrink-0">
+                <div className="inline-flex p-1 bg-surface-raised rounded-xl border border-border shrink-0">
                   <button
                     type="button"
                     onClick={() => setFormat("hypothetical")}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                       format === "hypothetical"
-                        ? "bg-primary text-white shadow-xs"
+                        ? "bg-accent text-white shadow-xs"
                         : "text-muted hover:text-text font-medium"
                     }`}
                   >
@@ -1642,7 +1627,7 @@ function CreateCaseContent() {
                     onClick={() => setFormat("real_signal")}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                       format === "real_signal"
-                        ? "bg-primary text-white shadow-xs"
+                        ? "bg-accent text-white shadow-xs"
                         : "text-muted hover:text-text font-medium"
                     }`}
                   >
@@ -1734,26 +1719,24 @@ function CreateCaseContent() {
                     <button
                       type="button"
                       onClick={() => setPageTarget(5)}
-                      className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
+                      className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
                         pageTarget === 5
-                          ? "bg-accent/15 border-accent text-accent"
-                          : "bg-surface border-border text-muted hover:text-text"
+                          ? "bg-accent text-white border-accent shadow-sm"
+                          : "bg-surface border-border text-muted hover:text-text hover:border-accent/50"
                       }`}
                     >
-                      <div className="font-bold">5 Pages (~2,250 words)</div>
-                      <div className="text-[10px] opacity-80">Standard institutional teaching case</div>
+                      5 Pages (~2,250 words)
                     </button>
                     <button
                       type="button"
                       onClick={() => setPageTarget(10)}
-                      className={`p-2.5 rounded-xl border text-xs font-semibold text-left transition-all ${
+                      className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
                         pageTarget === 10
-                          ? "bg-accent/15 border-accent text-accent"
-                          : "bg-surface border-border text-muted hover:text-text"
+                          ? "bg-accent text-white border-accent shadow-sm"
+                          : "bg-surface border-border text-muted hover:text-text hover:border-accent/50"
                       }`}
                     >
-                      <div className="font-bold">10 Pages (~4,500 words)</div>
-                      <div className="text-[10px] opacity-80">Comprehensive executive-length case study</div>
+                      10 Pages (~4,500 words)
                     </button>
                   </div>
                 </div>
@@ -1837,9 +1820,6 @@ function CreateCaseContent() {
                   <label className="text-xs font-semibold text-text block">
                     Academic Domain Focus
                   </label>
-                  <p className="text-[11px] text-muted">
-                    Choose from the 8 core business disciplines. Topics adjust dynamically.
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -1851,28 +1831,23 @@ function CreateCaseContent() {
                         key={d.id}
                         type="button"
                         onClick={() => handleDomainSelect(d.name)}
-                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                        className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                           isSelected
-                            ? "bg-primary text-white border-primary shadow-xs ring-1 ring-primary"
+                            ? "bg-accent text-white border-accent shadow-md ring-1 ring-accent"
                             : "bg-surface border-border hover:border-accent/60 text-text hover:bg-surface/80"
                         }`}
                       >
-                        <div className="flex items-center justify-between w-full mb-1">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : "text-accent"}`} />
-                            <span className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-text"}`}>
-                              {d.name}
-                            </span>
-                          </div>
-                          {isSelected && (
-                            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-1">
-                              <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
-                            </span>
-                          )}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? "text-white" : "text-accent"}`} />
+                          <span className={`text-xs font-bold truncate ${isSelected ? "text-white" : "text-text"}`}>
+                            {d.name}
+                          </span>
                         </div>
-                        <p className={`text-[10px] leading-snug line-clamp-2 ${isSelected ? "text-white/85 font-medium" : "text-muted"}`}>
-                          {d.shortDescription}
-                        </p>
+                        {isSelected && (
+                          <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-1">
+                            <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -2030,7 +2005,7 @@ function CreateCaseContent() {
                       onClick={() => handleCompanySelect(chip.id)}
                       className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
                         selectedCompanyId === chip.id && !isCustomCompany
-                          ? "bg-primary text-white border-primary font-bold shadow-2xs"
+                          ? "bg-accent text-white border-accent font-bold shadow-2xs"
                           : "bg-surface-raised border-border text-text hover:border-accent hover:text-accent font-medium"
                       }`}
                     >
@@ -2399,7 +2374,7 @@ function CreateCaseContent() {
                       onClick={() => setTone(t)}
                       className={`p-2.5 rounded-xl text-xs font-semibold border transition-all text-center ${
                         tone === t
-                          ? "bg-primary text-on-primary border-primary shadow-sm"
+                          ? "bg-accent text-white border-accent shadow-sm"
                           : "bg-surface border-border text-text hover:border-accent"
                       }`}
                     >
