@@ -461,7 +461,7 @@ function CreateCaseContent() {
       if (!res.ok) {
         throw new Error(data.error || "Failed to verify OTP.");
       }
-      setOtpMessage("Email verified successfully! You can now generate cases.");
+      setOtpMessage("Email verified successfully! You can now curate cases.");
       if (data.user) {
         setCurrentUser(data.user);
       }
@@ -1049,7 +1049,7 @@ function CreateCaseContent() {
         if (data.error_code === "UNVERIFIED_EMAIL" || (res.status === 403 && data.error_code === "UNVERIFIED_EMAIL")) {
           setOtpModalOpen(true);
           setGenerationError({
-            message: data.error || "Email verification required before generating cases.",
+            message: data.error || "Email verification required before curating cases.",
             retryable: false,
           });
           return;
@@ -1102,7 +1102,7 @@ function CreateCaseContent() {
         ? "Unable to reach the server. Please verify the local CaseLab server is running on port 3000 and try again."
         : err instanceof Error
         ? err.message
-        : "Failed to generate case study.";
+        : "Failed to curate case study.";
       setGenerationError({
         message: msg,
         retryable: true,
@@ -1235,7 +1235,7 @@ function CreateCaseContent() {
               <span>{AI_ENGINE_LABEL}</span>
             </div>
             <h1 className="font-serif text-2xl md:text-3xl font-bold text-text tracking-tight">
-              {currentUser?.role === "student" ? "Generate Case Studio" : "Curate Case Studio"}
+              Curate Case Studio
             </h1>
             <p className="text-xs text-muted mt-0.5">
               Author curriculum-aligned business cases and synchronized classroom teaching notes.
@@ -2603,8 +2603,8 @@ function CreateCaseContent() {
                       <RefreshCw className="w-5 h-5 text-accent animate-spin" />
                       <span className="font-serif font-bold text-sm text-text">
                         {type === "ce_pack"
-                          ? `Generating CE Case Pack (${department.toUpperCase()})...`
-                          : `Generating Case with ${AI_ENGINE_LABEL}...`}
+                          ? `Curating CE Case Pack (${department.toUpperCase()})...`
+                          : `Curating Case with ${AI_ENGINE_LABEL}...`}
                       </span>
                     </div>
                     <button
@@ -2612,7 +2612,7 @@ function CreateCaseContent() {
                       onClick={handleCancelGeneration}
                       className="px-3 py-1 rounded-lg bg-surface border border-danger/40 text-danger text-xs font-bold hover:bg-danger/10 transition-colors"
                     >
-                      Cancel Generation
+                      Cancel Curation
                     </button>
                   </div>
 
@@ -2657,7 +2657,7 @@ function CreateCaseContent() {
                           {generationStep === 1 && "1. Researching & Fact Verification"}
                           {generationStep === 2 && "2. Structuring Pedagogical Architecture"}
                           {generationStep === 3 && "3. Drafting Business Dilemma & Context"}
-                          {generationStep === 4 && "4. Generating Exhibits & Financial Models"}
+                          {generationStep === 4 && "4. Curating Exhibits & Financial Models"}
                           {generationStep === 5 && "5. Polishing Discussion Questions & Flow"}
                         </span>
                       </div>
@@ -2679,12 +2679,12 @@ function CreateCaseContent() {
                   <Sparkles className="w-5 h-5 text-accent-text" />
                   <span>
                     {type === "ce_pack"
-                      ? `Generate CE Case Pack (${department.toUpperCase()})`
+                      ? `Curate CE Case Pack (${department.toUpperCase()})`
                       : type === "short"
-                      ? "Generate Short Case (~2 pp)"
+                      ? "Curate Short Case (~2 pp)"
                       : type === "research"
-                      ? "Generate Case Research (Multi-Firm)"
-                      : "Generate Full Teaching Case"}
+                      ? "Curate Case Research (Multi-Firm)"
+                      : "Curate Full Teaching Case"}
                   </span>
                 </button>
               )}
@@ -3209,7 +3209,7 @@ export default function CreateCasePage() {
         <AppShell>
           <div className="max-w-6xl mx-auto py-12">
             <StateLoading
-              title="Loading Generate Case Studio..."
+              title="Loading Curate Case Studio..."
               subtitle="Initializing pedagogical configuration."
             />
           </div>

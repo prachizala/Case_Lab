@@ -353,7 +353,7 @@ export default function DashboardPage({
                 ? "Access assigned case studies, review quantitative exhibits, and track your analytical portfolio."
                 : role === "admin"
                 ? `Administer the ${COLLEGE_NAME_WITH_SHORT} curriculum platform, approve faculty/student registrations, and configure academic departments.`
-                : `Generate high-impact business cases using the ${AI_ENGINE_LABEL}, design multi-phased classroom simulations, and review facilitator guides.`}
+                : `Curate high-impact business cases using the ${AI_ENGINE_LABEL}, design multi-phased classroom simulations, and review facilitator guides.`}
             </p>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -367,11 +367,11 @@ export default function DashboardPage({
                     <span>Open Case Library</span>
                   </Link>
                   <Link
-                    href="/my-answers"
+                    href="/create"
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/40 bg-white/10 hover:bg-white/20 hover:border-white/70 text-white font-serif font-semibold text-xs shadow-2xs transition-all hover:scale-[1.02] backdrop-blur-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
                   >
-                    <FileQuestion className="w-4 h-4" />
-                    <span>My Answers</span>
+                    <Sparkles className="w-4 h-4" />
+                    <span>Curate Case</span>
                   </Link>
                 </>
               ) : role === "admin" ? (
@@ -388,7 +388,7 @@ export default function DashboardPage({
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/40 bg-white/10 hover:bg-white/20 hover:border-white/70 text-white font-serif font-semibold text-xs shadow-2xs transition-all hover:scale-[1.02] backdrop-blur-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>Generate Case</span>
+                    <span>Curate Case</span>
                   </Link>
                 </>
               ) : (
@@ -398,7 +398,7 @@ export default function DashboardPage({
                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-xs shadow-md transition-all hover:scale-[1.02]"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>Generate New Case ({AI_ENGINE_LABEL})</span>
+                    <span>Curate New Case ({AI_ENGINE_LABEL})</span>
                   </Link>
                   <Link
                     href="/library"
@@ -437,16 +437,16 @@ export default function DashboardPage({
                     const remaining = Math.max(0, limit - used);
                     return (
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-accent/15 border border-accent/25 text-accent text-[11px] font-bold">
-                        <span>{remaining} cases available to generate this month</span>
+                        <span>{remaining} cases available to curate this month</span>
                       </span>
                     );
                   })()}
                 </div>
                 <h2 className="font-serif text-2xl md:text-3xl font-extrabold text-text tracking-tight">
-                  {role === "student" ? "Generate a New Practice Case Study" : "Curate a New Teaching Case Study"}
+                  Curate a New Teaching Case Study
                 </h2>
                 <p className="text-xs md:text-sm text-muted leading-relaxed">
-                  Generate classroom simulations calibrated to Bloom&apos;s Taxonomy with the {AI_ENGINE_LABEL}. Includes executive summaries, 5 discussion questions, illustrative exhibit data, and comprehensive teaching notes.
+                  Curate classroom simulations calibrated to Bloom&apos;s Taxonomy with the {AI_ENGINE_LABEL}. Includes executive summaries, 5 discussion questions, illustrative exhibit data, and comprehensive teaching notes.
                 </p>
               </div>
 
@@ -456,7 +456,7 @@ export default function DashboardPage({
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-extrabold text-sm shadow-md hover:shadow-lg transition-all"
                 >
                   <Sparkles className="w-4 h-4 text-accent-text" />
-                  <span>{role === "student" ? "Open Generate Studio" : "Open Curate Studio"}</span>
+                  <span>Open Curate Studio</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -911,13 +911,13 @@ export default function DashboardPage({
                     <div className="pt-3 border-t border-border flex items-center justify-between text-[11px]">
                       <span className="text-muted">{sig.source}</span>
 
-                      {/* "CURATE / GENERATE CASE FROM THIS" BUTTON */}
+                      {/* "CURATE CASE FROM THIS" BUTTON */}
                       <Link
                         href={createUrl}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text text-xs font-serif font-bold shadow-sm transition-all"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-accent-text" />
-                        <span>{role === "student" ? "Generate case from this" : "Curate case from this"}</span>
+                        <span>Curate case from this</span>
                       </Link>
                     </div>
                   </div>

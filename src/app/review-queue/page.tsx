@@ -455,7 +455,7 @@ export default function ReviewQueuePage() {
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-accent hover:bg-accent-hover text-accent-text text-xs font-semibold shadow-sm transition-all"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Generate New Case</span>
+              <span>Curate New Case</span>
             </Link>
             <Link
               href="/library"

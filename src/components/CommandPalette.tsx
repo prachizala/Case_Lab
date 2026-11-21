@@ -58,9 +58,9 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
     },
     {
       id: "nav-create",
-      title: "Generate / Curate Case",
+      title: "Curate Case Studio",
       category: "Navigation",
-      description: "Author and generate high-impact business cases",
+      description: "Author and curate high-impact business cases",
       href: "/create",
       icon: Sparkles,
     },
@@ -121,15 +121,6 @@ export function CommandPalette({ currentUser, isOpen, onClose }: CommandPaletteP
       href: "/admin",
       icon: ShieldCheck,
       roleRequirement: ["admin"],
-    },
-    {
-      id: "nav-answers",
-      title: "My Strategic Answers",
-      category: "Navigation",
-      description: "Review submitted case analyses and certifications",
-      href: "/my-answers",
-      icon: FileQuestion,
-      roleRequirement: ["student"],
     },
     {
       id: "nav-portfolio",

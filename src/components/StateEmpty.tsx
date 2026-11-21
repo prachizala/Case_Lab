@@ -26,7 +26,7 @@ export function StateEmpty({
     description ||
     message ||
     "No entries match your search criteria. Begin by authoring a new teaching case or adjust your filters.";
-  const displayActionText = actionText || actionLabel || "Generate New Case";
+  const displayActionText = actionText || actionLabel || "Curate New Case";
   return (
     <div className="w-full min-h-[380px] flex flex-col items-center justify-center p-8 rounded-xl border border-dashed border-border bg-primary-soft/30 text-center">
       <div className="w-16 h-16 rounded-2xl bg-primary-soft border border-border flex items-center justify-center text-primary mb-4 shadow-sm">

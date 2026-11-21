@@ -208,13 +208,12 @@ export function AppShell({ children }: AppShellProps) {
   // Student
   const studentNav: NavItem[] = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { label: "Generate Case", href: "/create", icon: Sparkles },
+    { label: "Curate Case", href: "/create", icon: Sparkles },
     { label: "Trending Cases", href: "/trending", icon: TrendingUp },
     { label: "Case Library", href: "/library", icon: Layers },
     { label: "Analytics", href: "/analytics", icon: BarChart3, isSecondary: true },
     { label: "Go Prime", href: "/pricing", icon: CreditCard, isSecondary: true },
     { label: "Facilitator Guide", href: "/guide", icon: GraduationCap, isSecondary: true },
-    { label: "My Answers", href: "/my-answers", icon: FileQuestion, isSecondary: true },
     { label: "Portfolio", href: "/portfolio", icon: Briefcase, isSecondary: true },
   ];
 
@@ -317,9 +316,7 @@ export function AppShell({ children }: AppShellProps) {
                   {/* Full label on 2xl (>=1536px); on 1024-1535px, show clean condensed label */}
                   <span className="whitespace-nowrap hidden 2xl:inline">{item.label}</span>
                   <span className="whitespace-nowrap inline 2xl:hidden">
-                    {item.label === "Generate Case"
-                      ? "Generate"
-                      : item.label === "Curate Case"
+                    {item.label === "Curate Case"
                       ? "Curate"
                       : item.label === "Review Queue"
                       ? "Reviews"
@@ -485,7 +482,7 @@ export function AppShell({ children }: AppShellProps) {
                     </div>
                     {/* Monthly Case Quota Status */}
                     <div className="pt-1.5 text-[10px] text-muted flex items-center justify-between border-t border-border/40 mt-1.5">
-                      <span>Monthly Generations:</span>
+                      <span>Monthly Curations:</span>
                       <span className="font-mono font-semibold text-text">
                         {currentUser?.free_cases_used_this_month ?? 0} / {currentUser?.monthly_generation_limit ?? (currentUser?.role === "admin" ? 100 : currentUser?.role === "faculty" ? 15 : 10)}
                       </span>

@@ -317,7 +317,7 @@ export default function LibraryPage() {
             <div className="flex items-center gap-2 text-xs font-semibold text-accent uppercase tracking-wider mb-1">
               <span>Curriculum Archive</span>
               <span>•</span>
-              <span>Peer-Generated Case Library</span>
+              <span>Peer-Curated Case Library</span>
             </div>
             <h1 className="font-serif text-3xl font-bold text-text tracking-tight">
               Case Library & Collections
@@ -334,7 +334,7 @@ export default function LibraryPage() {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-accent-text font-serif font-bold text-sm hover:shadow-md transition-all border border-accent"
               >
                 <PlusCircle className="w-4 h-4 text-accent-text" />
-                <span>Generate New Case</span>
+                <span>Curate New Case</span>
               </Link>
             )}
           </div>
@@ -823,7 +823,7 @@ export default function LibraryPage() {
                       ? "Try adjusting your search query, clearing industry filters, or switching collections."
                       : "The case repository does not currently have cases matching your role permissions."
                   }
-                  actionText={isFacultyOrAdmin ? "Generate New Case" : "Clear Filters"}
+                  actionText={isFacultyOrAdmin ? "Curate New Case" : "Clear Filters"}
                   actionHref={isFacultyOrAdmin ? "/create" : undefined}
                   onAction={!isFacultyOrAdmin ? resetFilters : undefined}
                 />
