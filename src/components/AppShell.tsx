@@ -39,6 +39,7 @@ import {
   ENABLE_DEMO_PERSONA_SWITCHER,
 } from "@/config/college";
 import { getCachedUser, invalidateAuthCache } from "@/lib/auth-client";
+import { getUserInitials } from "@/lib/utils";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -437,13 +438,7 @@ export function AppShell({ children }: AppShellProps) {
                 className="flex items-center gap-2 h-10 p-1 rounded-xl hover:bg-white/10 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <div className="w-8 h-8 rounded-full bg-accent text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs border border-white/20">
-                  {currentUser?.name
-                    ? currentUser.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .slice(0, 2)
-                        .join("")
-                    : "U"}
+                  {getUserInitials(currentUser?.name)}
                 </div>
                 <ChevronDown
                   className={`w-3.5 h-3.5 text-on-primary-muted transition-transform duration-200 hidden sm:block ${

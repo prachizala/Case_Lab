@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { StateLoading } from "@/components/StateLoading";
 import { StateError } from "@/components/StateError";
 import { ClassroomSession, ColdCallRecord, BoardPlan, Profile } from "@/lib/types";
+import { getUserInitials } from "@/lib/utils";
 import {
   ArrowLeft,
   Users,
@@ -378,7 +379,7 @@ export default function LiveClassroomPage({
                   {selectedStudent ? (
                     <div className="space-y-2 animate-fadeIn">
                       <div className="w-16 h-16 rounded-full bg-primary text-on-primary font-serif font-black text-2xl flex items-center justify-center mx-auto border-2 border-white/40 shadow-md">
-                        {selectedStudent.name.split(" ").map((n) => n[0]).join("")}
+                        {getUserInitials(selectedStudent.name)}
                       </div>
                       <h3 className="text-2xl font-serif font-bold text-text">
                         {selectedStudent.name}

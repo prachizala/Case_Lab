@@ -6,6 +6,7 @@ import { StateLoading } from "@/components/StateLoading";
 import { StateError } from "@/components/StateError";
 import { Profile, Department, Course, UserRole, UserPlan, AuditLog, AuditAction, PlatformSettings, UserType } from "@/lib/types";
 import { COLLEGE_NAME_WITH_SHORT, COLLEGE_SHORT } from "@/config/college";
+import { getUserInitials } from "@/lib/utils";
 import {
   Users,
   Building,
@@ -2186,7 +2187,7 @@ export default function AdminPage() {
                         <td className="p-3.5">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0">
-                              {p.name ? p.name[0] : "U"}
+                              {getUserInitials(p.name)}
                             </div>
                             <div>
                               <p className="font-semibold text-text">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PractitionerReflection, Profile } from "@/lib/types";
 import { COLLEGE_SHORT } from "@/config/college";
+import { getUserInitials } from "@/lib/utils";
 import {
   Briefcase,
   ThumbsUp,
@@ -239,7 +240,7 @@ export function PractitionerReflectionsSection({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-primary text-on-primary font-serif font-black text-sm flex items-center justify-center">
-                    {r.alumni_name.split(" ").map((n) => n[0]).join("")}
+                    {getUserInitials(r.alumni_name)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
