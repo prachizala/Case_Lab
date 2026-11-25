@@ -94,6 +94,7 @@ export default function AdminPage() {
   const [facultyDeptFilter, setFacultyDeptFilter] = useState<string>("all");
   const [facultyCourseFilter, setFacultyCourseFilter] = useState<string>("all");
   const [facultySearch, setFacultySearch] = useState<string>("");
+  const [facultyReviewerOnly, setFacultyReviewerOnly] = useState<boolean>(false);
 
   // Student tab filters & state
   const [studentCourseFilter, setStudentCourseFilter] = useState<string>("all");
@@ -107,6 +108,7 @@ export default function AdminPage() {
   const [subDeptFilter, setSubDeptFilter] = useState<string>("all");
   const [subReviewerFilter, setSubReviewerFilter] = useState<string>("all");
   const [subSearch, setSubSearch] = useState<string>("");
+  const [subOverdueOnly, setSubOverdueOnly] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [reassignModalCase, setReassignModalCase] = useState<any | null>(null);
   const [selectedNewReviewerId, setSelectedNewReviewerId] = useState<string>("");
@@ -964,63 +966,188 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* STATS OVERVIEW CARDS */}
+        {/* STATS OVERVIEW CARDS - INTERACTIVE JUMP BUTTONS */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Students</span>
+          {/* 1. Students */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("students")}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
+              activeTab === "students"
+                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                : "border-border bg-surface hover:border-accent/40"
+            }`}
+            title="Click to view all student cohorts & active students"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-accent transition-colors">Students</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-success mt-1">
               {stats.studentCount || profiles.filter((p) => p.role === "student").length}
             </p>
-          </div>
+          </button>
 
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Faculty</span>
+          {/* 2. Faculty */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("faculty");
+              setFacultyReviewerOnly(false);
+            }}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
+              activeTab === "faculty" && !facultyReviewerOnly
+                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                : "border-border bg-surface hover:border-accent/40"
+            }`}
+            title="Click to view faculty directory & allocations"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-accent transition-colors">Faculty</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-info mt-1">
               {stats.facultyCount || profiles.filter((p) => p.role === "faculty").length}
             </p>
-          </div>
+          </button>
 
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Reviewers</span>
+          {/* 3. Reviewers */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("faculty");
+              setFacultyReviewerOnly(true);
+            }}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
+              activeTab === "faculty" && facultyReviewerOnly
+                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                : "border-border bg-surface hover:border-accent/40"
+            }`}
+            title="Click to view designated reviewers & workloads"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-accent transition-colors">Reviewers</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-accent mt-1">
               {stats.reviewersCount || profiles.filter((p) => p.role === "faculty" && p.is_reviewer).length}
             </p>
-          </div>
+          </button>
 
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">In Review</span>
+          {/* 4. In Review */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("submissions");
+              setSubStatusFilter("in_review");
+              setSubOverdueOnly(false);
+            }}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
+              activeTab === "submissions" && subStatusFilter === "in_review" && !subOverdueOnly
+                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                : "border-border bg-surface hover:border-accent/40"
+            }`}
+            title="Click to view cases currently in peer review"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-accent transition-colors">In Review</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-primary dark:text-text mt-1">
               {stats.pendingSubmissionsCount || cases.filter((c) => ["submitted", "in_review", "changes_requested"].includes(c.status)).length}
             </p>
-          </div>
+          </button>
 
-          <div className={`p-3.5 rounded-xl border shadow-sm ${stats.overdueReviewsCount && stats.overdueReviewsCount > 0 ? "border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400" : "border-border bg-surface text-text"}`}>
-            <span className="text-[10px] uppercase font-bold opacity-80">Overdue (&gt;3d)</span>
+          {/* 5. Overdue (>3d) */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("submissions");
+              setSubOverdueOnly(true);
+            }}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/40 group ${
+              activeTab === "submissions" && subOverdueOnly
+                ? "border-amber-500 bg-amber-500/15 ring-1 ring-amber-500/30 text-amber-600 dark:text-amber-400 shadow-sm"
+                : stats.overdueReviewsCount && stats.overdueReviewsCount > 0
+                  ? "border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:border-amber-500"
+                  : "border-border bg-surface text-text hover:border-accent/40"
+            }`}
+            title="Click to view overdue reviews (>3 days without feedback)"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold opacity-80 group-hover:opacity-100 transition-opacity">Overdue (&gt;3d)</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold mt-1">
               {stats.overdueReviewsCount || 0}
             </p>
-          </div>
+          </button>
 
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Repository</span>
+          {/* 6. Repository */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("repository")}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
+              activeTab === "repository"
+                ? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/30 shadow-sm"
+                : "border-border bg-surface hover:border-emerald-500/40"
+            }`}
+            title="Click to view published repository items & moderation"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-emerald-600 transition-colors">Repository</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
               {stats.repositoryItemsCount || repositoryItems.filter((i) => i.is_published).length}
             </p>
-          </div>
+          </button>
 
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Pending Reg.</span>
+          {/* 7. Pending Reg. */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("users");
+              setRoleFilter("all");
+            }}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-warning/40 group ${
+              activeTab === "users" && profiles.filter((p) => !p.is_approved).length > 0
+                ? "border-warning bg-warning/10 ring-1 ring-warning/30 shadow-sm"
+                : "border-border bg-surface hover:border-warning/40"
+            }`}
+            title="Click to review and approve pending registrations"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-warning transition-colors">Pending Reg.</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-warning group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-warning mt-1">
               {stats.pendingApprovalCount || profiles.filter((p) => !p.is_approved).length}
             </p>
-          </div>
+          </button>
 
-          <div className="p-3.5 rounded-xl border border-border bg-surface shadow-sm">
-            <span className="text-[10px] uppercase font-bold text-muted">Total Users</span>
+          {/* 8. Total Users */}
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("users");
+              setRoleFilter("all");
+            }}
+            className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
+              activeTab === "users" && profiles.filter((p) => !p.is_approved).length === 0
+                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                : "border-border bg-surface hover:border-accent/40"
+            }`}
+            title="Click to view all registered users & quota telemetry"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-muted group-hover:text-accent transition-colors">Total Users</span>
+              <ArrowRight className="w-3 h-3 text-muted/40 group-hover:text-accent group-hover:translate-x-0.5 transition-all" />
+            </div>
             <p className="font-serif text-2xl font-bold text-text mt-1">
               {stats.totalUsers || profiles.length}
             </p>
-          </div>
+          </button>
         </div>
 
         {/* TABS NAVIGATION */}
@@ -1038,8 +1165,11 @@ export default function AdminPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("faculty")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+            onClick={() => {
+              setActiveTab("faculty");
+              setFacultyReviewerOnly(false);
+            }}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "faculty"
                 ? "bg-accent text-white shadow-sm font-bold"
                 : "text-muted hover:text-text hover:bg-surface"
@@ -1051,7 +1181,7 @@ export default function AdminPage() {
 
           <button
             onClick={() => setActiveTab("students")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "students"
                 ? "bg-accent text-white shadow-sm font-bold"
                 : "text-muted hover:text-text hover:bg-surface"
@@ -1062,8 +1192,11 @@ export default function AdminPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab("submissions")}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
+            onClick={() => {
+              setActiveTab("submissions");
+              setSubOverdueOnly(false);
+            }}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
               activeTab === "submissions"
                 ? "bg-accent text-white shadow-sm font-bold"
                 : "text-muted hover:text-text hover:bg-surface"
@@ -1363,6 +1496,18 @@ export default function AdminPage() {
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setFacultyReviewerOnly(!facultyReviewerOnly)}
+                  className={`text-xs px-3 py-2 rounded-xl border font-semibold transition-all cursor-pointer ${
+                    facultyReviewerOnly
+                      ? "bg-accent text-white border-accent shadow-sm"
+                      : "bg-surface border-border text-muted hover:text-text hover:bg-primary-soft/30"
+                  }`}
+                >
+                  {facultyReviewerOnly ? "Reviewers Only ✓" : "All Faculty"}
+                </button>
+
                 <select
                   value={facultyDeptFilter}
                   onChange={(e) => setFacultyDeptFilter(e.target.value)}
@@ -1403,6 +1548,7 @@ export default function AdminPage() {
                   {profiles
                     .filter((p) => p.role === "faculty")
                     .filter((p) => {
+                      if (facultyReviewerOnly && !p.is_reviewer) return false;
                       if (facultyDeptFilter !== "all" && p.department_id !== facultyDeptFilter) return false;
                       if (facultyCourseFilter !== "all" && p.course_id !== facultyCourseFilter) return false;
                       if (facultySearch.trim()) {
@@ -1738,9 +1884,22 @@ export default function AdminPage() {
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
+                {subOverdueOnly && (
+                  <button
+                    type="button"
+                    onClick={() => setSubOverdueOnly(false)}
+                    className="text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 font-semibold flex items-center gap-1.5 hover:bg-amber-500/25 transition-colors cursor-pointer"
+                  >
+                    <span>Overdue (&gt;3d) Only</span>
+                    <span className="font-bold">✕</span>
+                  </button>
+                )}
                 <select
                   value={subStatusFilter}
-                  onChange={(e) => setSubStatusFilter(e.target.value)}
+                  onChange={(e) => {
+                    setSubOverdueOnly(false);
+                    setSubStatusFilter(e.target.value);
+                  }}
                   className="text-xs p-2 rounded-xl bg-surface border border-border text-text focus:outline-none"
                 >
                   <option value="all">All Statuses</option>
@@ -1781,7 +1940,13 @@ export default function AdminPage() {
                 <tbody className="divide-y divide-border">
                   {cases
                     .filter((c) => {
-                      if (subStatusFilter !== "all" && c.status !== subStatusFilter) return false;
+                      if (subOverdueOnly) {
+                        const activeRound = reviewRounds.find((r) => r.case_id === c.id && r.decision === "pending");
+                        const isOverdue = activeRound && (Date.now() - new Date(activeRound.assigned_at).getTime() > 3 * 24 * 3600 * 1000);
+                        if (!isOverdue) return false;
+                      } else if (subStatusFilter !== "all" && c.status !== subStatusFilter) {
+                        return false;
+                      }
                       if (subDeptFilter !== "all" && c.department_id !== subDeptFilter) return false;
                       if (subSearch.trim()) {
                         const q = subSearch.toLowerCase();
