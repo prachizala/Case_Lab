@@ -447,9 +447,6 @@ export const initialProfiles: Profile[] = [
   },
 ];
 
-// Sample cases purged per institutional request. Real institutional cases will be provided tomorrow.
-export const initialCases: CaseStudy[] = [];
-
 export const testFixtureCases: CaseStudy[] = [
   {
     id: "case-001",
@@ -976,7 +973,7 @@ export const testFixtureCases: CaseStudy[] = [
   }
 ];
 
-export const initialCollections: CaseCollection[] = [];
+export const initialCases: CaseStudy[] = [...testFixtureCases];
 
 export const testFixtureCollections: CaseCollection[] = [
   {
@@ -999,7 +996,7 @@ export const testFixtureCollections: CaseCollection[] = [
   },
 ];
 
-export const initialRubrics: Rubric[] = [];
+export const initialCollections: CaseCollection[] = [...testFixtureCollections];
 
 export const testFixtureRubrics: Rubric[] = [
   {
@@ -1040,7 +1037,7 @@ export const testFixtureRubrics: Rubric[] = [
   },
 ];
 
-export const initialAnswers: StudentAnswer[] = [];
+export const initialRubrics: Rubric[] = [...testFixtureRubrics];
 
 export const testFixtureAnswers: StudentAnswer[] = [
   {
@@ -1107,7 +1104,7 @@ In the face of unexpected 40% export duties, the executive team must negotiate b
   },
 ];
 
-export const initialGrades: Grade[] = [];
+export const initialAnswers: StudentAnswer[] = [...testFixtureAnswers];
 
 export const testFixtureGrades: Grade[] = [
   {
@@ -1167,6 +1164,8 @@ export const testFixtureGrades: Grade[] = [
     updated_at: new Date(Date.now() - 3600000 * 8).toISOString(),
   },
 ];
+
+export const initialGrades: Grade[] = [...testFixtureGrades];
 
 export const initialOutcomes: Outcome[] = [
   {
@@ -1234,8 +1233,6 @@ export const initialOutcomes: Outcome[] = [
   },
 ];
 
-export const initialCaseOutcomes: CaseOutcome[] = [];
-
 export const testFixtureCaseOutcomes: CaseOutcome[] = [
   { case_id: "case-001", outcome_id: "out-co-1" },
   { case_id: "case-001", outcome_id: "out-co-2" },
@@ -1245,6 +1242,8 @@ export const testFixtureCaseOutcomes: CaseOutcome[] = [
   { case_id: "case-002", outcome_id: "out-co-4" },
   { case_id: "case-002", outcome_id: "out-po-3" },
 ];
+
+export const initialCaseOutcomes: CaseOutcome[] = [...testFixtureCaseOutcomes];
 
 export const initialSignals: CaseSignal[] = [
   {
@@ -1560,7 +1559,18 @@ class MockStore {
     }
     return p;
   }
-  private case_versions: CaseVersion[] = [];
+  private case_versions: CaseVersion[] = [
+    {
+      id: "ver-case-001-v1",
+      case_id: "case-001",
+      version_number: 1,
+      title: "FinTech Disruption at Gujarat Cooperative Bank: The Micro-Lending Dilemma",
+      content: testFixtureCases[0]?.content || ({} as any),
+      updated_by: "usr-faculty-1",
+      change_summary: "Initial approved curriculum dossier published for Shanti Business School (SBS).",
+      created_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+    },
+  ];
 
   /**
    * Seed in-memory test fixtures for automated test suites.
@@ -4351,6 +4361,7 @@ class MockStore {
       const actorRole = actor?.role || "faculty";
 
       if (log.action === "case_created") {
+        const caseExists = this.cases.some((c) => c.id === log.target_id);
         activities.push({
           id: log.id,
           type: "case_created",
@@ -4358,10 +4369,11 @@ class MockStore {
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: log.target_id,
+          case_id: caseExists ? log.target_id : undefined,
           details: `Created new ${log.metadata?.industry || "teaching"} case study`,
         });
       } else if (log.action === "case_submitted") {
+        const caseExists = this.cases.some((c) => c.id === log.target_id);
         activities.push({
           id: log.id,
           type: "case_submitted",
@@ -4369,10 +4381,11 @@ class MockStore {
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: log.target_id,
+          case_id: caseExists ? log.target_id : undefined,
           details: "Submitted case study for institutional peer review",
         });
       } else if (log.action === "case_approval") {
+        const caseExists = this.cases.some((c) => c.id === log.target_id);
         activities.push({
           id: log.id,
           type: "case_approved",
@@ -4380,10 +4393,11 @@ class MockStore {
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: log.target_id,
+          case_id: caseExists ? log.target_id : undefined,
           details: "Approved case study for classroom simulation",
         });
       } else if (log.action === "case_published") {
+        const caseExists = this.cases.some((c) => c.id === log.target_id);
         activities.push({
           id: log.id,
           type: "case_published",
@@ -4391,7 +4405,7 @@ class MockStore {
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: log.target_id,
+          case_id: caseExists ? log.target_id : undefined,
           details: "Officially published case study to Institutional Repository",
         });
       } else if (log.action === "registration_approved") {
