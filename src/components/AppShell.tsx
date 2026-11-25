@@ -20,7 +20,6 @@ import {
   Menu,
   X,
   UserCheck,
-  ArrowRightLeft,
   ClipboardCheck,
   Layers,
   Search,
@@ -60,7 +59,6 @@ export function AppShell({ children }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   const moreDropdownRef = useRef<HTMLDivElement>(null);
@@ -113,7 +111,6 @@ export function AppShell({ children }: AppShellProps) {
       if (e.key === "Escape") {
         setMoreDropdownOpen(false);
         setUserDropdownOpen(false);
-        setRoleSwitcherOpen(false);
         setMobileMenuOpen(false);
       }
     };
@@ -140,28 +137,6 @@ export function AppShell({ children }: AppShellProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleRoleSwitch = async (targetUserId: string) => {
-    try {
-      invalidateAuthCache();
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "switch-role", userId: targetUserId }),
-      });
-      const data = await res.json();
-      if (data.user) {
-        invalidateAuthCache();
-        setCurrentUser(data.user);
-        setRoleSwitcherOpen(false);
-        setUserDropdownOpen(false);
-        // Full navigation ensures all server and client components reload fresh with the session user
-        window.location.href = "/dashboard";
-      }
-    } catch (err) {
-      console.error("Role switch error:", err);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -484,72 +459,6 @@ export function AppShell({ children }: AppShellProps) {
                     </div>
                   </div>
 
-                  {/* Quick Demo Role Switcher (Guarded) */}
-                  {ENABLE_DEMO_PERSONA_SWITCHER && (
-                    <div className="mt-2 pt-2 border-t border-border/60">
-                      <button
-                        type="button"
-                        onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-text hover:bg-muted/10 transition-colors"
-                      >
-                        <span className="flex items-center gap-2">
-                          <ArrowRightLeft className="w-3.5 h-3.5 text-accent" />
-                          <span>Switch Persona / Role</span>
-                        </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-accent/15 text-accent font-bold">
-                          DEMO
-                        </span>
-                      </button>
-
-                      {roleSwitcherOpen && (
-                        <div className="mt-1.5 p-1.5 rounded-xl bg-surface-raised border border-border/70 space-y-1 animate-fadeIn">
-                          <p className="text-[9px] uppercase font-bold text-muted px-2 py-0.5">
-                            Institutional Personas:
-                          </p>
-                          <button
-                            onClick={() => handleRoleSwitch("usr-admin-1")}
-                            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
-                              role === "admin"
-                                ? "bg-primary text-white font-semibold"
-                                : "hover:bg-muted/10 text-text"
-                            }`}
-                          >
-                            <span className="truncate font-semibold">Admin</span>
-                            <span className="text-[9px] font-mono px-1 rounded bg-white/20 font-bold shrink-0 ml-1">
-                              ADMIN
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => handleRoleSwitch("usr-faculty-1")}
-                            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
-                              role === "faculty"
-                                ? "bg-primary text-white font-semibold"
-                                : "hover:bg-muted/10 text-text"
-                            }`}
-                          >
-                            <span className="truncate font-semibold">Faculty</span>
-                            <span className="text-[9px] font-mono px-1 rounded bg-white/20 font-bold shrink-0 ml-1">
-                              FACULTY
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => handleRoleSwitch("usr-student-1")}
-                            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
-                              role === "student"
-                                ? "bg-primary text-white font-semibold"
-                                : "hover:bg-muted/10 text-text"
-                            }`}
-                          >
-                            <span className="truncate font-semibold">Student</span>
-                            <span className="text-[9px] font-mono px-1 rounded bg-white/20 font-bold shrink-0 ml-1">
-                              STUDENT
-                            </span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   {/* Sign Out Button */}
                   <div className="mt-2 pt-2 border-t border-border/60">
                     <button
@@ -557,7 +466,7 @@ export function AppShell({ children }: AppShellProps) {
                       className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-danger hover:bg-danger/10 transition-colors"
                     >
                       <LogOut className="w-3.5 h-3.5" />
-                      <span>Sign Out of Platform</span>
+                      <span>Sign Out</span>
                     </button>
                   </div>
                 </div>
@@ -623,44 +532,6 @@ export function AppShell({ children }: AppShellProps) {
                   );
                 })}
               </div>
-
-              {/* Mobile Persona Switcher */}
-              {ENABLE_DEMO_PERSONA_SWITCHER && (
-                <div className="pt-2 border-t border-white/15">
-                  <p className="text-[10px] font-mono uppercase tracking-wider text-on-primary-muted mb-1.5">
-                    Demo Switch Persona:
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <button
-                      onClick={() => {
-                        handleRoleSwitch("usr-admin-1");
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-medium text-white"
-                    >
-                      Admin
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleRoleSwitch("usr-faculty-1");
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-medium text-white"
-                    >
-                      Faculty
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleRoleSwitch("usr-student-1");
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-medium text-white"
-                    >
-                      Student
-                    </button>
-                  </div>
-                </div>
-              )}
             </PageContainer>
           </div>
         )}
