@@ -69,7 +69,9 @@ import {
   RotateCw,
   Type,
   Eye,
+  KeyRound,
 } from "lucide-react";
+import { getFlowExpectedResponse } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { getCachedUser } from "@/lib/auth-client";
 
@@ -1650,12 +1652,12 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                   7. Practitioner Reflections
                 </a>
               )}
-              {!isStudent && content.teaching_note && (
+              {content.teaching_note && (
                 <a
                   href="#teaching-note"
                   className="block px-2.5 py-1.5 rounded-lg font-medium text-accent hover:bg-primary-soft transition-colors"
                 >
-                  8. Teaching Note (Confidential)
+                  {isStudent ? "7. Classroom Session Flow" : "8. Teaching Note (Confidential)"}
                 </a>
               )}
               {isStudent ? (
@@ -2148,18 +2150,18 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
           </section>
         )}
 
-        {/* 7. FACILITATOR TEACHING NOTE (FOR FACULTY ONLY) */}
-        {!isStudent && content.teaching_note && (
+        {/* 7. TEACHING NOTE & CLASSROOM FLOW */}
+        {content.teaching_note && (
           <section id="teaching-note" className="p-6 md:p-8 rounded-2xl border border-border bg-surface shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div className="flex items-center gap-2">
                 <GraduationCap className="w-6 h-6 text-accent" />
                 <div>
                   <h2 className="font-serif text-xl font-bold text-text">
-                    Facilitator Teaching Note
+                    {isStudent ? "Classroom Session Flow & Analytical Plan" : "Facilitator Teaching Note"}
                   </h2>
-                  <span className="text-[11px] font-bold text-accent uppercase tracking-wider">
-                    Confidential • {COLLEGE_SHORT} Faculty Eyes Only
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isStudent ? "text-muted" : "text-accent"}`}>
+                    {isStudent ? "Student Analytical Practice" : `Confidential • ${COLLEGE_SHORT} Faculty Eyes Only`}
                   </span>
                 </div>
               </div>
@@ -2185,23 +2187,39 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
               <h3 className="text-xs font-bold uppercase tracking-wider text-text">
                 Classroom Timing & Discussion Flow
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {content.teaching_note.class_flow.map((flow, i) => (
-                  <div
-                    key={i}
-                    className="p-3.5 rounded-xl border border-border bg-primary-soft/30 space-y-1"
-                  >
-                    <div className="flex items-center justify-between text-xs font-bold text-text">
-                      <span>{flow.phase}</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary text-on-primary font-bold">
-                        {flow.duration_minutes} min
-                      </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {content.teaching_note.class_flow.map((flow, i) => {
+                  const expectedAns = getFlowExpectedResponse(flow);
+                  return (
+                    <div
+                      key={i}
+                      className="p-3.5 rounded-xl border border-border bg-primary-soft/30 space-y-2"
+                    >
+                      <div className="flex items-center justify-between text-xs font-bold text-text">
+                        <span>{flow.phase}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary text-on-primary font-bold">
+                          {flow.duration_minutes} min
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted leading-relaxed">
+                        {flow.activity}
+                      </p>
+
+                      {/* FACULTY ONLY: Model Answer & Facilitator Key */}
+                      {!isStudent && (
+                        <div className="p-2.5 rounded-lg bg-surface border border-accent/30 space-y-1 mt-2">
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent uppercase tracking-wider">
+                            <KeyRound className="w-3 h-3 text-accent" />
+                            <span>Faculty Model Solution &amp; Facilitation Key</span>
+                          </div>
+                          <p className="text-[11px] text-text whitespace-pre-line leading-relaxed font-normal">
+                            {expectedAns}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-[11px] text-muted leading-relaxed">
-                      {flow.activity}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

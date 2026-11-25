@@ -159,6 +159,7 @@ export interface TeachingNote {
     phase: string;
     duration_minutes: number;
     activity: string;
+    expected_response?: string;
   }[];
   frameworks: {
     name: string;

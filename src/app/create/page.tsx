@@ -35,6 +35,7 @@ import {
   COLLEGE_SHORT,
   ENABLE_DEMO_PERSONA_SWITCHER,
 } from "@/config/college";
+import { getFlowExpectedResponse } from "@/lib/utils";
 import {
   Sparkles,
   ChevronDown,
@@ -2857,19 +2858,52 @@ function CreateCaseContent() {
                 {previewTab === "teaching_note" && generatedCase.content.teaching_note && (
                   <div className="space-y-4 text-xs">
                     <div>
-                      <h4 className="font-serif font-bold text-sm text-text mb-2">Classroom Session Flow</h4>
-                      <div className="space-y-2">
-                        {generatedCase.content.teaching_note.class_flow.map((flow, i) => (
-                          <div key={i} className="p-3 rounded-xl bg-primary-soft/40 border border-border flex items-start gap-3">
-                            <span className="px-2 py-1 rounded bg-accent text-accent-text font-mono font-bold text-[10px] shrink-0">
-                              {flow.duration_minutes}m
-                            </span>
-                            <div>
-                              <p className="font-bold text-text">{flow.phase}</p>
-                              <p className="text-muted text-[11px] mt-0.5">{flow.activity}</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-serif font-bold text-sm text-text">Classroom Session Flow</h4>
+                        {currentUser?.role !== "student" ? (
+                          <span className="text-[10px] font-bold text-accent uppercase tracking-wider bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20 flex items-center gap-1">
+                            <KeyRound className="w-3 h-3 text-accent" />
+                            <span>Faculty View • Model Answers Included</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-muted uppercase tracking-wider bg-primary-soft/60 px-2.5 py-0.5 rounded-full border border-border">
+                            Student Practice View
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-3">
+                        {generatedCase.content.teaching_note.class_flow.map((flow, i) => {
+                          const expectedAns = getFlowExpectedResponse(flow);
+                          const isFaculty = currentUser?.role !== "student";
+                          return (
+                            <div key={i} className="p-3.5 rounded-xl bg-primary-soft/40 border border-border space-y-2">
+                              <div className="flex items-start gap-3">
+                                <span className="px-2 py-1 rounded bg-accent text-accent-text font-mono font-bold text-[10px] shrink-0">
+                                  {flow.duration_minutes}m
+                                </span>
+                                <div className="flex-1">
+                                  <p className="font-bold text-text text-xs">{flow.phase}</p>
+                                  <p className="text-muted text-[11px] mt-0.5 leading-relaxed">{flow.activity}</p>
+                                </div>
+                              </div>
+
+                              {/* FACULTY ONLY: Model Answer & Expected Solution */}
+                              {isFaculty && (
+                                <div className="mt-2.5 pt-2.5 border-t border-border/80">
+                                  <div className="p-3 rounded-xl bg-surface border border-accent/30 space-y-1.5 shadow-2xs">
+                                    <div className="flex items-center gap-1.5 text-accent font-bold text-[11px]">
+                                      <KeyRound className="w-3.5 h-3.5 text-accent" />
+                                      <span>Faculty Model Answer &amp; Discussion Solution</span>
+                                    </div>
+                                    <p className="text-text text-[11px] leading-relaxed whitespace-pre-line font-normal">
+                                      {expectedAns}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -2894,11 +2928,33 @@ function CreateCaseContent() {
                 {previewTab === "questions" && (
                   <div className="space-y-2.5">
                     {generatedCase.content.discussion_questions.map((q, idx) => (
-                      <div key={idx} className="p-3 rounded-xl bg-primary-soft/50 border border-border flex items-start gap-3 text-xs">
-                        <span className="w-5 h-5 rounded-full bg-accent text-accent-text font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                          {idx + 1}
-                        </span>
-                        <p className="text-text leading-relaxed font-medium">{q}</p>
+                      <div key={idx} className="p-3.5 rounded-xl bg-primary-soft/50 border border-border space-y-2 text-xs">
+                        <div className="flex items-start gap-3">
+                          <span className="w-5 h-5 rounded-full bg-accent text-accent-text font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                            {idx + 1}
+                          </span>
+                          <p className="text-text leading-relaxed font-medium flex-1">{q}</p>
+                        </div>
+                        {currentUser?.role !== "student" && (
+                          <div className="mt-2 pt-2 border-t border-border/70 pl-8">
+                            <div className="p-2.5 rounded-lg bg-surface border border-accent/20 text-[11px] space-y-1">
+                              <span className="text-[10px] font-bold text-accent uppercase tracking-wider block">
+                                Faculty Discussion Guidance:
+                              </span>
+                              <p className="text-muted leading-relaxed">
+                                {idx === 0
+                                  ? "Guide students to unpack the audited exhibits and differentiate between structural margin erosion and cyclical demand fluctuations."
+                                  : idx === 1
+                                  ? "Require students to calculate debt covenant sensitivities and break-even sales hurdle rates using Exhibit 1 data."
+                                  : idx === 2
+                                  ? "Examine governance balance and organizational resistance across the CFO, VP Growth, and frontline COO."
+                                  : idx === 3
+                                  ? "Stress-test external macroeconomic and regulatory shifts impacting industry margins."
+                                  : "Evaluate 90-day execution milestones and board governance oversight."}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -134,10 +134,10 @@ SCHEMA (Return pure valid JSON):
       ? `"teaching_note": {
     "objectives": ["Objective 1", "Objective 2", "Objective 3"],
     "class_flow": [
-      { "phase": "Opening Cold Call & Dilemma Framing", "duration_minutes": 15, "activity": "Challenge protagonist assumptions" },
-      { "phase": "Quantitative Stress-Testing", "duration_minutes": 30, "activity": "Dissect exhibits and balance sheet covenants" },
-      { "phase": "Boardroom Alternative Debate", "duration_minutes": 30, "activity": "Weigh Alternative 1 vs 2 vs 3" },
-      { "phase": "Plenary Synthesis & Takeaways", "duration_minutes": 15, "activity": "Consolidate 3-Board layout" }
+      { "phase": "Opening Cold Call & Dilemma Framing", "duration_minutes": 15, "activity": "Challenge protagonist assumptions", "expected_response": "Model diagnostic takeaway distinguishing symptoms from root causes" },
+      { "phase": "Quantitative Stress-Testing", "duration_minutes": 30, "activity": "Dissect exhibits and balance sheet covenants", "expected_response": "Specific numerical calculations of debt headroom and sensitivity" },
+      { "phase": "Boardroom Alternative Debate", "duration_minutes": 30, "activity": "Weigh Alternative 1 vs 2 vs 3", "expected_response": "Consensus trade-off analysis balancing solvency against digital growth" },
+      { "phase": "Plenary Synthesis & Takeaways", "duration_minutes": 15, "activity": "Consolidate 3-Board layout", "expected_response": "Final 3-Board takeaway summarizing diagnosis, frameworks, and milestones" }
     ],
     "frameworks": [
       { "name": "Porter's Five Forces", "application": "Assess supplier concentration and competitive rivalry", "key_takeaway": "Price competition erodes industry profitability without digital moats" },
@@ -441,22 +441,26 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
         {
           phase: "Phase 1: Opening Cold Call & Dilemma Framing",
           duration_minutes: isShort ? 10 : 15,
-          activity: `Direct cold call to students asking: "${decisionMaker} has 72 hours before the board meeting. What is the fundamental root cause of the crisis—is it balance sheet stress, technological obsolescence, or cultural complacency?"`
+          activity: `Direct cold call to students asking: "${decisionMaker} has 72 hours before the board meeting. What is the fundamental root cause of the crisis—is it balance sheet stress, technological obsolescence, or cultural complacency?"`,
+          expected_response: "Model Diagnostic Answer: The fundamental driver is structural digital disruption combined with debt-financed operational rigidity, rather than temporary balance sheet stress. Students must diagnose that 30 years of traditional distributor moats failed to prevent the 380 bps gross margin contraction as direct-to-consumer challenger platforms bypassed wholesale networks."
         },
         {
           phase: "Phase 2: Quantitative Exhibit & Financial Stress-Testing",
           duration_minutes: isShort ? 15 : 30,
-          activity: "Divide the class into 3 analytical squads. Task Squad A with calculating debt covenant headroom under Alternative 1; Squad B with evaluating post-merger integration risks under Alternative 2; and Squad C with computing the terminal valuation impact of Alternative 3."
+          activity: "Divide the class into 3 analytical squads. Task Squad A with calculating debt covenant headroom under Alternative 1; Squad B with evaluating post-merger integration risks under Alternative 2; and Squad C with computing the terminal valuation impact of Alternative 3.",
+          expected_response: "Quantitative Solutions & Headroom Stress-Test:\n• Squad A (Alternative 1): Debt-to-Equity reaches 1.12x in 2026, leaving minimal headroom before breaching the 1.20x bank loan covenant.\n• Squad B (Alternative 2): Acquiring a 51% stake costs ₹65–85 Cr with high post-merger integration friction between startup agility and legacy logistics.\n• Squad C (Alternative 3): Preserves healthy near-term EBITDA (14%) and FCF (₹38 Cr), but caps terminal growth at 2%, risking long-term obsolescence."
         },
         {
           phase: "Phase 3: The Boardroom Roleplay & Alternative Debate",
           duration_minutes: isShort ? 15 : 30,
-          activity: "Stage an executive committee roleplay where students represent the CFO, VP Growth, and COO. Force students to defend their specific capital allocation choice under intense peer cross-examination."
+          activity: "Stage an executive committee roleplay where students represent the CFO, VP Growth, and COO. Force students to defend their specific capital allocation choice under intense peer cross-examination.",
+          expected_response: "Boardroom Debate Defense Key:\n• CFO Defense: Prioritizes solvency; leverage >1.0x in an inflationary environment threatens bankruptcy.\n• VP Growth Defense: Failure to invest guarantees permanent degradation into a contract manufacturer within 36 months.\n• COO Defense: Frontline plants at 94% capacity cannot absorb arbitrary overhead cuts without severe supply chain disruptions.\n• Consensus Synthesis: Adopt a phased hybrid route—defend core cash flows (Alternative 3) to self-fund an initial asset-light joint venture (Alternative 2) before committing ₹140 Cr to in-house automation."
         },
         {
           phase: "Phase 4: Plenary Synthesis & 3-Board Layout Consolidation",
           duration_minutes: isShort ? 5 : 15,
-          activity: "Consolidate the classroom consensus onto the 3-Board plan: Board 1 (Symptoms vs Root Causes), Board 2 (DuPont & Porter Framework Evaluation), and Board 3 (Recommended Action Plan & Governance Milestones)."
+          activity: "Consolidate the classroom consensus onto the 3-Board plan: Board 1 (Symptoms vs Root Causes), Board 2 (DuPont & Porter Framework Evaluation), and Board 3 (Recommended Action Plan & Governance Milestones).",
+          expected_response: "3-Board Classroom Blackboard Solution:\n• Board 1 (Diagnosis): Margin erosion (-370 bps), customer acquisition cost inflation (+24.2%), under-35 customer flight (-18%).\n• Board 2 (Framework Rigor): DuPont ROE deconstruction (asset turnover dilution) + Porter's Five Forces (threat of tech substitutes).\n• Board 3 (Action Milestones): 90-day governance roadmap with phased debt covenants and executive alignment."
         }
       ],
       frameworks,

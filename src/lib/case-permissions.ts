@@ -125,7 +125,15 @@ export function sanitizeCaseStudyForStudent(caseStudy: CaseStudy): CaseStudy {
   if (sanitized.content) {
     const content = { ...sanitized.content } as any;
     if (content.teaching_note) {
-      delete content.teaching_note;
+      // Retain student-facing classroom session flow without faculty model answers
+      content.teaching_note = {
+        objectives: content.teaching_note.objectives || [],
+        class_flow: (content.teaching_note.class_flow || []).map((f: any) => {
+          const { expected_response, model_answer, answer, solution, ...studentFlow } = f;
+          return studentFlow;
+        }),
+        frameworks: content.teaching_note.frameworks || [],
+      };
     }
     if (content.teaching_notes) {
       delete content.teaching_notes;
