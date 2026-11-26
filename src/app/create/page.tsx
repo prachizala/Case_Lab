@@ -420,6 +420,7 @@ function CreateCaseContent() {
   // Generated Case Preview State
   const [generatedCase, setGeneratedCase] = useState<CaseStudy | null>(null);
   const [previewTab, setPreviewTab] = useState<"text" | "exhibits" | "teaching_note" | "questions">("text");
+  const [previewRoleMode, setPreviewRoleMode] = useState<"faculty" | "student">("faculty");
   const [savingDraft, setSavingDraft] = useState<boolean>(false);
   const [submittingReview, setSubmittingReview] = useState<boolean>(false);
   const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
@@ -475,6 +476,11 @@ function CreateCaseContent() {
 
   useEffect(() => {
     if (currentUser) {
+      if (currentUser.role === "student") {
+        setPreviewRoleMode("student");
+      } else {
+        setPreviewRoleMode("faculty");
+      }
       if (currentUser.department_id) {
         setSelectedDepartmentId(currentUser.department_id);
       }
@@ -2798,27 +2804,69 @@ function CreateCaseContent() {
                   </div>
                 )}
 
-                {/* Preview Navigation Tabs */}
-                <div className="flex border-b border-border gap-2 text-xs font-semibold">
-                  {[
-                    { id: "text", label: "Case Text" },
-                    { id: "exhibits", label: `Exhibits (${generatedCase.content.exhibits?.length || 0})` },
-                    ...(generatedCase.content.teaching_note ? [{ id: "teaching_note", label: "Teaching Note" }] : []),
-                    { id: "questions", label: `Discussion Questions (${generatedCase.content.discussion_questions?.length || 0})` },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setPreviewTab(tab.id as any)}
-                      className={`pb-2.5 px-3 transition-colors relative ${
-                        previewTab === tab.id
-                          ? "text-accent border-b-2 border-accent font-bold"
-                          : "text-muted hover:text-text"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+                {/* Preview Navigation Tabs & Role Perspective Switcher */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                  <div className="flex border-b sm:border-b-0 border-border gap-2 text-xs font-semibold overflow-x-auto">
+                    {[
+                      { id: "text", label: "Case Text" },
+                      { id: "exhibits", label: `Exhibits (${generatedCase.content.exhibits?.length || 0})` },
+                      ...(generatedCase.content.teaching_note ? [{ id: "teaching_note", label: "Teaching Note" }] : []),
+                      { id: "questions", label: `Discussion Questions (${generatedCase.content.discussion_questions?.length || 0})` },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setPreviewTab(tab.id as any)}
+                        className={`pb-2.5 px-3 transition-colors relative whitespace-nowrap ${
+                          previewTab === tab.id
+                            ? "text-accent border-b-2 border-accent font-bold"
+                            : "text-muted hover:text-text"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Perspective Toggle: Faculty (With Answers) vs Student (Without Answers) */}
+                  {currentUser?.role !== "student" ? (
+                    <div className="flex items-center gap-1 bg-primary-soft/60 p-1 rounded-xl border border-border shrink-0">
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider px-2">
+                        View:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewRoleMode("faculty")}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                          previewRoleMode === "faculty"
+                            ? "bg-accent text-accent-text shadow-xs"
+                            : "text-muted hover:text-text"
+                        }`}
+                        title="Faculty view: Displays model answers and facilitation solutions"
+                      >
+                        <KeyRound className="w-3.5 h-3.5" />
+                        <span>Faculty (With Answers)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewRoleMode("student")}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                          previewRoleMode === "student"
+                            ? "bg-surface text-text border border-border shadow-xs"
+                            : "text-muted hover:text-text"
+                        }`}
+                        title="Student practice view: Hides answers and solutions"
+                      >
+                        <Users className="w-3.5 h-3.5" />
+                        <span>Student (Without Answers)</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-soft/60 border border-border text-[11px] text-muted">
+                      <Users className="w-3 h-3 text-muted" />
+                      <span>Student Practice View</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Section Regeneration Dropdown */}
@@ -2925,53 +2973,60 @@ function CreateCaseContent() {
                 {previewTab === "teaching_note" && generatedCase.content.teaching_note && (
                   <div className="space-y-4 text-xs">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-serif font-bold text-sm text-text">Classroom Session Flow</h4>
-                        {currentUser?.role !== "student" ? (
-                          <span className="text-[10px] font-bold text-accent uppercase tracking-wider bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20 flex items-center gap-1">
-                            <KeyRound className="w-3 h-3 text-accent" />
-                            <span>Faculty View • Model Answers Included</span>
-                          </span>
-                        ) : (
-                          <span className="text-[10px] font-bold text-muted uppercase tracking-wider bg-primary-soft/60 px-2.5 py-0.5 rounded-full border border-border">
-                            Student Practice View
-                          </span>
-                        )}
-                      </div>
-                      <div className="space-y-3">
-                        {generatedCase.content.teaching_note.class_flow.map((flow, i) => {
-                          const expectedAns = getFlowExpectedResponse(flow);
-                          const isFaculty = currentUser?.role !== "student";
-                          return (
-                            <div key={i} className="p-3.5 rounded-xl bg-primary-soft/40 border border-border space-y-2">
-                              <div className="flex items-start gap-3">
-                                <span className="px-2 py-1 rounded bg-accent text-accent-text font-mono font-bold text-[10px] shrink-0">
-                                  {flow.duration_minutes}m
+                      {(() => {
+                        const isFaculty = previewRoleMode === "faculty" && currentUser?.role !== "student";
+                        return (
+                          <>
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-serif font-bold text-sm text-text">Classroom Session Flow</h4>
+                              {isFaculty ? (
+                                <span className="text-[10px] font-bold text-accent uppercase tracking-wider bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20 flex items-center gap-1.5 shadow-2xs">
+                                  <KeyRound className="w-3.5 h-3.5 text-accent" />
+                                  <span>Faculty View • Model Answers Included</span>
                                 </span>
-                                <div className="flex-1">
-                                  <p className="font-bold text-text text-xs">{flow.phase}</p>
-                                  <p className="text-muted text-[11px] mt-0.5 leading-relaxed">{flow.activity}</p>
-                                </div>
-                              </div>
-
-                              {/* FACULTY ONLY: Model Answer & Expected Solution */}
-                              {isFaculty && (
-                                <div className="mt-2.5 pt-2.5 border-t border-border/80">
-                                  <div className="p-3 rounded-xl bg-surface border border-accent/30 space-y-1.5 shadow-2xs">
-                                    <div className="flex items-center gap-1.5 text-accent font-bold text-[11px]">
-                                      <KeyRound className="w-3.5 h-3.5 text-accent" />
-                                      <span>Faculty Model Answer &amp; Discussion Solution</span>
-                                    </div>
-                                    <p className="text-text text-[11px] leading-relaxed whitespace-pre-line font-normal">
-                                      {expectedAns}
-                                    </p>
-                                  </div>
-                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-wider bg-primary-soft/60 px-2.5 py-0.5 rounded-full border border-border flex items-center gap-1.5">
+                                  <Users className="w-3.5 h-3.5 text-muted" />
+                                  <span>Student Practice View</span>
+                                </span>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
+                            <div className="space-y-3">
+                              {generatedCase.content.teaching_note.class_flow.map((flow, i) => {
+                                const expectedAns = getFlowExpectedResponse(flow);
+                                return (
+                                  <div key={i} className="p-3.5 rounded-xl bg-primary-soft/40 border border-border space-y-2">
+                                    <div className="flex items-start gap-3">
+                                      <span className="px-2 py-1 rounded bg-accent text-accent-text font-mono font-bold text-[10px] shrink-0">
+                                        {flow.duration_minutes}m
+                                      </span>
+                                      <div className="flex-1">
+                                        <p className="font-bold text-text text-xs">{flow.phase}</p>
+                                        <p className="text-muted text-[11px] mt-0.5 leading-relaxed">{flow.activity}</p>
+                                      </div>
+                                    </div>
+
+                                    {/* FACULTY ONLY: Model Answer & Expected Solution */}
+                                    {isFaculty && (
+                                      <div className="mt-2.5 pt-2.5 border-t border-border/80">
+                                        <div className="p-3.5 rounded-xl bg-surface border-2 border-accent/30 space-y-1.5 shadow-2xs">
+                                          <div className="flex items-center gap-1.5 text-accent font-serif font-bold text-xs">
+                                            <KeyRound className="w-3.5 h-3.5 text-accent" />
+                                            <span>Faculty Model Answer &amp; Discussion Solution</span>
+                                          </div>
+                                          <p className="text-text text-xs leading-relaxed whitespace-pre-line font-normal">
+                                            {expectedAns}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <div>
@@ -2994,36 +3049,40 @@ function CreateCaseContent() {
                 {/* Tab 4: Discussion Questions */}
                 {previewTab === "questions" && (
                   <div className="space-y-2.5">
-                    {generatedCase.content.discussion_questions.map((q, idx) => (
-                      <div key={idx} className="p-3.5 rounded-xl bg-primary-soft/50 border border-border space-y-2 text-xs">
-                        <div className="flex items-start gap-3">
-                          <span className="w-5 h-5 rounded-full bg-accent text-accent-text font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                            {idx + 1}
-                          </span>
-                          <p className="text-text leading-relaxed font-medium flex-1">{q}</p>
-                        </div>
-                        {currentUser?.role !== "student" && (
-                          <div className="mt-2 pt-2 border-t border-border/70 pl-8">
-                            <div className="p-2.5 rounded-lg bg-surface border border-accent/20 text-[11px] space-y-1">
-                              <span className="text-[10px] font-bold text-accent uppercase tracking-wider block">
-                                Faculty Discussion Guidance:
-                              </span>
-                              <p className="text-muted leading-relaxed">
-                                {idx === 0
-                                  ? "Guide students to unpack the audited exhibits and differentiate between structural margin erosion and cyclical demand fluctuations."
-                                  : idx === 1
-                                  ? "Require students to calculate debt covenant sensitivities and break-even sales hurdle rates using Exhibit 1 data."
-                                  : idx === 2
-                                  ? "Examine governance balance and organizational resistance across the CFO, VP Growth, and frontline COO."
-                                  : idx === 3
-                                  ? "Stress-test external macroeconomic and regulatory shifts impacting industry margins."
-                                  : "Evaluate 90-day execution milestones and board governance oversight."}
-                              </p>
-                            </div>
+                    {(() => {
+                      const isFaculty = previewRoleMode === "faculty" && currentUser?.role !== "student";
+                      return generatedCase.content.discussion_questions.map((q, idx) => (
+                        <div key={idx} className="p-3.5 rounded-xl bg-primary-soft/50 border border-border space-y-2 text-xs">
+                          <div className="flex items-start gap-3">
+                            <span className="w-5 h-5 rounded-full bg-accent text-accent-text font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <p className="text-text leading-relaxed font-medium flex-1">{q}</p>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          {isFaculty && (
+                            <div className="mt-2 pt-2 border-t border-border/70 pl-8">
+                              <div className="p-3 rounded-lg bg-surface border border-accent/25 text-xs space-y-1.5 shadow-2xs">
+                                <span className="text-[10px] font-serif font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
+                                  <KeyRound className="w-3 h-3 text-accent" />
+                                  <span>Faculty Discussion Guidance &amp; Model Answer:</span>
+                                </span>
+                                <p className="text-muted text-xs leading-relaxed">
+                                  {idx === 0
+                                    ? "Guide students to unpack the audited exhibits and differentiate between structural margin erosion and cyclical demand fluctuations. Model answers should cite specific balance sheet line items."
+                                    : idx === 1
+                                    ? "Require students to calculate debt covenant sensitivities and break-even sales hurdle rates using Exhibit 1 data. Model answers should demonstrate scenario trade-offs."
+                                    : idx === 2
+                                    ? "Examine governance balance and organizational resistance across the CFO, VP Growth, and frontline COO. Model answers must balance solvency against market expansion."
+                                    : idx === 3
+                                    ? "Stress-test external macroeconomic and regulatory shifts impacting industry margins. Model answers address regulatory compliance and channel alignment."
+                                    : "Evaluate 90-day execution milestones and board governance oversight. Model answers present measurable milestones and risk containment gates."}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ));
+                    })()}
                   </div>
                 )}
               </div>

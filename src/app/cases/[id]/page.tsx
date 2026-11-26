@@ -1911,14 +1911,37 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
             {content.discussion_questions.map((q, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-xl border border-border bg-primary-soft/30 flex items-start gap-3"
+                className="p-4 rounded-xl border border-border bg-primary-soft/30 space-y-2.5"
               >
-                <span className="w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                  {idx + 1}
-                </span>
-                <p className="text-xs md:text-sm font-medium text-text leading-relaxed">
-                  {q}
-                </p>
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <p className="text-xs md:text-sm font-medium text-text leading-relaxed flex-1">
+                    {q}
+                  </p>
+                </div>
+                {!isStudent && (
+                  <div className="mt-2 pt-2 border-t border-border/70 pl-9">
+                    <div className="p-3 rounded-lg bg-surface border border-accent/25 text-xs space-y-1.5 shadow-2xs">
+                      <span className="text-[10px] font-serif font-bold text-accent uppercase tracking-wider flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5 text-accent" />
+                        <span>Faculty Discussion Guidance &amp; Model Solution:</span>
+                      </span>
+                      <p className="text-muted text-xs leading-relaxed">
+                        {idx === 0
+                          ? "Guide students to unpack the audited exhibits and differentiate between structural margin erosion and cyclical demand fluctuations. Model answers should cite specific balance sheet line items."
+                          : idx === 1
+                          ? "Require students to calculate debt covenant sensitivities and break-even sales hurdle rates using Exhibit 1 data. Model answers should demonstrate scenario trade-offs."
+                          : idx === 2
+                          ? "Examine governance balance and organizational resistance across the CFO, VP Growth, and frontline COO. Model answers must balance solvency against market expansion."
+                          : idx === 3
+                          ? "Stress-test external macroeconomic and regulatory shifts impacting industry margins. Model answers address regulatory compliance and channel alignment."
+                          : "Evaluate 90-day execution milestones and board governance oversight. Model answers present measurable milestones and risk containment gates."}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -110,6 +110,23 @@ function generateSimulatedCasePack(input: GenerateCasePackInput): CECasePack {
   const marksPerQ = input.examMetadata?.marks_per_question || 20;
 
   if (input.department === "finance") {
+    const goldExamples = loadApprovedGoldExamples("finance");
+    if (goldExamples.length > 0) {
+      const gold = JSON.parse(JSON.stringify(goldExamples[0])) as CECasePack;
+      if (input.subject) gold.meta.subject = input.subject;
+      if (input.topics && input.topics.length > 0) gold.meta.topic = input.topics;
+      if (input.concepts && input.concepts.length > 0) gold.meta.concepts = input.concepts;
+      if (input.examMetadata?.course_code) gold.meta.course_code = input.examMetadata.course_code;
+      if (input.examMetadata?.ce_no) gold.meta.ce_no = input.examMetadata.ce_no;
+      if (input.examMetadata?.set) gold.meta.set = input.examMetadata.set;
+      if (input.examMetadata?.maximum_marks) gold.meta.max_marks = input.examMetadata.maximum_marks;
+      if (numQ === 1) {
+        gold.questions = gold.questions.slice(0, 1);
+        gold.answers = gold.answers.slice(0, 1);
+      }
+      return gold;
+    }
+
     return {
       status: "draft",
       meta: {
