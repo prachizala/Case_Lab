@@ -1543,6 +1543,32 @@ class MockStore {
         free_cases_reset_at: p.free_cases_reset_at || getNextMonthResetKolkata(),
       };
     });
+
+    // Hydrate persisted cases from disk if available (Node runtime only, skipped in Edge)
+    try {
+      if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
+        const fs = require("fs");
+        const path = require("path");
+        const dataDir = process.env.VERCEL ? "/tmp" : path.resolve(process.cwd(), "data");
+        const storeFile = path.join(dataDir, "persisted-cases.json");
+        if (fs.existsSync(storeFile)) {
+          const raw = fs.readFileSync(storeFile, "utf-8");
+          const loaded: CaseStudy[] = JSON.parse(raw);
+          if (Array.isArray(loaded)) {
+            for (const item of loaded) {
+              const existingIdx = this.cases.findIndex((c) => c.id === item.id);
+              if (existingIdx >= 0) {
+                this.cases[existingIdx] = item;
+              } else {
+                this.cases.unshift(item);
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // Safe fallback
+    }
   }
 
   private checkAndResetMonthlyQuota(p: Profile): Profile {
@@ -2611,15 +2637,34 @@ class MockStore {
   }
 
   saveCase(newCase: CaseStudy): CaseStudy {
+    let saved: CaseStudy;
     const idx = this.cases.findIndex((c) => c.id === newCase.id);
     if (idx >= 0) {
       this.cases[idx] = { ...newCase, language: newCase.language || this.cases[idx].language || "en", updated_at: new Date().toISOString() };
-      return this.cases[idx];
+      saved = this.cases[idx];
     } else {
       const persisted = { ...newCase, language: newCase.language || "en", version: newCase.version || 1 };
       this.cases.unshift(persisted);
-      return persisted;
+      saved = persisted;
     }
+
+    // Persist to disk backup asynchronously / safely (Node runtime only, skipped in Edge)
+    try {
+      if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
+        const fs = require("fs");
+        const path = require("path");
+        const dataDir = process.env.VERCEL ? "/tmp" : path.resolve(process.cwd(), "data");
+        if (!fs.existsSync(dataDir)) {
+          fs.mkdirSync(dataDir, { recursive: true });
+        }
+        const storeFile = path.join(dataDir, "persisted-cases.json");
+        fs.writeFileSync(storeFile, JSON.stringify(this.cases.slice(0, 100), null, 2), "utf-8");
+      }
+    } catch {
+      // Safe fallback
+    }
+
+    return saved;
   }
 
   // APPROVAL & WORKFLOW ACTIONS

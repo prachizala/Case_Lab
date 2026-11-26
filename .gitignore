@@ -42,3 +42,7 @@ scratch/
 # faculty original work (confidential, local only)
 reference/gold/originals/
 
+# local database persistence cache
+data/
+
+
