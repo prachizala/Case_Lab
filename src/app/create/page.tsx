@@ -78,8 +78,10 @@ import {
   Truck,
   BarChart3,
   Cog,
+  Bot,
 } from "lucide-react";
 import { DOMAINS, getDomainByName, getTopicsForDomain, DOMAIN_NAMES, DomainConfig } from "@/config/domains";
+import { getDomainAgent } from "@/lib/agents/domain-agents";
 
 const DIFFICULTIES: CaseDifficulty[] = ["Beginner", "Intermediate", "Advanced"];
 
@@ -165,6 +167,65 @@ function getDomainIcon(name: string) {
     default:
       return Layers;
   }
+}
+
+function ActiveDomainAgentCard({ domainName }: { domainName?: string }) {
+  const agent = getDomainAgent(domainName);
+  return (
+    <div className="mt-3 p-3.5 rounded-xl border border-accent/30 bg-accent/5 dark:bg-accent/10 space-y-2.5 transition-all">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
+            <Bot className="w-3.5 h-3.5 text-accent" />
+            Active Domain Specialist Agent
+          </span>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-white shadow-sm">
+            {agent.badge}
+          </span>
+        </div>
+        <span className="text-[11px] font-medium text-muted flex items-center gap-1">
+          <Zap className="w-3 h-3 text-amber-500 fill-amber-500" /> Calibrated for Max Accuracy
+        </span>
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h4 className="text-xs font-bold text-text">{agent.agentName}</h4>
+          <span className="text-[11px] text-muted font-medium">({agent.title})</span>
+        </div>
+        <p className="text-[11px] text-text/80 leading-relaxed">
+          {agent.tagline}
+        </p>
+      </div>
+
+      {/* Key Frameworks & Decision Maker */}
+      <div className="pt-2 border-t border-accent/20 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+        <div>
+          <span className="font-semibold text-text block mb-1">Domain Analytical Frameworks:</span>
+          <div className="flex flex-wrap gap-1">
+            {agent.keyFrameworks.slice(0, 4).map((f) => (
+              <span key={f} className="px-1.5 py-0.5 rounded bg-surface border border-border text-[10px] text-text/90 font-medium">
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <span className="font-semibold text-text block mb-1">Chief Protagonist Stakeholder:</span>
+          <span className="text-[11px] text-text/90 font-medium block">
+            {agent.decisionMaker}
+          </span>
+          <span className="text-[10px] text-muted block mt-0.5 truncate">
+            {agent.cSuiteStakeholders[0]}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function CreateCaseContent() {
@@ -1416,6 +1477,9 @@ function CreateCaseContent() {
                         );
                       })}
                     </div>
+
+                    {/* Active Domain Specialist Agent Engine Status Card */}
+                    <ActiveDomainAgentCard domainName={domain} />
                   </div>
 
                   {/* Syllabus Document Grounding (PDF/DOCX) */}
@@ -1853,6 +1917,9 @@ function CreateCaseContent() {
                     );
                   })}
                 </div>
+
+                {/* Active Domain Specialist Agent Engine Status Card */}
+                <ActiveDomainAgentCard domainName={domain} />
 
                 {/* Topics Grouped by Unit */}
                 <div className="pt-1 space-y-2">

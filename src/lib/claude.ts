@@ -12,6 +12,10 @@ import {
   CaseType,
 } from "./types";
 import { COLLEGE_NAME_WITH_SHORT } from "@/config/college";
+import {
+  getDomainAgent,
+  enhancePromptWithDomainAgent,
+} from "@/lib/agents/domain-agents";
 
 export interface GenerateCaseParams {
   type: CaseType; // 'short' | 'full' | 'research' | 'flash'
@@ -59,8 +63,9 @@ export function buildSystemPrompt(params: {
   bloomsLevel?: string;
   includeTeachingNote?: boolean;
   includeExhibits?: ("financials" | "org_chart" | "market_data")[];
+  domain?: CaseDomain;
 }): string {
-  return `You are a distinguished Professor of Business Administration and Master Case Writer at ${COLLEGE_NAME_WITH_SHORT}.
+  const basePrompt = `You are a distinguished Professor of Business Administration and Master Case Writer at ${COLLEGE_NAME_WITH_SHORT}.
 Your mission is to write an original, authentic, publication-grade pedagogical teaching case study conforming to the gold standard of Harvard Business School (HBS), Stanford GSB, and Ivey Publishing.
 
 CRITICAL PEDAGOGICAL & NARRATIVE ARCHITECTURE:
@@ -150,6 +155,8 @@ SCHEMA (Return pure valid JSON):
   "verify_facts_flag": ${params.format === "real_signal" ? "true" : "false"},
   "figures_disclaimer": "All specific metrics, financial line items, and organizational names are pedagogical models designed for classroom case analysis."
 }`;
+
+  return enhancePromptWithDomainAgent(basePrompt, params.domain);
 }
 
 export async function generateCaseWithClaude(
@@ -164,6 +171,11 @@ export async function generateCaseWithClaude(
         language: params.language,
         format: params.format,
         type: params.type,
+        tone: params.tone,
+        bloomsLevel: params.bloomsLevel,
+        includeTeachingNote: params.includeTeachingNote,
+        includeExhibits: params.includeExhibits,
+        domain: params.domain,
       });
 
       const userPrompt = `Generate a ${params.type.toUpperCase()} case study with the following specifications:
@@ -236,168 +248,71 @@ function generateHighFidelityMockCase(params: GenerateCaseParams): GenerationRes
   const isResearch = params.type === "research";
   const isReal = params.format === "real_signal";
   const ind = params.industry || "Fintech & Banking";
-  const func = params.functionalFocus || "Strategic Finance & Capital Allocation";
   const domain = params.domain || "Strategy";
   const company = params.primaryCompany?.trim() || (isReal ? "Gujarat Co-operative Milk Marketing Federation (Amul)" : "Apex Strategic Enterprises Ltd");
   const region = params.locationMarket?.trim() || params.contextRegion || "Gujarat, India";
   const dilemma = params.centralDilemma?.trim() || "Whether to allocate ₹140 Cr toward an aggressive in-house digital supply chain overhaul, acquire a venture-backed tech challenger, or defend operating margins through premium consolidation.";
-  const decisionMaker = params.keyDecisionMaker?.trim() || "Managing Director & Chief Executive Officer";
-  const protagonists = params.protagonists?.trim() || "Chief Financial Officer, VP of Strategic Growth, Chief Operating Officer";
-  const targetAudience = params.targetAudience || "MBA";
-  const tone = params.tone || "Academic";
   const bloomsLevel = params.bloomsLevel || "Apply & Analyze";
 
-  let title = "";
-  let summary = "";
-  let background = "";
-  let challenge = "";
-  let decisionPoint = "";
-  let questions: string[] = [];
-  let objectives: string[] = params.learningObjectives && params.learningObjectives.length > 0
+  // Specialized Domain Agent Engine
+  const domainAgent = getDomainAgent(domain);
+  const domainContent = domainAgent.generateDomainContent({
+    company,
+    region,
+    dilemma,
+    isReal,
+    isShort,
+    bloomsLevel,
+  });
+
+  const decisionMaker = params.keyDecisionMaker?.trim() || domainAgent.decisionMaker;
+  const protagonists = params.protagonists?.trim() || domainAgent.cSuiteStakeholders.join(", ");
+  const targetAudience = params.targetAudience || "MBA";
+  const tone = params.tone || "Academic";
+
+  const title = isResearch
+    ? `Case Research: ${company} vs. Emerging Challengers — ${domainAgent.agentName} in ${ind} (${region})`
+    : isShort
+    ? `Short Case: ${domainAgent.badge} — Crossroad Dilemma at ${company} (${region})`
+    : `${domainAgent.agentName}: ${company} and the Transformation of ${ind} in ${region}`;
+
+  const summary = domainContent.summary;
+  const background = domainContent.background;
+  const challenge = domainContent.challenge;
+  const decisionPoint = domainContent.decisionPoint;
+  const questions: string[] = domainContent.questions;
+  const objectives: string[] = params.learningObjectives && params.learningObjectives.length > 0
     ? [...params.learningObjectives]
-    : [];
-  let frameworks: { name: string; application: string; key_takeaway: string }[] = [];
+    : domainContent.objectives;
+  const frameworks = domainContent.frameworks;
+  const exhibits: CaseExhibit[] = [...domainContent.exhibits];
 
-  // =========================================================================
-  // ENGLISH STANDARD (HBS / IVEY BENCHMARK) - ENGLISH ONLY
-  // =========================================================================
-    title = isResearch
-      ? `Case Research: ${company} vs. Emerging Challengers — Strategic Paradigms in ${ind} (${region})`
-      : isShort
-      ? `Short Case: Crossroad Dilemma at ${company} (${region})`
-      : `Strategic Leadership: ${company} and the Transformation of ${ind} in ${region}`;
-
-    summary = `A publication-grade pedagogical case study examining capital allocation, digital disruption, and organizational leadership at ${company}. Anchored in ${region}, the case chronicles how ${decisionMaker} must confront an acute inflection point in the ${ind} sector and deliver a definitive strategic blueprint to the Board of Directors within 72 hours.`;
-
-    background = `### 1. The Opening Hook & Impending Board Deadline
-On an unseasonably humid Thursday afternoon in late September 2024, ${decisionMaker} paced across the panoramic 8th-floor corner executive suite of ${company}'s corporate headquarters in ${region}. Outside, the commercial corridor buzzed with delivery fleets and commuters. Inside, spread across the 14-person teakwood boardroom table, were three confidential black binders embossed with gold foil: *"STRICTLY CONFIDENTIAL — FOR BOARD OF DIRECTORS ONLY."*
-
-In exactly 72 hours, on Monday at 9:00 AM, the emergency executive committee and institutional audit board would convene. At stake was not a routine budgetary debate, but the fundamental architectural trajectory of the enterprise for the next decade. For thirty years, the company had reigned as an untouchable regional institution. Today, as ${decisionMaker} reviewed the audited Q2 financials, the numbers told an unvarnished truth: the historical business model was running out of runway.
-
-### 2. Enterprise Genesis & The Historical Moat
-Established three decades ago with pioneering entrepreneurial capital in ${region}, ${company} had methodically grown from a regional operation into an admired market bellwether in the ${ind} space. Its historic market dominance was underpinned by three mutually reinforcing competitive moats:
-- **Proprietary Grassroots Distribution & Logistics**: An asset-heavy logistics and supply network spanning tier-1 metropolitan centers to remote tier-3 trading clusters. Competitors attempting to replicate this physical infrastructure faced prohibitive capital entry barriers.
-- **Trusted Brand Equity & Institutional Relationships**: Decades of unblemished delivery, community trust, and multi-generational relationships with retail distributors and enterprise buyers.
-- **Frugal Working Capital Discipline**: A conservative balance sheet culture that historically generated consistent double-digit Return on Invested Capital (ROIC) while maintaining a safe debt-to-equity ratio below 0.50x.
-
-### 3. Macro-Environment & Industry Upheaval
-However, the preceding 24 months had delivered an unprecedented structural shock across ${region}. Rapid broadband penetration and the ubiquity of smartphone-based commerce enabled venture-backed challenger platforms to bypass physical wholesale intermediaries. These agile competitors deployed asset-light, direct-to-consumer (D2C) architectures, subsidizing customer acquisition through venture equity.
-
-Simultaneously, raw material inflation, rising energy tariffs, and stringent statutory compliance mandates compressed gross margins. Between FY23 and FY25, ${company}'s gross margin contracted by 380 basis points, while customer retention among demographics under the age of 35 dropped by 18%. The core conundrum facing leadership was inescapable: the very asset-heavy infrastructure that had created the company's 30-year moat now imposed severe operational rigidity.`;
-
-    challenge = `### 1. Conflicting Boardroom Perspectives
-Behind closed doors, the executive leadership team was sharply fractured into three distinct philosophical camps:
-
-> *"We cannot allow Silicon Valley speculative euphoria to destroy thirty years of audited compounding,"* insisted the Chief Financial Officer, tapping an index finger firmly against the audited cash-flow statement. *"Our debt-to-equity ratio has already climbed from 0.45x to 0.88x. If we greenlight an aggressive ₹140 Crore in-house capital expenditure program today, a single quarter of macroeconomic softness or interest rate spikes could breach our bank loan covenants. Our duty to shareholders is balance sheet solvency."*
-
-> *"Standing still in an industry transition is not conservatism; it is institutional suicide,"* countered the Vice President of Strategic Growth. *"Our traditional wholesale distributor moats are dissolving in real time. If we do not invest heavily into direct-to-consumer digital infrastructure, automated micro-fulfillment hubs, and algorithmic inventory replenishment, our competitors will relegate us to a low-margin contract manufacturer within 36 months."*
-
-> *"The factory floor and logistics network are already operating at 94% capacity,"* cautioned the Chief Operating Officer. *"Morale among our plant managers and frontline logistics partners is fragile. If corporate leadership cuts operational overhead to fund external tech consultants and digital marketing burn, we will trigger severe operational bottlenecks and labor friction."*
-
-### 2. The Strategic Crossroads: Three Mutually Exclusive Alternatives
-Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive recommendation chosen from three distinct paths:
-
-- **Alternative 1: Aggressive In-House Transformation (Asset-Heavy Expansion)**
-  - *Capital Required*: ₹140 Cr – ₹175 Cr (Funded via syndicated bank term loans & internal accruals).
-  - *Strategic Mandate*: Construct proprietary automated regional fulfillment hubs, build a native D2C mobile commerce platform, and re-skill 1,200 frontline employees.
-  - *Upside*: 100% margin capture, proprietary customer data, sovereign technological IP, and long-term cost leadership.
-  - *Downside*: Strains balance sheet leverage (Debt/Equity > 1.1x), depresses near-term ROCE, high IT implementation risk.
-
-- **Alternative 2: Strategic Joint Venture / Inorganic Digital M&A (Asset-Light Alliance)**
-  - *Capital Required*: ₹65 Cr – ₹85 Cr (Funded via equity dilution & strategic warrants).
-  - *Strategic Mandate*: Acquire a 51% controlling stake in a fast-growing digital startup challenger, or form a 50:50 joint venture with an established logistics-tech platform.
-  - *Upside*: Rapid time-to-market (< 6 months), instant acquisition of young digital engineering talent, immediate access to millennial/Gen-Z demographics.
-  - *Downside*: Post-merger cultural friction, loss of operational autonomy, governance deadlocks, and brand dilution.
-
-- **Alternative 3: Defensive Consolidation & Margin-Focused Retrenchment**
-  - *Capital Required*: ₹25 Cr – ₹35 Cr (Self-funded entirely from operational cash flows).
-  - *Strategic Mandate*: Refuse margin-dilutive price wars, exit unprofitable commodity SKU lines, double down on premium institutional accounts, and defend free cash flow.
-  - *Upside*: Preserves healthy EBITDA margin (14%+), zero external balance sheet risk, guarantees steady dividend distributions.
-  - *Downside*: Cedes market volume share to rivals, caps enterprise scale, leaves the brand vulnerable to generational obsolescence.`;
-
-    decisionPoint = `As the clock counts down to Monday's 9:00 AM board meeting, which strategic alternative should ${decisionMaker} formally endorse, and how should the transition roadmap be financed and governed to protect long-term enterprise value?`;
-
-    questions = [
-      `Using Exhibits 1 and 3, diagnose the root structural causes of ${company}'s margin compression and unit economic degradation.`,
-      `Conduct a rigorous quantitative stress test comparing Alternative 1, Alternative 2, and Alternative 3 across ROIC, free cash flow runway, and debt covenant vulnerability.`,
-      `In light of the boardroom conflict between the CFO, VP Growth, and COO, how should ${decisionMaker} structure the organizational change management process to prevent executive attrition?`,
-      `How do regional regulatory mandates and macroeconomic interest rate trends constrain ${company}'s capital structure optionality?`,
-      `Synthesize an executive board memorandum for Monday morning detailing your recommended strategic alternative, key implementation milestones, and concrete risk mitigation protocols.`
-    ];
-
-    if (objectives.length === 0) {
-      objectives = [
-        `Master holistic strategic diagnosis of a multi-division enterprise facing structural industry disruption in ${ind}.`,
-        `Evaluate complex capital allocation trade-offs between asset-heavy expansion and asset-light inorganic alliances.`,
-        `Synthesize qualitative C-suite boardroom conflict with rigorous audited financial statement analysis (${bloomsLevel}).`
-      ];
-    }
-
-    frameworks = [
-      { name: "Porter's Five Forces & Industry Structure", application: "Assessing supplier concentration, threat of tech substitutes, and competitive rivalry.", key_takeaway: "Industry attractiveness is structurally deteriorating without proprietary digital differentiation." },
-      { name: "DuPont ROE Decomposition Model", application: "Deconstructing return on equity into net profit margin, asset turnover, and financial leverage.", key_takeaway: "Asset-heavy expansion dilutes ROE unless working capital turnover accelerates proportionally." },
-      { name: "VRIO Strategic Capability Audit", application: "Auditing physical distribution infrastructure vs proprietary customer data.", key_takeaway: "Physical assets are valuable but imitable; direct customer relationships and algorithmic data are the true rare moats." }
-    ];
-
-  // =========================================================================
-  // 4. EXHIBITS GENERATION (FINANCIALS, ORG CHART, MARKET DATA)
-  // =========================================================================
-  const exhibits: CaseExhibit[] = [];
+  // Also include requested exhibits if missing (org_chart, market_data)
   const requestedExhibits = params.includeExhibits || ["financials", "market_data", "org_chart"];
-
-  if (requestedExhibits.includes("financials")) {
+  if (requestedExhibits.includes("org_chart") && !exhibits.some((e) => e.type === "org_chart")) {
     exhibits.push({
-      id: "exhibit-1",
-      title: `Exhibit 1: ${company} — 3-Year Audited Financial Statement & Unit Economics`,
-      type: "financials",
-      description: "Audited financial highlights, operating margins, capital structure, and unit economics (all figures in ₹ Crores unless noted)",
-      data: [
-        { metric: "Gross Revenue (Topline)", y2023: "₹1,480 Cr", y2024: "₹1,660 Cr", y2025: "₹1,850 Cr", y2026_proj: "₹1,940 Cr", cagr: "+7.7%" },
-        { metric: "Cost of Goods Sold (COGS)", y2023: "₹925 Cr", y2024: "₹1,062 Cr", y2025: "₹1,225 Cr", y2026_proj: "₹1,310 Cr", cagr: "+11.8%" },
-        { metric: "Gross Margin %", y2023: "37.5%", y2024: "36.0%", y2025: "33.8%", y2026_proj: "32.5%", cagr: "-370 bps" },
-        { metric: "SG&A & Marketing Expenses", y2023: "₹310 Cr", y2024: "₹365 Cr", y2025: "₹428 Cr", y2026_proj: "₹455 Cr", cagr: "+13.6%" },
-        { metric: "Operating EBITDA", y2023: "₹245 Cr", y2024: "₹233 Cr", y2025: "₹197 Cr", y2026_proj: "₹175 Cr", cagr: "-10.6%" },
-        { metric: "EBITDA Margin %", y2023: "16.6%", y2024: "14.0%", y2025: "10.6%", y2026_proj: "9.0%", cagr: "-600 bps" },
-        { metric: "Depreciation & Amortization", y2023: "₹48 Cr", y2024: "₹54 Cr", y2025: "₹62 Cr", y2026_proj: "₹68 Cr", cagr: "+9.2%" },
-        { metric: "Operating Profit (EBIT)", y2023: "₹197 Cr", y2024: "₹179 Cr", y2025: "₹135 Cr", y2026_proj: "₹107 Cr", cagr: "-15.7%" },
-        { metric: "Finance & Interest Costs", y2023: "₹24 Cr", y2024: "₹36 Cr", y2025: "₹52 Cr", y2026_proj: "₹65 Cr", cagr: "+39.4%" },
-        { metric: "Profit After Tax (Net Income)", y2023: "₹130 Cr", y2024: "₹107 Cr", y2025: "₹62 Cr", y2026_proj: "₹32 Cr", cagr: "-37.6%" },
-        { metric: "Free Cash Flow (FCF)", y2023: "₹118 Cr", y2024: "₹84 Cr", y2025: "₹38 Cr", y2026_proj: "₹12 Cr", cagr: "-53.2%" },
-        { metric: "Debt-to-Equity Ratio", y2023: "0.45x", y2024: "0.62x", y2025: "0.88x", y2026_proj: "1.12x", cagr: "+43 bps" },
-        { metric: "Working Capital Cycle (Days)", y2023: "42 Days", y2024: "49 Days", y2025: "58 Days", y2026_proj: "64 Days", cagr: "+22 Days" },
-        { metric: "Customer Acquisition Cost (CAC)", y2023: "₹480", y2024: "₹590", y2025: "₹760", y2026_proj: "₹920", cagr: "+24.2%" },
-      ]
-    });
-  }
-
-  if (requestedExhibits.includes("org_chart")) {
-    exhibits.push({
-      id: "exhibit-2",
-      title: "Exhibit 2: Organizational Governance & C-Suite Decision Matrix",
+      id: "exhibit-org",
+      title: "Exhibit: Organizational Governance & C-Suite Decision Matrix",
       type: "org_chart",
-      description: "Board of Directors, Executive Committee hierarchy, and strategic mandates at the heart of the dispute",
-      data: [
-        { role: "Board of Directors (Chairmanship)", occupant: "Independent Chairperson & 6 Non-Executive Directors", mandate: "Fiduciary oversight, audit compliance, capital allocation approvals above ₹50 Cr" },
-        { role: "Managing Director & CEO", occupant: decisionMaker, mandate: "Overall enterprise strategy, P&L accountability, board-executive consensus building" },
-        { role: "Chief Financial Officer (CFO)", occupant: "S. K. Venkatesh, Senior Partner", mandate: "Treasury management, banking covenants, risk underwriting, debt management" },
-        { role: "VP of Strategic Growth & Digital", occupant: "Dr. Kavita Rao, Head of Strategy", mandate: "D2C omnichannel initiatives, startup acquisitions, customer acquisition architecture" },
-        { role: "Chief Operating Officer (COO)", occupant: "Maheshwar Rao, EVP Logistics", mandate: "Plant management, warehouse automation, regional supply chain logistics, labor relations" }
-      ]
+      description: "Executive hierarchy and domain responsibilities",
+      data: domainAgent.cSuiteStakeholders.map((s, idx) => ({
+        role: `Executive Stakeholder ${idx + 1}`,
+        occupant: s.split("(")[0].trim(),
+        mandate: s.includes("(") ? s.slice(s.indexOf("(") + 1, s.lastIndexOf(")")) : "Strategic domain leadership",
+      })),
     });
   }
-
-  if (requestedExhibits.includes("market_data")) {
+  if (requestedExhibits.includes("market_data") && !exhibits.some((e) => e.type === "market_data")) {
     exhibits.push({
-      id: "exhibit-3",
-      title: `Exhibit 3: Competitive Market Share & Industry Benchmark Matrix in ${region} (FY25)`,
+      id: "exhibit-market",
+      title: `Exhibit: Competitive Benchmark & ${domainAgent.domain} Industry Data in ${region}`,
       type: "market_data",
-      description: `Market concentration, pricing power index, and digital penetration across ${region}`,
+      description: `Market dynamics and ${domainAgent.domain} benchmarks`,
       data: [
-        { firm: company, market_share: "34.2%", yoy_growth: "+4.1%", pricing_power: "100 (Index Base)", digital_mix: "14.2%", nps: "+48" },
-        { firm: "Venture-Backed Digital Challenger A", market_share: "22.8%", yoy_growth: "+32.4%", pricing_power: "88 (-12%)", digital_mix: "86.5%", nps: "+58" },
-        { firm: "National Conglomerate Division B", market_share: "19.5%", yoy_growth: "+14.8%", pricing_power: "94 (-6%)", digital_mix: "42.0%", nps: "+44" },
-        { firm: "Unorganized & Regional Micro-Producers", market_share: "23.5%", yoy_growth: "-8.5%", pricing_power: "78 (-22%)", digital_mix: "4.0%", nps: "+24" }
-      ]
+        { firm: company, market_share: "34.2%", yoy_growth: "+4.1%", benchmark: "100 (Index Base)" },
+        { firm: "Challenger A", market_share: "22.8%", yoy_growth: "+32.4%", benchmark: "118 (+18%)" },
+        { firm: "Conglomerate Division B", market_share: "19.5%", yoy_growth: "+14.8%", benchmark: "94 (-6%)" },
+      ],
     });
   }
 
@@ -406,16 +321,7 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
     summary,
     background,
     challenge,
-    key_data: [
-      { metric: "Operating Margin (EBITDA)", value: "16.6% -> 10.6%", period: "Trailing 36M", notes: "-600 bps structural contraction" },
-      { metric: "Debt-to-Equity Ratio", value: "0.88x (Covenant: 1.0x)", period: "FY25 Audited", notes: "Approaching debt covenant ceiling" },
-      { metric: "Customer Acquisition Cost (CAC)", value: "₹760 (+24.2% YoY)", period: "FY25 Benchmark", notes: "Digital marketing bid inflation" },
-      { metric: "Free Cash Flow (FCF)", value: "₹38 Cr (-53.2%)", period: "FY25 Trailing", notes: "Severe cash generation squeeze" },
-      { metric: "Working Capital Cycle", value: "58 Days (vs 42 Days)", period: "FY25 Audited", notes: "Inventory buildup in regional warehouses" },
-      { metric: "Proposed CAPEX Outlay", value: "₹140 Cr – ₹175 Cr", period: "Phase 1 Dilemma", notes: "Central capital allocation choice" },
-      { metric: "Millennial Retention Drop", value: "-18% YoY", period: "Under-35 Cohort", notes: "Customer migration to digital rivals" },
-      { metric: "Plant Capacity Utilization", value: "94.2%", period: "Current Trailing", notes: "High physical asset utilization" }
-    ],
+    key_data: domainContent.keyData,
     decision_point: decisionPoint,
     discussion_questions: questions,
     exhibits,
@@ -425,44 +331,19 @@ Faced with ${dilemma}, ${decisionMaker} must present a definitive, cohesive reco
     key_decision_maker: decisionMaker,
     protagonists,
     learning_objectives: objectives,
-    domain,
+    domain: domainAgent.domain as CaseDomain,
     difficulty: params.difficulty || "Intermediate",
     target_audience: targetAudience,
     tone,
     blooms_level: bloomsLevel,
     verify_facts_flag: isReal,
-    figures_disclaimer: "All specific operational metrics, balance sheet figures, and organizational details are pedagogical models designed for rigorous classroom case analysis at Shanti Business School.",
+    figures_disclaimer: `All specific operational metrics, financial line items, and organizational details are pedagogical models calibrated by the ${domainAgent.agentName} for rigorous classroom case analysis at ${COLLEGE_NAME_WITH_SHORT}.`,
   };
 
   if (params.includeTeachingNote !== false) {
     content.teaching_note = {
       objectives,
-      class_flow: [
-        {
-          phase: "Phase 1: Opening Cold Call & Dilemma Framing",
-          duration_minutes: isShort ? 10 : 15,
-          activity: `Direct cold call to students asking: "${decisionMaker} has 72 hours before the board meeting. What is the fundamental root cause of the crisis—is it balance sheet stress, technological obsolescence, or cultural complacency?"`,
-          expected_response: "Model Diagnostic Answer: The fundamental driver is structural digital disruption combined with debt-financed operational rigidity, rather than temporary balance sheet stress. Students must diagnose that 30 years of traditional distributor moats failed to prevent the 380 bps gross margin contraction as direct-to-consumer challenger platforms bypassed wholesale networks."
-        },
-        {
-          phase: "Phase 2: Quantitative Exhibit & Financial Stress-Testing",
-          duration_minutes: isShort ? 15 : 30,
-          activity: "Divide the class into 3 analytical squads. Task Squad A with calculating debt covenant headroom under Alternative 1; Squad B with evaluating post-merger integration risks under Alternative 2; and Squad C with computing the terminal valuation impact of Alternative 3.",
-          expected_response: "Quantitative Solutions & Headroom Stress-Test:\n• Squad A (Alternative 1): Debt-to-Equity reaches 1.12x in 2026, leaving minimal headroom before breaching the 1.20x bank loan covenant.\n• Squad B (Alternative 2): Acquiring a 51% stake costs ₹65–85 Cr with high post-merger integration friction between startup agility and legacy logistics.\n• Squad C (Alternative 3): Preserves healthy near-term EBITDA (14%) and FCF (₹38 Cr), but caps terminal growth at 2%, risking long-term obsolescence."
-        },
-        {
-          phase: "Phase 3: The Boardroom Roleplay & Alternative Debate",
-          duration_minutes: isShort ? 15 : 30,
-          activity: "Stage an executive committee roleplay where students represent the CFO, VP Growth, and COO. Force students to defend their specific capital allocation choice under intense peer cross-examination.",
-          expected_response: "Boardroom Debate Defense Key:\n• CFO Defense: Prioritizes solvency; leverage >1.0x in an inflationary environment threatens bankruptcy.\n• VP Growth Defense: Failure to invest guarantees permanent degradation into a contract manufacturer within 36 months.\n• COO Defense: Frontline plants at 94% capacity cannot absorb arbitrary overhead cuts without severe supply chain disruptions.\n• Consensus Synthesis: Adopt a phased hybrid route—defend core cash flows (Alternative 3) to self-fund an initial asset-light joint venture (Alternative 2) before committing ₹140 Cr to in-house automation."
-        },
-        {
-          phase: "Phase 4: Plenary Synthesis & 3-Board Layout Consolidation",
-          duration_minutes: isShort ? 5 : 15,
-          activity: "Consolidate the classroom consensus onto the 3-Board plan: Board 1 (Symptoms vs Root Causes), Board 2 (DuPont & Porter Framework Evaluation), and Board 3 (Recommended Action Plan & Governance Milestones).",
-          expected_response: "3-Board Classroom Blackboard Solution:\n• Board 1 (Diagnosis): Margin erosion (-370 bps), customer acquisition cost inflation (+24.2%), under-35 customer flight (-18%).\n• Board 2 (Framework Rigor): DuPont ROE deconstruction (asset turnover dilution) + Porter's Five Forces (threat of tech substitutes).\n• Board 3 (Action Milestones): 90-day governance roadmap with phased debt covenants and executive alignment."
-        }
-      ],
+      class_flow: domainContent.classFlow,
       frameworks,
     };
   }

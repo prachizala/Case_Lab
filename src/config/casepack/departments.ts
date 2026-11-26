@@ -351,10 +351,484 @@ export const MARKETING_DEPARTMENT_PROFILE: DepartmentProfile = {
   isQuantitativeTopic: (_topic: string): boolean => false,
 };
 
-export const DEPARTMENT_PROFILES: Record<"finance" | "hr" | "marketing", DepartmentProfile> = {
+export const IT_DEPARTMENT_PROFILE: DepartmentProfile = {
+  id: "it",
+  name: "IT",
+  code: "IT",
+  quantitative: true,
+  units: [
+    {
+      unit: 1,
+      title: "Cloud Infrastructure, Migration & 6Rs Framework",
+      quantitative: true,
+      topics: [
+        "Cloud Migration Strategy (Rehost, Replatform, Refactor, Repurchase, Retire, Retain)",
+        "Total Cost of Ownership (TCO) & Cloud ROI Modeling",
+        "Public vs Private vs Hybrid Multi-Cloud Architecture",
+      ],
+    },
+    {
+      unit: 2,
+      title: "Enterprise Cybersecurity & Zero Trust Architecture",
+      quantitative: false,
+      topics: [
+        "NIST Cybersecurity Framework (Identify, Protect, Detect, Respond, Recover)",
+        "Zero Trust Architecture & Identity Access Management (IAM)",
+        "Ransomware Incident Response & Disaster Recovery RPO/RTO",
+      ],
+    },
+    {
+      unit: 3,
+      title: "Legacy Modernization & Technical Debt Management",
+      quantitative: true,
+      topics: [
+        "Monolithic vs Microservices Decoupling (Strangler Fig Pattern)",
+        "Technical Debt Interest & Maintenance Overhead Index",
+        "API Gateway, Service Mesh & Event-Driven Architecture",
+      ],
+    },
+    {
+      unit: 4,
+      title: "Data Engineering, MLOps & System Reliability",
+      quantitative: true,
+      topics: [
+        "High-Availability Uptime SLAs (99.9% vs 99.99%) & Outage Downtime Cost",
+        "Data Lakehouse & Streaming Pipeline Governance",
+        "DevOps / SRE Practices & DORA Delivery Metrics",
+      ],
+    },
+  ],
+  frameworks: [
+    "AWS / Gartner Cloud 6Rs Migration Framework",
+    "NIST Cybersecurity Framework (CSF v2.0)",
+    "Zero Trust Security Maturity Model",
+    "Strangler Fig Legacy Modernization Pattern",
+    "CAP Theorem & Distributed Data Consistency",
+    "DORA Metrics (Deployment Frequency, Lead Time, Change Fail Rate, MTTR)",
+    "RPO (Recovery Point Objective) & RTO (Recovery Time Objective) Matrix",
+  ],
+  case_requirements: [
+    "Enterprise IT dilemma set in an Indian banking, telecom, or SaaS organization.",
+    "Technical exhibit table with system metrics: legacy maintenance costs, cloud runaway spend, downtime hours, SLA penalties.",
+    "Clear architectural crossroad: lift-and-shift vs native cloud refactor vs private data center modernization.",
+  ],
+  question_patterns: [
+    "Evaluate the proposed cloud migration strategy using the 6Rs framework and compute the 3-year TCO differential.",
+    "Formulate a zero-trust incident response roadmap to address high-severity vulnerability disclosures.",
+    "Analyze the operational risks of migrating from a legacy monolithic core to containerized microservices.",
+  ],
+  answer_patterns: [
+    "Executive IT Problem Diagnosis detailing technical debt and system bottlenecks.",
+    "Architecture Trade-Off Analysis evaluating performance, security, and cost.",
+    "Structured Cloud / Infrastructure Comparison Table.",
+    "Risk Mitigation Roadmap including rollback procedures and SLA governance.",
+    "Executive Conclusion with 18-month technology milestones.",
+  ],
+  validators: [
+    "schema_valid",
+    "word_count_bounds",
+    "concept_coverage",
+    "bloom_verbs",
+    "no_placeholders",
+  ],
+  exam_metadata_defaults: {
+    course_code: "IT-501",
+    ce_no: "CE-2",
+    set: "A",
+    maximum_marks: 40,
+    marks_per_question: 20,
+    date: "Fall 2026",
+  },
+  isQuantitativeTopic: (topic: string): boolean => {
+    const lower = topic.toLowerCase();
+    return lower.includes("tco") || lower.includes("cost") || lower.includes("sla") || lower.includes("uptime") || lower.includes("rpo") || lower.includes("rto") || lower.includes("roi");
+  },
+};
+
+export const SUPPLY_CHAIN_DEPARTMENT_PROFILE: DepartmentProfile = {
+  id: "supply-chain",
+  name: "Supply Chain",
+  code: "SCM",
+  quantitative: true,
+  units: [
+    {
+      unit: 1,
+      title: "Strategic Sourcing & Kraljic Portfolio Management",
+      quantitative: true,
+      topics: [
+        "Kraljic Matrix (Strategic, Bottleneck, Leverage, Non-Critical Items)",
+        "Total Cost of Ownership (TCO) in Global Sourcing",
+        "Supplier Relationship Management & Single vs Dual Sourcing",
+      ],
+    },
+    {
+      unit: 2,
+      title: "Inventory Optimization & Demand Planning",
+      quantitative: true,
+      topics: [
+        "Economic Order Quantity (EOQ) & Quantity Discounts",
+        "Safety Stock & Service Level Reorder Point (ROP)",
+        "Bullwhip Effect Causes & Upstream Demand Distortion",
+      ],
+    },
+    {
+      unit: 3,
+      title: "Logistics Networks & Fulfillment Architecture",
+      quantitative: true,
+      topics: [
+        "Hub-and-Spoke vs Direct Point-to-Point Distribution",
+        "Cold Chain Logistics & Temperature Excursion Monitoring",
+        "Warehouse Automation & Automated Storage and Retrieval (ASRS)",
+      ],
+    },
+    {
+      unit: 4,
+      title: "Supply Chain Resilience & Risk Governance",
+      quantitative: false,
+      topics: [
+        "Supply Chain Geopolitical Disruptions & Nearshoring",
+        "On-Time In-Full (OTIF) Delivery & Fulfillment Scorecards",
+        "Circular Supply Chains & Reverse Logistics Economics",
+      ],
+    },
+  ],
+  frameworks: [
+    "Kraljic Portfolio Purchasing Matrix",
+    "SCOR (Supply Chain Operations Reference) Model",
+    "Economic Order Quantity (EOQ) & Reorder Point (ROP)",
+    "Bullwhip Effect Counter-Distortion Strategy",
+    "On-Time In-Full (OTIF) Metric & Fill Rate Scorecard",
+    "ABC-XYZ Inventory Segmentation Analysis",
+    "Days of Sales Inventory (DOS) & Working Capital Cycle",
+  ],
+  case_requirements: [
+    "Real-world supply chain dilemma set in Indian manufacturing, FMCG, retail, or automotive logistics.",
+    "At least one comprehensive supply chain exhibit: lead times, freight tariffs, inventory holding costs, stockouts, OTIF %.",
+    "Operational conflict between inventory holding costs (CFO) vs order fill rates (VP Sales) vs factory run rates (COO).",
+  ],
+  question_patterns: [
+    "Diagnose the root causes of upstream demand amplification using the Bullwhip Effect framework.",
+    "Compute optimal safety stock and reorder point given lead-time variability and targeted 98% service level.",
+    "Formulate a dual-sourcing procurement strategy using the Kraljic Matrix to mitigate supplier dependency.",
+  ],
+  answer_patterns: [
+    "Supply Chain Diagnostic identifying delivery bottlenecks and inventory carrying costs.",
+    "Quantitative Reorder Point & EOQ Mathematical Working.",
+    "Procurement Strategy Comparison across supplier tiers.",
+    "Logistics Network Realignment Roadmap with warehouse hub layout.",
+    "Executive Conclusion with OTIF performance milestones.",
+  ],
+  validators: [
+    "schema_valid",
+    "word_count_bounds",
+    "concept_coverage",
+    "bloom_verbs",
+    "no_placeholders",
+  ],
+  exam_metadata_defaults: {
+    course_code: "SCM-501",
+    ce_no: "CE-2",
+    set: "A",
+    maximum_marks: 40,
+    marks_per_question: 20,
+    date: "Fall 2026",
+  },
+  isQuantitativeTopic: (topic: string): boolean => {
+    const lower = topic.toLowerCase();
+    return lower.includes("eoq") || lower.includes("safety stock") || lower.includes("reorder") || lower.includes("inventory") || lower.includes("otif") || lower.includes("cost") || lower.includes("tco");
+  },
+};
+
+export const STRATEGY_DEPARTMENT_PROFILE: DepartmentProfile = {
+  id: "strategy",
+  name: "Strategy",
+  code: "STR",
+  quantitative: false,
+  units: [
+    {
+      unit: 1,
+      title: "Industry Structure & Macro-Environment",
+      quantitative: false,
+      topics: [
+        "Porter's Five Forces Industry Attractiveness Analysis",
+        "PESTLE Structural Macro-Environmental Scanning",
+        "Strategic Group Mapping & Competitor Trajectory",
+      ],
+    },
+    {
+      unit: 2,
+      title: "Internal Resources, Core Competencies & Moats",
+      quantitative: false,
+      topics: [
+        "Barney's VRIO Capability & Sustainable Competitive Advantage",
+        "Porter's Value Chain Primary & Support Activities",
+        "Dynamic Capabilities & Organizational Agility",
+      ],
+    },
+    {
+      unit: 3,
+      title: "Corporate Growth Strategies & Diversification",
+      quantitative: false,
+      topics: [
+        "Ansoff Product-Market Growth Matrix",
+        "BCG Portfolio Growth-Share Matrix (Stars, Cows, Dogs, Questions)",
+        "Vertical Integration vs Strategic Outsourcing",
+      ],
+    },
+    {
+      unit: 4,
+      title: "Business Model Innovation & Strategic Alliances",
+      quantitative: false,
+      topics: [
+        "Blue Ocean Strategy & Four Actions ERRC Grid",
+        "Mergers & Acquisitions Synergy Realization & Due Diligence",
+        "Platform Ecosystems & Two-Sided Network Effects",
+      ],
+    },
+  ],
+  frameworks: [
+    "Porter's Five Forces Industry Analysis",
+    "Barney's VRIO Framework (Valuable, Rare, Inimitable, Organized)",
+    "Blue Ocean Strategy (Value Innovation & ERRC Grid)",
+    "Ansoff Growth Matrix",
+    "BCG Growth-Share Matrix",
+    "Porter's Generic Strategies (Cost Leadership, Differentiation, Focus)",
+    "Post-Merger Integration & Synergy Valuation Scorecard",
+  ],
+  case_requirements: [
+    "High-stakes boardroom strategy case set in an Indian conglomerate, unicorn startup, or transforming incumbent.",
+    "Rich strategic exhibit: market share concentration, competitor margin benchmarking, strategic group coordinates.",
+    "Three mutually exclusive strategic paths requiring rigorous qualitative and commercial trade-off analysis.",
+  ],
+  question_patterns: [
+    "Conduct a comprehensive VRIO audit of the company's internal capabilities to identify defensible competitive moats.",
+    "Using Porter's Five Forces, evaluate whether the proposed industry pivot improves long-term economic returns.",
+    "Formulate an ERRC (Eliminate, Reduce, Raise, Create) grid to unlock an uncontested Blue Ocean market space.",
+  ],
+  answer_patterns: [
+    "Executive Strategic Problem Diagnosis framing the boardroom inflection point.",
+    "Detailed Framework Application (VRIO / Porter / Blue Ocean).",
+    "Structured Strategic Alternatives Trade-Off Table.",
+    "Governance & Organizational Change Management Protocol.",
+    "Executive Conclusion with 3-year phased strategic milestones.",
+  ],
+  validators: [
+    "schema_valid",
+    "word_count_bounds",
+    "concept_coverage",
+    "bloom_verbs",
+    "no_placeholders",
+  ],
+  exam_metadata_defaults: {
+    course_code: "STR-501",
+    ce_no: "CE-1",
+    set: "A",
+    maximum_marks: 40,
+    marks_per_question: 20,
+    date: "Fall 2026",
+  },
+  isQuantitativeTopic: (_topic: string): boolean => false,
+};
+
+export const ANALYTICS_DEPARTMENT_PROFILE: DepartmentProfile = {
+  id: "analytics",
+  name: "Analytics",
+  code: "ANA",
+  quantitative: true,
+  units: [
+    {
+      unit: 1,
+      title: "Business Intelligence & Executive Telemetry",
+      quantitative: true,
+      topics: [
+        "Executive KPI Dashboard Architecture & Metrics Hierarchy",
+        "Descriptive vs Diagnostic Telemetry Analytics",
+        "Data Quality Profiling & Missingness Remediation",
+      ],
+    },
+    {
+      unit: 2,
+      title: "Predictive Analytics & Statistical Modeling",
+      quantitative: true,
+      topics: [
+        "Hypothesis Testing, p-values & Statistical Significance",
+        "Linear & Logistic Regression for Managerial Decisions",
+        "Time-Series Forecasting & Seasonality Deconstruction",
+      ],
+    },
+    {
+      unit: 3,
+      title: "Machine Learning & Customer Intelligence",
+      quantitative: true,
+      topics: [
+        "Confusion Matrix Evaluation (Precision, Recall, F1, ROC-AUC)",
+        "Customer Churn Propensity & Hazard Rate Modeling",
+        "Customer Lifetime Value (CLV) Cohort Progression",
+      ],
+    },
+    {
+      unit: 4,
+      title: "A/B Testing, Experimentation & MLOps",
+      quantitative: true,
+      topics: [
+        "Randomized Controlled Trials & A/B Sample Sizing",
+        "Type I (Alpha) vs Type II (Beta) Decision Errors",
+        "Model Drift, Data Drift & Automated Retraining Governance",
+      ],
+    },
+  ],
+  frameworks: [
+    "CRISP-DM (Cross-Industry Standard Process for Data Mining)",
+    "Confusion Matrix (Precision, Recall, Specificity, F1-Score, ROC-AUC)",
+    "A/B Testing Statistical Hypothesis Testing Framework",
+    "Customer Lifetime Value (CLV) & Churn Hazard Model",
+    "Marketing Attribution Multi-Touch Modeling",
+    "Pareto 80/20 Customer Value Segmentation",
+  ],
+  case_requirements: [
+    "Data-driven enterprise dilemma set in Indian fintech, quick-commerce, digital banking, or healthtech.",
+    "At least one comprehensive statistical/analytical exhibit: confusion matrix metrics, p-values, churn rates, CLV tables.",
+    "Trade-off between algorithmic automation vs human review, model false-positives vs false-negatives.",
+  ],
+  question_patterns: [
+    "Interpret the confusion matrix in Exhibit 2 and calculate the business cost of False Positives vs False Negatives.",
+    "Formulate an A/B testing experiment to validate a new recommendation algorithm without cannibalizing gross margins.",
+    "Using CRISP-DM methodology, evaluate why the initial predictive model failed to maintain out-of-sample accuracy.",
+  ],
+  answer_patterns: [
+    "Executive Analytical Diagnosis distinguishing statistical correlation from causation.",
+    "Step-by-Step Mathematical Calculations (Precision, Recall, p-value interpretation).",
+    "Decision Threshold Trade-Off Analysis evaluating dollar impact of classification errors.",
+    "Data Governance & Model Monitoring Protocol.",
+    "Executive Conclusion with data platform implementation milestones.",
+  ],
+  validators: [
+    "schema_valid",
+    "word_count_bounds",
+    "concept_coverage",
+    "bloom_verbs",
+    "no_placeholders",
+  ],
+  exam_metadata_defaults: {
+    course_code: "ANA-501",
+    ce_no: "CE-2",
+    set: "A",
+    maximum_marks: 40,
+    marks_per_question: 20,
+    date: "Fall 2026",
+  },
+  isQuantitativeTopic: (topic: string): boolean => {
+    const lower = topic.toLowerCase();
+    return lower.includes("predictive") || lower.includes("regression") || lower.includes("testing") || lower.includes("clv") || lower.includes("churn") || lower.includes("matrix") || lower.includes("statistic");
+  },
+};
+
+export const OPERATIONS_DEPARTMENT_PROFILE: DepartmentProfile = {
+  id: "operations",
+  name: "Operations",
+  code: "OPS",
+  quantitative: true,
+  units: [
+    {
+      unit: 1,
+      title: "Process Capacity & Theory of Constraints",
+      quantitative: true,
+      topics: [
+        "Process Flow Mapping & Cycle Time vs Takt Time",
+        "Bottleneck Identification & Theory of Constraints (Drum-Buffer-Rope)",
+        "Little's Law (WIP = Throughput x Cycle Time) Application",
+      ],
+    },
+    {
+      unit: 2,
+      title: "Lean Operations, Waste Elimination & SMED",
+      quantitative: true,
+      topics: [
+        "The 7 Wastes of Lean (Muda) & Value Stream Mapping (VSM)",
+        "Single-Minute Exchange of Die (SMED) Setup Time Reduction",
+        "5S Workplace Organization & Visual Factory Governance",
+      ],
+    },
+    {
+      unit: 3,
+      title: "Quality Management, Six Sigma & DMAIC",
+      quantitative: true,
+      topics: [
+        "DMAIC Six Sigma Methodology (Define, Measure, Analyze, Improve, Control)",
+        "Statistical Process Control (SPC) & Process Capability (Cp, Cpk)",
+        "Ishikawa Fishbone Root Cause Diagram & Pareto Defect Analysis",
+      ],
+    },
+    {
+      unit: 4,
+      title: "Asset Maintenance & Equipment Effectiveness (OEE)",
+      quantitative: true,
+      topics: [
+        "Overall Equipment Effectiveness (OEE = Availability x Performance x Quality)",
+        "Total Productive Maintenance (TPM) Autonomous Maintenance Pillars",
+        "Cellular Manufacturing vs Functional Line Layout Optimization",
+      ],
+    },
+  ],
+  frameworks: [
+    "Overall Equipment Effectiveness (OEE) Decomposition",
+    "Theory of Constraints (TOC) & Drum-Buffer-Rope Bottleneck Scheduling",
+    "Single-Minute Exchange of Die (SMED) Internal vs External Setup",
+    "DMAIC Six Sigma Continuous Improvement Roadmap",
+    "Little's Law & Work-in-Progress (WIP) Optimization",
+    "Ishikawa Cause-and-Effect & Pareto Defect Prioritization",
+    "Statistical Process Control (SPC) X-bar & R Charts",
+  ],
+  case_requirements: [
+    "Shop-floor operations dilemma set in an Indian manufacturing plant, assembly unit, or high-volume service center.",
+    "Detailed operational exhibit table: machine availability %, scrap defect rates, changeover minutes, OEE by line.",
+    "Conflicting managerial priorities: high product variety (Sales) vs long uninterrupted runs (COO) vs scrap elimination (Quality).",
+  ],
+  question_patterns: [
+    "Deconstruct plant OEE into Availability, Performance, and Quality, and identify the primary defect bottleneck.",
+    "Apply SMED principles to separate internal vs external changeover activities and cut line downtime by 50%.",
+    "Design a DMAIC roadmap with concrete statistical tollgates to eliminate critical assembly variances.",
+  ],
+  answer_patterns: [
+    "Operations Diagnostic identifying throughput bottlenecks and cycle time variance.",
+    "Quantitative OEE and Little's Law Step-by-Step Calculations.",
+    "Lean / SMED Implementation Work Instructions Table.",
+    "Quality Control Charter and SPC Monitoring Protocol.",
+    "Executive Conclusion with 180-day operational turnaround milestones.",
+  ],
+  validators: [
+    "schema_valid",
+    "word_count_bounds",
+    "concept_coverage",
+    "bloom_verbs",
+    "no_placeholders",
+  ],
+  exam_metadata_defaults: {
+    course_code: "OPS-501",
+    ce_no: "CE-2",
+    set: "A",
+    maximum_marks: 40,
+    marks_per_question: 20,
+    date: "Fall 2026",
+  },
+  isQuantitativeTopic: (topic: string): boolean => {
+    const lower = topic.toLowerCase();
+    return lower.includes("oee") || lower.includes("capacity") || lower.includes("takt") || lower.includes("cycle") || lower.includes("smed") || lower.includes("dmaic") || lower.includes("spc") || lower.includes("little");
+  },
+};
+
+export const DEPARTMENT_PROFILES: Record<
+  "finance" | "hr" | "marketing" | "it" | "supply-chain" | "strategy" | "analytics" | "operations",
+  DepartmentProfile
+> = {
   finance: FINANCE_DEPARTMENT_PROFILE,
   hr: HR_DEPARTMENT_PROFILE,
   marketing: MARKETING_DEPARTMENT_PROFILE,
+  it: IT_DEPARTMENT_PROFILE,
+  "supply-chain": SUPPLY_CHAIN_DEPARTMENT_PROFILE,
+  strategy: STRATEGY_DEPARTMENT_PROFILE,
+  analytics: ANALYTICS_DEPARTMENT_PROFILE,
+  operations: OPERATIONS_DEPARTMENT_PROFILE,
 };
 
 /**
@@ -430,15 +904,29 @@ export function createGenericDomainProfile(domainNameOrId: string, customTopics?
 }
 
 export function getDepartmentProfile(departmentId: string, customTopics?: string[]): DepartmentProfile {
-  const normalized = departmentId.toLowerCase().trim();
+  const normalized = departmentId.toLowerCase().trim().replace(/\s+/g, "-");
   if (normalized === "finance") return FINANCE_DEPARTMENT_PROFILE;
-  if (normalized === "hr") return HR_DEPARTMENT_PROFILE;
+  if (normalized === "hr" || normalized === "human-resources") return HR_DEPARTMENT_PROFILE;
   if (normalized === "marketing") return MARKETING_DEPARTMENT_PROFILE;
+  if (normalized === "it" || normalized === "information-technology") return IT_DEPARTMENT_PROFILE;
+  if (normalized === "supply-chain" || normalized === "supplychain" || normalized === "logistics") return SUPPLY_CHAIN_DEPARTMENT_PROFILE;
+  if (normalized === "strategy") return STRATEGY_DEPARTMENT_PROFILE;
+  if (normalized === "analytics" || normalized === "business-analytics") return ANALYTICS_DEPARTMENT_PROFILE;
+  if (normalized === "operations" || normalized === "production") return OPERATIONS_DEPARTMENT_PROFILE;
 
-  // Use generic domain profile for the other 5 domains
+  // Fallback to generic domain profile if custom or unknown
   return createGenericDomainProfile(departmentId, customTopics);
 }
 
 export function getAllDepartmentProfiles(): DepartmentProfile[] {
-  return [FINANCE_DEPARTMENT_PROFILE, HR_DEPARTMENT_PROFILE, MARKETING_DEPARTMENT_PROFILE];
+  return [
+    FINANCE_DEPARTMENT_PROFILE,
+    MARKETING_DEPARTMENT_PROFILE,
+    HR_DEPARTMENT_PROFILE,
+    IT_DEPARTMENT_PROFILE,
+    SUPPLY_CHAIN_DEPARTMENT_PROFILE,
+    STRATEGY_DEPARTMENT_PROFILE,
+    ANALYTICS_DEPARTMENT_PROFILE,
+    OPERATIONS_DEPARTMENT_PROFILE,
+  ];
 }
