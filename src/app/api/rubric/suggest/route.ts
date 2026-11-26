@@ -59,7 +59,7 @@ Return ONLY valid JSON with this exact array structure of 4 criteria, where max_
           return NextResponse.json({ success: true, criteria: parsed });
         }
       } catch (aiErr) {
-        console.warn("Claude rubric generation fallback to deterministic model:", aiErr);
+        console.warn("AI rubric generation fallback to deterministic model:", aiErr);
       }
     }
 

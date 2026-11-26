@@ -132,7 +132,7 @@ async function handleSignalsCron(req: NextRequest) {
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    const canUseClaude = apiKey && apiKey.startsWith("sk-ant-") && !apiKey.includes("placeholder");
+    const canUseLiveAI = apiKey && apiKey.startsWith("sk-ant-") && !apiKey.includes("placeholder");
 
     let addedCount = 0;
     let duplicateCount = 0;
@@ -174,8 +174,8 @@ async function handleSignalsCron(req: NextRequest) {
         score = matchedFallback.potential_score;
         reason = matchedFallback.potential_reason;
         industry = matchedFallback.industry;
-      } else if (canUseClaude) {
-        // Call Claude API to score potential 1-10 and give 1-line reason
+      } else if (canUseLiveAI) {
+        // Call AI API to score potential 1-10 and give 1-line reason
         try {
           const anthropic = new Anthropic({ apiKey });
           const response = await anthropic.messages.create({
@@ -218,7 +218,7 @@ Return ONLY valid JSON in this format:
               industry = parsed.industry.trim();
             }
           }
-        } catch (claudeErr) {
+        } catch (aiErr) {
           // Graceful fallback to heuristic scoring
         }
       }

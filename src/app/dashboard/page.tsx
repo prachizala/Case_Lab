@@ -815,7 +815,7 @@ export default function DashboardPage({
           </div>
         </div>
 
-        {/* 4. CASE SIGNALS RADAR (INDIAN BUSINESS NEWS + CLAUDE POTENTIAL) */}
+        {/* 4. CASE SIGNALS RADAR (INDIAN BUSINESS NEWS + AI CURRICULUM POTENTIAL) */}
         {role !== "student" && (
           <div id="signals-radar" className="p-6 md:p-8 rounded-3xl border border-border bg-surface shadow-md space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4">
@@ -828,7 +828,7 @@ export default function DashboardPage({
                   Real Signal Case Candidates
                 </h3>
                 <p className="text-xs text-muted">
-                  Continuous news intelligence analyzed by Claude AI for teaching case potential, governance conflicts, and capital allocation dilemmas.
+                  Continuous news intelligence analyzed by SBS Institutional AI for teaching case potential, governance conflicts, and capital allocation dilemmas.
                 </p>
               </div>
 

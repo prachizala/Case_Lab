@@ -317,7 +317,7 @@ export default function FacilitatorGuidePage() {
                         <span>AI Synthesis & Bounds Clamping</span>
                       </div>
                       <p className="text-xs text-muted pl-7">
-                        When you click &ldquo;Evaluate with Claude AI&rdquo;, marks are awarded per criterion and strictly clamped within rubric bounds. Marks are saved as provisional with <code>is_published: false</code>.
+                        When you click &ldquo;Evaluate with AI Engine&rdquo;, marks are awarded per criterion and strictly clamped within rubric bounds. Marks are saved as provisional with <code>is_published: false</code>.
                       </p>
                     </div>
 
@@ -358,7 +358,7 @@ export default function FacilitatorGuidePage() {
                   <h3 className="font-serif text-sm font-bold text-white flex items-center gap-1.5">
                     <span>Guide Assistant</span>
                     <span className="px-1.5 py-0.5 rounded text-[9px] uppercase font-mono font-bold bg-white/15 text-on-primary border border-white/20">
-                      Claude AI
+                      AI Engine
                     </span>
                   </h3>
                   <p className="text-[10px] text-white/60">Case Method & Platform Consultant</p>

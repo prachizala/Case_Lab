@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, reply, refused: false });
       } catch (aiErr) {
-        console.warn("Claude guide chat error, falling back to deterministic answer:", aiErr);
+        console.warn("AI guide chat error, falling back to deterministic answer:", aiErr);
       }
     }
 
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
         "For NAAC & NBA accredited rubrics, map each criterion directly to Course Outcomes (COs) and Program Outcomes (POs). Allocate 60% of marks to quantitative evidence and risk assessment, 25% to operational feasibility, and 15% to boardroom communication. The platform automatically tracks attainment against your configured 60% threshold.";
     } else if (msgLower.includes("grading") || msgLower.includes("workflow")) {
       answer =
-        `${APP_NAME}'s Two-Tier Grading Protocol: 1) Run 'Evaluate with Claude AI' on student submissions to generate provisional marks clamped within rubric bounds. 2) Review the AI feedback and apply instructor overrides. 3) Click 'Publish Final Grade' — marks remain strictly confidential and withheld until you publish.`;
+        `${APP_NAME}'s Two-Tier Grading Protocol: 1) Run 'Evaluate with AI Engine' on student submissions to generate provisional marks clamped within rubric bounds. 2) Review the AI feedback and apply instructor overrides. 3) Click 'Publish Final Grade' — marks remain strictly confidential and withheld until you publish.`;
     }
 
     return NextResponse.json({

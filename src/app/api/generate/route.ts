@@ -242,7 +242,7 @@ export async function POST(req: NextRequest) {
     if (simulateBadJson) {
       return NextResponse.json(
         {
-          error: "CLAUDE_JSON_PARSE_ERROR: AI response was malformed and could not be parsed into a teaching case. Please retry.",
+          error: "AI_JSON_PARSE_ERROR: AI response was malformed and could not be parsed into a teaching case. Please retry.",
           retryable: true,
         },
         { status: 502 }
@@ -396,7 +396,7 @@ export async function POST(req: NextRequest) {
     const errorMessage =
       err instanceof Error ? err.message : "Failed to generate case study.";
 
-    if (errorMessage.includes("CLAUDE_JSON_PARSE_ERROR")) {
+    if (errorMessage.includes("AI_JSON_PARSE_ERROR") || errorMessage.includes("JSON_PARSE_ERROR")) {
       return NextResponse.json(
         {
           error: errorMessage,

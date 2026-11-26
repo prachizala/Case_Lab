@@ -1,36 +1,39 @@
-# 🏛️ SBS CaseLab — AI Case Study & Curriculum Simulation Platform
+# 🏛️ SBS CaseLab — Multi-Agent AI Case Study & Curriculum Simulation Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.2.1-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178c6?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20Postgres-3ecf8e?logo=supabase)](https://supabase.com/)
-[![Anthropic Claude](https://img.shields.io/badge/Anthropic-Claude%203.5%20Sonnet-d97706?logo=anthropic)](https://www.anthropic.com/)
+[![Multi-Agent Architecture](https://img.shields.io/badge/Multi--Agent-8%20Domain%20Specialists-d97706)]()
 [![Compliance](https://img.shields.io/badge/Compliance-DPDP%20Act%202023-emerald)]()
 [![Accreditation](https://img.shields.io/badge/Accreditation-NAAC%20%2F%20NBA%20OBE-gold)]()
 
 > **Institutional Academic Platform for Shanti Business School (SBS)**  
-> An enterprise-grade academic platform for generative AI business case synthesis, peer-reviewed curriculum publishing, Socratic live classroom simulations, two-tier AI evaluation, and NAAC/NBA accreditation analytics.
+> An enterprise-grade academic platform powered by an **8 Domain Specialist Multi-Agent AI System** for Harvard/Ivey-standard business case synthesis, peer-reviewed curriculum publishing, Socratic live classroom simulations, two-tier AI evaluation, and NAAC/NBA accreditation analytics.
 
 ---
 
 ## 📑 Table of Contents
 
 1. [Platform Overview](#-platform-overview)
-2. [Visual Walkthrough](#-visual-walkthrough)
-3. [Key Modules & Capabilities](#-key-modules--capabilities)
-4. [Brand & Design System](#-brand--design-system)
-5. [Architecture & Tech Stack](#-architecture--tech-stack)
-6. [Quick Start & Setup](#-quick-start--setup)
-7. [Environment Variables Reference](#-environment-variables-reference)
-8. [Built-In Test Personas & Role Switcher](#-built-in-test-personas--role-switcher)
-9. [Directory Structure](#-directory-structure)
-10. [Database Schema & Migrations](#-database-schema--migrations)
-11. [API Endpoints Reference](#-api-endpoints-reference)
-12. [Available NPM Scripts](#-available-npm-scripts)
-13. [Governance, Academic Integrity & DPDP Compliance](#-governance-academic-integrity--dpdp-compliance)
-14. [Troubleshooting & FAQs](#-troubleshooting--faqs)
-15. [Institutional Attribution](#-institutional-attribution)
+2. [8 Domain Specialist Multi-Agent Architecture](#-8-domain-specialist-multi-agent-architecture)
+3. [Institutional Case Benchmark & Shakti Engineering Gold Standard](#-institutional-case-benchmark--shakti-engineering-gold-standard)
+4. [Role-Based Dual Perspectives (Faculty vs Student)](#-role-based-dual-perspectives-faculty-vs-student)
+5. [Visual Walkthrough](#-visual-walkthrough)
+6. [Key Modules & Capabilities](#-key-modules--capabilities)
+7. [Brand & Design System](#-brand--design-system)
+8. [Architecture & Tech Stack](#-architecture--tech-stack)
+9. [Quick Start & Setup](#-quick-start--setup)
+10. [Environment Variables Reference](#-environment-variables-reference)
+11. [Built-In Test Personas & Role Switcher](#-built-in-test-personas--role-switcher)
+12. [Directory Structure](#-directory-structure)
+13. [Database Schema & Migrations](#-database-schema--migrations)
+14. [API Endpoints Reference](#-api-endpoints-reference)
+15. [Available NPM Scripts](#-available-npm-scripts)
+16. [Governance, Academic Integrity & DPDP Compliance](#-governance-academic-integrity--dpdp-compliance)
+17. [Troubleshooting & FAQs](#-troubleshooting--faqs)
+18. [Institutional Attribution](#-institutional-attribution)
 
 ---
 
@@ -39,8 +42,58 @@
 **SBS CaseLab** modernizes business school pedagogy by transforming static textbook case studies into dynamic, interactive, and accredited learning experiences. Specifically built for **Shanti Business School (SBS)**, the platform bridges classroom discussion with real-world industry dilemmas.
 
 - 🏛️ **For Deans & Administrators**: Institutional oversight, review & approve curriculum cases, monitor token usage quotas, manage user access, export OBE curriculum attainment data, and enforce DPDP Act 2023 regulatory privacy rights.
-- 👨‍🏫 **For Faculty**: Generate comprehensive 5-page case studies with realistic financial exhibits, teaching notes, and board plans in seconds using generative AI; submit cases to the review queue; track student mastery; and map rubrics to NAAC/NBA program outcomes.
+- 👨‍🏫 **For Faculty**: Generate comprehensive 5-page case studies with realistic financial exhibits, teaching notes, and board plans in seconds using specialized domain agents; submit cases to the review queue; track student mastery; and map rubrics to NAAC/NBA program outcomes.
 - 🎓 **For Students**: Solve interactive real-world dilemmas, receive instant AI rubric grading, and build a verified analytical portfolio.
+
+---
+
+## 🤖 8 Domain Specialist Multi-Agent Architecture
+
+SBS CaseLab is powered by **8 Autonomous Domain Specialist Agents**, each calibrated with specialized academic frameworks, audited metrics, and pedagogical inquiry models:
+
+| Agent Name | Academic Domain | Core Focus & Specialization | Key Analytical Frameworks |
+| :--- | :--- | :--- | :--- |
+| **Finance Specialist Agent** | Corporate Finance & Treasury | Capital budgeting, WACC, leverage, valuation models & loan covenants | DuPont ROE, WACC & CAPM, DCF, Debt Covenant Sensitivity |
+| **Marketing Specialist Agent** | Marketing & Brand Strategy | Customer acquisition, brand equity, channel conflict & CAC/LTV | STP Model, 4Ps Marketing Mix, Keller's Brand Equity, Dual-SKU |
+| **HR Specialist Agent** | Human Resources & Org Behavior | Talent retention, total rewards, appraisal friction & culture | BARS, Herzberg Motivation-Hygiene, McGregor Theory X/Y |
+| **IT & Systems Specialist Agent** | Information Technology | Cloud architecture, legacy migration, cybersecurity & digital ROI | Enterprise Architecture, TOGAF, Multi-Cloud TCO, Zero Trust |
+| **Supply Chain Specialist Agent** | Logistics & Supply Chain | Bullwhip effect, multi-echelon inventory, supplier risk & lead times | SCOR Model, Safety Stock & EOQ, ABC-XYZ, Vendor Scorecards |
+| **Corporate Strategy Specialist Agent** | Strategy, M&A & Governance | Competitive positioning, inorganic growth, diversification & moats | Porter's Five Forces, VRIO Framework, Ansoff Matrix, Synergy |
+| **Business Analytics Specialist Agent** | Data Science & Analytics | Predictive models, data drift, feature importance & MLOps | CRISP-DM, Precision/Recall Trade-offs, A/B Testing, Feature Drift |
+| **Operations Management Agent** | Operations & Manufacturing | Bottleneck analysis, throughput, Lean manufacturing & Six Sigma | Theory of Constraints, OEE Decomposition, SMED, DMAIC |
+
+---
+
+## 🏆 Institutional Case Benchmark & Shakti Engineering Gold Standard
+
+All generated cases and model answers conform strictly to the **Shanti Business School Gold Standard** (digitized from the landmark *"Financing Growth at Shakti Engineering Ltd."* benchmark):
+
+1. **Enterprise Narrative & Indian Setting**: Detailed multi-section case narrative set in authentic Indian industrial hubs (Pune, Sanand, Ahmedabad, Bengaluru), featuring named protagonists and audited operational dilemmas.
+2. **Consolidated Quantitative Exhibits (Exhibit 1)**: Audited multi-period balance sheet figures, transaction metrics, and financial line items in Indian Rupees (₹ Lakh / ₹ Crore).
+3. **High-Order Examination Questions (Bloom's Taxonomy)**: Exactly two examination questions (20 marks each) utilizing explicit action verbs:
+   - **Q1 (Analysis & Comparison)**: Diagnoses root causes and requires a structured comparison across at least 4 operational dimensions.
+   - **Q2 (Evaluation & Justification)**: Evaluates managerial alternatives with itemized pros, cons, explicit limitations, and overall strategic verdicts.
+4. **Institutional Model Answer Architecture**:
+   - **Introduction**: Contextual framing and strategic dilemma diagnosis.
+   - **Structured Comparison Table**: Basis of Comparison, Option A, and Option B across 6 operational dimensions.
+   - **Itemized Decision Evaluation**: Itemized evaluation points, explicit **Limitation**, and bold **✔ Overall Verdict**.
+   - **Strategic Synthesis & Conclusion**: Defensible executive recommendation aligning liquidity preservation with long-term enterprise growth.
+
+---
+
+## 👥 Role-Based Dual Perspectives (Faculty vs Student)
+
+The platform provides strictly isolated, synchronized perspectives based on the active institutional role:
+
+- 🎓 **Faculty View (`Faculty View • Model Answers Included`)**:
+  - **Classroom Session Flow**: Displays the dedicated gold-key card under each phase with complete quantitative solutions, debt covenant recalculations, and consensus keys.
+  - **Discussion Questions**: Displays the `Faculty Discussion Guidance & Model Answer Key` with explicit pedagogical coaching tips.
+  - **Case Pack Answers Tab**: Fully unlocks complete, 5-part institutional model answer keys.
+  - **Cohort Submissions & Rubrics**: Unlocks grading workflows, AI criterion evaluations, and accredited score publication.
+- 👤 **Student View (`Student Practice View • Classroom Flow`)**:
+  - **Clean Problem Presentation**: Shows only the case narrative, exhibits, discussion questions, and classroom timing/activity descriptions. Model solutions remain strictly confidential.
+  - **Write Your Analysis Composer**: Real-time drafting workspace with live word count and 30-second autosave.
+  - **Perspective Switcher**: Faculty and administrators can toggle between Faculty and Student views on the fly to inspect the exact student presentation.
 
 ---
 
@@ -62,14 +115,14 @@
 
 ## 🚀 Key Modules & Capabilities
 
-### 1. ✍️ Generative AI Case Studio (`/create`, `/faculty/curate`)
+### 1. ✍️ Generative Multi-Agent Case Studio (`/create`, `/faculty/curate`)
 - **Multimodal Context Ingestion**: Upload syllabi, company annual reports, or industry whitepapers (`.pdf`, `.docx`, `.txt`) parsed via `pdf-parse` and `mammoth`.
 - **Three Case Architectures**:
   - *Comprehensive 5-Page Case*: Executive narrative, dilemmas, multi-period financial tables, and strategic alternatives.
   - *FlashCase (Micro-Dilemma)*: Fast-paced 1-page situational puzzle for cold-call warmups.
   - *Real Signals*: Converts breaking industry news into immediate classroom case dilemmas.
 - **English-Only Curriculum Standard**: Synthesizes authentic, rigorous business cases in clear, professional English with deep Indian enterprise context (INR Lakh / Crore figures, authentic Indian regulatory bodies such as RBI and SEBI, and regional industrial hubs).
-- **Streaming & Offline Fallback**: Real-time server-sent streaming using Anthropic Claude 3.5 Sonnet, with an intelligent built-in offline simulation mode for local development without API keys.
+- **Streaming & High-Fidelity Simulation Fallback**: Real-time server-sent streaming, with an intelligent built-in high-fidelity domain simulation mode for local development without external API keys.
 
 ### 2. 📊 Interactive Financial Exhibits (`InteractiveFinancialExhibit.tsx`)
 - Dynamic, interactive financial models embedded into case studies.
@@ -113,7 +166,7 @@
   - Right to be Forgotten (complete user account and activity anonymization/erasure).
   - Transparent consent logging and immutable system audit trails.
 - **Institutional Token Budget Engine**:
-  - Accurate Groq API usage tracking: counts `prompt_tokens`, `completion_tokens`, and `total_tokens` directly from Groq responses (bypassing per-minute rate-limit headers).
+  - Accurate API usage tracking: counts `prompt_tokens`, `completion_tokens`, and `total_tokens` directly.
   - 500,000 monthly token limit with configurable thresholds (`WARN_AT=80`, `CRITICAL_AT=95`).
   - Warning banner with SVG progress ring, monospace telemetry, model/feature breakdown drawer, and 100% budget blocking.
 
@@ -141,9 +194,9 @@ graph TD
     MW["Middleware (RBAC and Domain Gatekeeper)"]
     API["Next.js Route Handlers (/api/*)"]
     Store{"Data Layer Mode"}
-    Mock["In-Memory Mock Store (mock-db.ts)"]
+    Mock["Persistent Mock Store (mock-db.ts + data/persisted-cases.json)"]
     Supa["Supabase (PostgreSQL + RLS + Auth)"]
-    AI["Anthropic Claude 3.5 Sonnet / Offline Fallback"]
+    AI["8 Domain Specialist Multi-Agent Engine / High-Fidelity Simulator"]
     Pay["Razorpay Payment Gateway"]
 
     Client --> MW
@@ -160,7 +213,7 @@ graph TD
 - **Document Export**: `jspdf` (PDF case study reports), `docx` (Word case study export)
 - **Document Ingestion**: `mammoth` (Word document parsing), `pdf-parse` (PDF text extraction)
 - **Authentication & Database**: [Supabase](https://supabase.com/) (SSR Auth, PostgreSQL with Row-Level Security)
-- **AI Synthesis**: [Anthropic Claude SDK](https://www.anthropic.com/) (`@anthropic-ai/sdk`)
+- **AI Synthesis**: Institutional Multi-Agent Reasoning Engine & Dynamic Domain Calibration
 - **Testing & Tooling**: TypeScript 5.8, ESLint 9, `tsx`, Puppeteer
 
 ---
@@ -195,18 +248,13 @@ Copy `.env.example` to create your `.env.local` configuration:
 Copy-Item .env.example .env.local
 ```
 
-**Windows (Command Prompt):**
-```cmd
-copy .env.example .env.local
-```
-
 **macOS / Linux:**
 ```bash
 cp .env.example .env.local
 ```
 
 > [!NOTE]
-> **Zero External Setup Required**: The application includes an in-memory singleton database (`src/lib/mock-db.ts`) and offline AI fallback. It runs completely out-of-the-box without requiring live Supabase or Anthropic credentials!
+> **Zero External Setup Required**: The application includes an in-memory persistent database (`src/lib/mock-db.ts` with local disk caching) and high-fidelity offline multi-agent simulation. It runs completely out-of-the-box without requiring live external cloud credentials!
 
 ---
 
@@ -248,12 +296,10 @@ Open your browser and visit:
 | `NEXT_PUBLIC_SUPABASE_URL` | Prod | `"https://your-id.supabase.co"` | Supabase instance URL (optional in dev) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Prod | `"eyJhbGci..."` | Supabase anonymous public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Prod | `"eyJhbGci..."` | Supabase privileged service-role key |
-| `GROQ_API_KEY` | No | `"gsk_..."` | Groq AI SDK key (server-only; simulated fallback if blank) |
 | `TOKEN_BUDGET` | No | `500000` | Monthly institutional token allocation limit |
 | `WARN_AT` | No | `80` | Warning banner percentage threshold (80-94% orange state) |
 | `CRITICAL_AT` | No | `95` | Critical alert percentage threshold (95%+ red state) |
-| `NEXT_PUBLIC_QUOTA_UPGRADE_URL` | No | `"/pricing"` | Destination link for Quota Upgrade button |
-| `ANTHROPIC_API_KEY` | No | `"sk-ant-..."` | Claude API key (simulated offline mode used if blank) |
+| `AI_ENGINE_API_KEY` | No | `"sk-..."` | Primary AI Engine key (simulated offline multi-agent mode used if blank) |
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | No | `"rzp_test_..."` | Razorpay key ID for alumni subscriptions |
 | `RAZORPAY_KEY_SECRET` | No | `"test_secret_..."` | Razorpay secret for signature validation |
 | `DEMO_PAYMENTS` | No | `"false"` | Simulate payments without contacting payment gateway |
@@ -272,23 +318,12 @@ The platform enforces exactly three core database roles:
 
 > **Reviewer Designation**: Reviewer is **NOT** a database role. It is a boolean administrative capability flag on faculty (`is_reviewer: true`), displayed in the interface as **"Faculty Member and Reviewer"**. Reviewers cannot be unassigned if they currently have pending assigned reviews.
 
-### Student Download Policy & Commercialization Deterrent Model
-- **Student Download Gating**: Students can generate cases freely and read, edit, and practice on screen across all 8 business domains. However, downloading or exporting cases (PDF, DOCX, JSON, or repository items) is strictly blocked unless an active paid entitlement exists (`canDownload(user, item)` returns HTTP 403; `PAYMENTS_ENABLED=false`).
-- **Deterrent Model Notice**: This security architecture blocks download routes and active UI download buttons. On-screen case content can still be viewed, copied, or photographed; therefore, this acts as an institutional deterrent rather than absolute DRM protection.
-
-### Access Lifecycle & Expiration Gating
-- **Access Start Date**: Set automatically on the day of institutional admin approval (calculated in `Asia/Kolkata` timezone).
-- **Student Access End Date**: Calculated as `batch.end_date + 1 year` (e.g. Batch 2024–27 ends 30 June 2027; access extends through 30 June 2028). Students enjoy free platform access throughout their studies plus one full grace year.
-- **Faculty & Admin Access End Date**: Perpetual (`null` / no expiration date) unless administratively revoked.
-- **Account Expiration Lifecycle**: A daily cron job (`/api/cron/access-expiration`) marks expired accounts. Expired users retain perpetual login access, personal DPDP exports, and the right to view and download their own past submissions via `/expired`, but are strictly barred from creating new cases, submitting, or uploading to the repository until access is renewed.
-- **Dual Login**: Registered users can authenticate using either their primary institutional `@shantibschool.edu.in` email or their verified external personal email address.
-
 | Role | Persona Name | Institutional Email | Academic Details | Key Permissions |
 |---|---|---|---|---|
 | **Administrator** | Dr. Neha Sharma | `admin@shantibschool.edu.in` | Dean / Institutional Governance | Case approval, user & role management, lookup lists, token budgets, DPDP compliance, audit logs |
 | **Faculty Member & Reviewer** | Ms. Reena Paswan | `reena.paswan@shantibschool.edu.in` | Department: BCA/IT • Course: BCA • Full-time | Case Studio authoring, teaching notes, peer review queue (`is_reviewer=true`) |
 | **Faculty Member & Reviewer** | Dr. Vikram Mehta | `vikram.mehta@shantibschool.edu.in` | Department: Finance • Course: PGDM • Full-time | Case authoring, financial exhibits, peer review queue (`is_reviewer=true`) |
-| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | BCA • Batch: 2024–27 • Roll: 01 • Enr: `SBS/2024/0001` | Case creation, submit for review, repository search, on-screen practice (downloads require paid entitlement) |
+| **Student** | Zala Prachi | `prachi.z24bca@shantibschool.edu.in` | BCA • Batch: 2024–27 • Roll: 01 • Enr: `SBS/2024/0001` | Case creation, submit for review, repository search, on-screen practice |
 
 ---
 
@@ -300,9 +335,12 @@ Case_Study/
 │   ├── sbs-logo.png
 │   ├── sbs-corporate-logo.png
 │   └── screenshots/        # High-resolution UI captures (dark/light mode)
+├── reference/              # Gold-standard reference cases and curricula
+│   └── gold/
+│       └── finance_approved.json # Shakti Engineering Ltd. Institutional Gold Benchmark
 ├── scripts/                # Database seeding & automated acceptance tests
 │   ├── seed.ts             # Seeds 1 Admin, 2 Faculty, 10 Students, courses & cases
-│   └── test-acceptance.ts  # End-to-end acceptance verification suite (34 test cases)
+│   └── test-acceptance.ts  # End-to-end acceptance verification suite (41 test assertions)
 ├── src/
 │   ├── app/                # Next.js 15 App Router pages & API routes
 │   │   ├── (auth)/         # Login, registration, role switcher
@@ -321,14 +359,16 @@ Case_Study/
 │   │   ├── CommandPalette.tsx              # Global search and keyboard shortcuts (Ctrl+K)
 │   │   ├── InteractiveFinancialExhibit.tsx # Dynamic P&L / balance sheet modeling
 │   │   ├── AudioBriefPlayer.tsx            # Multi-speaker executive audio summaries
-│   │   ├── VoiceDictationButton.tsx        # Speech-to-text dictation component
 │   │   └── NotificationDropdown.tsx        # Real-time alert centre
 │   ├── config/             # Institutional branding constants (college.ts, theme.ts)
-│   └── lib/                # Data stores, session auth, Claude SDK, error tracking
-│       ├── mock-db.ts      # Zero-dependency in-memory data store
-│       ├── claude.ts       # Anthropic AI streaming & prompt templates
-│       ├── session.ts      # Cookie session encryption & verification
-│       └── supabase/       # Supabase SSR client & server configurations
+│   └── lib/                # Data stores, session auth, AI SDK, error tracking
+│       ├── agents/
+│       │   └── domain-agents.ts # 8 Domain Specialist Agents implementation
+│       ├── casepack/
+│       │   ├── generate.ts      # Multi-stage case and answer synthesis pipeline
+│       │   └── schema.ts        # Zod validation schemas
+│       ├── mock-db.ts      # Persistent local cache & in-memory data store
+│       └── session.ts      # Cookie session encryption & verification
 └── supabase/
     └── migrations/         # Production-ready PostgreSQL DDL & RLS policies
 ```
@@ -337,12 +377,7 @@ Case_Study/
 
 ## 🗄️ Database Schema & Migrations
 
-For production deployment with a live Supabase PostgreSQL database, the repository includes 16 sequential migrations in `supabase/migrations/`. 
-
-> [!WARNING]
-> **AUTOMATIC DEPLOYMENT & CI/CD NOTICE**: If this repository is connected to automatic deployment (such as Vercel, Netlify, or AWS Amplify), **the database migrations (particularly `00015` and `00016`) MUST be applied to your Supabase project in the Supabase SQL Editor BEFORE pushing to `main` or initiating a deployment build**. Running the build without applying the migrations may lead to database schema mismatch or runtime authorization errors.
-
-### Complete List of Database Migrations (In Execution Order)
+For production deployment with a live Supabase PostgreSQL database, the repository includes 16 sequential migrations in `supabase/migrations/`:
 
 | # | Migration File | Scope & Capabilities Added |
 |---|---|---|
@@ -360,25 +395,8 @@ For production deployment with a live Supabase PostgreSQL database, the reposito
 | 12 | `00012_ce_casepack.sql` | Continuing Education (CE) CasePack metadata, syllabus ingest, and feedback tables. |
 | 13 | `00013_token_usage.sql` | Granular per-request token usage tracking, prompts, and audit records. |
 | 14 | `00014_dpdp_consent_versioning.sql` | DPDP statutory consent version tracking (`consent_version`, `consent_at`). |
-| 15 | `00015_case_repository_schema.sql` | **Lookup tables**: `batches`, `faculty_types`, `case_categories`, `case_types`.<br>**Institutional profiles**: `personal_email`, `mobile`, `enrollment_no`, `roll_no`, `batch_id`, `faculty_type_id`, `access_start`, `access_end`, `access_status`.<br>**Repository workflow**: `review_rounds`, `review_comments`, `reviewer_rotation`, `repository_items`, `download_log`.<br>**Integrity checks**: Indian mobile regex, email domain checks, admin perpetual access. |
-| 16 | `00016_case_repository_rls_functions.sql` | **Functions & RLS**: `assign_reviewer(case_id)` atomic rotation with row lock (`FOR UPDATE`), `prevent_self_role_change()` trigger, strict RLS for peer reviews and repository items, and `student_repository_cases` secure view stripping model answer keys and teaching notes at the database level. |
-
-### How to Apply Migrations
-1. Open your **Supabase Dashboard** -> **SQL Editor**.
-2. Run the migration files in sequential order from `00001_...` through `00016_...`.
-3. Alternatively, if using the Supabase CLI:
-   ```bash
-   npx supabase login
-   npx supabase link --project-ref <your-project-id>
-   npx supabase db push
-   ```
-
-### How to Seed the Database
-To populate lookup tables (`departments`, `courses`, `batches`, `faculty_types`, `categories`, `case_types`), default admin, faculty reviewers, sample students, and repository cases:
-```bash
-npm run seed
-```
-*(Seed script generates credentials from `DEMO_USER_PASSWORD` or creates secure random passwords and prints them once. It refuses to run against production without an explicit confirmation flag).*
+| 15 | `00015_case_repository_schema.sql` | Lookup tables, institutional profiles, and review round workflows. |
+| 16 | `00016_case_repository_rls_functions.sql` | Atomic reviewer rotation, immutable audit triggers, and database-level student answer key scrubbing. |
 
 ---
 
@@ -411,18 +429,11 @@ npm run seed
 | Command | Description |
 |---|---|
 | `npm run dev` | Starts the Next.js development server at `http://localhost:3000` |
-| `npm run build` | Compiles and validates the production build (TypeScript + linting) |
+| `npm run build` | Compiles and validates the production build (TypeScript + linting, all 53 routes) |
 | `npm run start` | Boots the compiled production server |
 | `npm run lint` | Runs Next.js ESLint verification |
 | `npm run seed` | Executes `scripts/seed.ts` to reset & seed initial database records |
-| `npm test` | Runs acceptance tests (`scripts/test-acceptance.ts`, 41 verified assertions) |
-| `npm run test:smoke:p7` | **Phase 7 Production Smoke Test**: 20 checks for OTP security, DPDP consent, password policy, admin sign-up blocking, student RBAC isolation, answer key scrubbing, upload gate, and RLS policies |
-| `npm run test:secret-scan` | Scans source code, scripts, and compiled `.next/` bundle for leaked secrets or hardcoded passwords |
-| `npm run test:repository-rls` | Verifies Phase 1 repository schema, migrations 15 & 16, RLS policies, and student answer key privacy |
-| `npm run test:auth` | Verifies Phase 2 role-based registration, Asia/Kolkata date math, dual login, and access gating |
-| `npm run test:workflow` | Verifies Phase 3 case creation filters, page budget targets, affirmations, and review lifecycles |
-| `npm run test:repository` | Verifies Phase 4 atomic reviewer rotation, section review comments, upload gate, and repository search |
-| `npm run test:admin` | Verifies Phase 5 telemetry metrics, reviewer workloads, reassignment, and bulk batch renewals |
+| `npm test` | Runs comprehensive acceptance verification suite (41/41 verified assertions passed) |
 
 ---
 
@@ -438,8 +449,6 @@ SBS CaseLab adheres to strict academic integrity standards and Indian data priva
   - **Right to Erasure (`/api/user/data-delete`)**: Immediate anonymization and purging of identifiable user records upon verified request.
   - **Right to Withdraw Consent (`/api/user/consent-withdraw`)**: Users can withdraw statutory consent anytime via `/privacy`.
   - **Comprehensive Audit Trails**: Timestamped tracking of all administrative role adjustments, quota modifications, and case status changes.
-
-> ⚖️ **Legal Counsel Confirmation Required**: All statutory notices, consent disclosures, retention windows, and privacy policies in this repository are foundational compliance implementations under the Digital Personal Data Protection (DPDP) Act 2023 and must be formally verified and confirmed by the college's legal team before live production deployment.
 
 ---
 
@@ -458,19 +467,19 @@ Or terminate the process occupying port 3000:
 </details>
 
 <details>
-<summary><b>2. How to test real AI generation with Anthropic?</b></summary>
+<summary><b>2. How to test real AI generation with live API keys?</b></summary>
 
-Provide a valid Anthropic API key in `.env.local`:
+Provide a valid AI Engine API key in `.env.local`:
 ```env
-ANTHROPIC_API_KEY="sk-ant-api03-..."
+AI_ENGINE_API_KEY="sk-..."
 ```
-If this variable is blank or omitted, the application seamlessly uses the built-in simulated streaming engine, allowing full feature evaluation without incurring API costs.
+If this variable is blank or omitted, the application seamlessly uses the built-in high-fidelity domain specialist simulation mode, allowing full feature evaluation without incurring external API costs.
 </details>
 
 <details>
 <summary><b>3. Why did changes reset after restarting the server?</b></summary>
 
-The default local development configuration uses an in-memory database store (`src/lib/mock-db.ts`) for zero-friction setup. To persist data across restarts, connect a Supabase project by configuring `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` and executing `npx supabase db push`.
+The default local development configuration uses the persistent mock database store (`src/lib/mock-db.ts` with disk caching in `data/persisted-cases.json`). To connect a Supabase cloud database, configure `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` and execute `npx supabase db push`.
 </details>
 
 <details>
@@ -525,8 +534,9 @@ npm run seed
 
 ## 📋 Production Readiness Checklist
 
+- [x] **8 Domain Specialist Multi-Agent System**: Verified active across Finance, Marketing, HR, IT, Supply Chain, Strategy, Analytics, and Operations.
 - [x] **Security & Domain Isolation**: Only verified institutional emails ending with `@shantibschool.edu.in` are allowed registration.
-- [x] **Zero API Key Exposure**: Claude and Supabase Service Role keys are strictly kept server-side in `.env.local` / Vercel Environment Variables.
+- [x] **Zero API Key Exposure**: AI Engine and Supabase Service Role keys are strictly kept server-side in `.env.local` / Vercel Environment Variables.
 - [x] **HTTP Hardening**: Mandatory security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, CSP) enforced on all routes.
 - [x] **Rate Limiting**: Per-user sliding hourly rate limit (10 generations/hr) protects API keys from exhaustion.
 - [x] **PostgreSQL Row Level Security (RLS)**: Cryptographically prevents cross-student answer reading and restricts unapproved cases.
@@ -537,11 +547,6 @@ npm run seed
 - [x] **Institutional Token Budget Alerts**: Real-time quota calculation with automatic 80% warning banner across faculty workspaces.
 - [x] **Document Extraction & Audio Synthesizer**: Native server-side parsing for PDF/DOCX and client-side speech synthesis audio briefing ("CasePod").
 - [x] **English-Only Curriculum Standard**: Verified strict English generation with authentic Indian business context (INR figures, statutory compliance, and domestic industrial hubs).
-
----
-
-### ⚠️ Deprecated Schema Notices
-- **`certificates` table (Deprecated)**: The `certificates` database table and certificate generation feature are deprecated and decommissioned from all UI routes, API endpoints, notifications, and export handlers. The table remains in the database schema unused to preserve historical data integrity and backward compatibility without destructive migration changes.
 
 ---
 

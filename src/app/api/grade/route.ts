@@ -117,7 +117,7 @@ INSTRUCTIONS:
             }
           }
         } catch (aiErr) {
-          console.warn("Claude AI grading error, applying resilient fallback:", aiErr);
+          console.warn("AI grading error, applying resilient fallback:", aiErr);
         }
       }
 

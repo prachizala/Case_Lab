@@ -1194,7 +1194,7 @@ export function getAllDomainAgents(): DomainAgentConfig[] {
 }
 
 /**
- * Enhances the base Claude AI system prompt with the specialized domain agent persona and guidelines
+ * Enhances the base institutional system prompt with the specialized domain agent persona and guidelines
  */
 export function enhancePromptWithDomainAgent(basePrompt: string, domainName?: CaseDomain): string {
   const agent = getDomainAgent(domainName);

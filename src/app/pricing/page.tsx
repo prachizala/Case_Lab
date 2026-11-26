@@ -430,10 +430,10 @@ export default function PricingPage() {
                   <span>{COLLEGE_NAME_WITH_SHORT} Campus Accreditation Tier</span>
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-text">
-                  Campus-Wide Outcomes-Based Education & Claude AI Cluster
+                  Campus-Wide Outcomes-Based Education &amp; Institutional AI Cluster
                 </h3>
                 <p className="text-xs text-muted leading-relaxed">
-                  Tailored for universities and graduate business schools requiring full NAAC/NBA Course Outcome (CO) and Program Outcome (PO) mapping, automated attainment calculation, Socratic 3-board classroom synchronization, tamper-evident audit logs, and per-college monthly Claude AI token allocation governance.
+                  Tailored for universities and graduate business schools requiring full NAAC/NBA Course Outcome (CO) and Program Outcome (PO) mapping, automated attainment calculation, Socratic 3-board classroom synchronization, tamper-evident audit logs, and per-college monthly Institutional AI token allocation governance.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">

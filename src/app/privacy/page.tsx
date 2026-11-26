@@ -343,7 +343,7 @@ export default function PrivacyPage() {
             <div className="space-y-1">
               <h4 className="font-bold text-text">1. Zero Student Training Data Leakage</h4>
               <p className="text-muted">
-                Student answer submissions and faculty teaching notes processed through the Claude API are governed by zero-retention enterprise agreements. Your case analyses are never utilized to train public or proprietary commercial frontier models.
+                Student answer submissions and faculty teaching notes processed through the Institutional AI Engine are governed by zero-retention enterprise agreements. Your case analyses are never utilized to train public or proprietary commercial frontier models.
               </p>
             </div>
 

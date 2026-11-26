@@ -227,10 +227,10 @@ Please generate the complete, production-grade JSON case study now.`;
         model: selectedModel,
       };
     } catch (err: unknown) {
-      console.error("Claude API call or parsing error:", err);
+      console.error("AI API call or parsing error:", err);
       // If error is JSON parse failure, rethrow so caller shows retry button
       if (err instanceof SyntaxError) {
-        throw new Error("CLAUDE_JSON_PARSE_ERROR: Failed to parse structured JSON from Claude response.");
+        throw new Error("AI_JSON_PARSE_ERROR: Failed to parse structured JSON from AI response.");
       }
       throw err;
     }
