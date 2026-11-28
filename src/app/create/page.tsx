@@ -3026,34 +3026,40 @@ function CreateCaseContent() {
                                     : "Student classroom preparation flow and discussion milestones (answers hidden for practice)."}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border shadow-2xs shrink-0">
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewRoleMode("faculty")}
-                                  className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
-                                    isFaculty
-                                      ? "bg-accent text-accent-text shadow-xs"
-                                      : "text-muted hover:text-text"
-                                  }`}
-                                  title="Faculty view: Displays model answers, quantitative solutions, and facilitation keys"
-                                >
-                                  <KeyRound className="w-3.5 h-3.5" />
-                                  <span>Faculty (With Answers)</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewRoleMode("student")}
-                                  className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                                    !isFaculty
-                                      ? "bg-primary-soft text-text border border-border shadow-xs"
-                                      : "text-muted hover:text-text"
-                                  }`}
-                                  title="Student view: Clean classroom prompts without confidential solutions"
-                                >
-                                  <Users className="w-3.5 h-3.5" />
-                                  <span>Student (Practice View)</span>
-                                </button>
-                              </div>
+                              {currentUser?.role !== "student" ? (
+                                <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border shadow-2xs shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewRoleMode("faculty")}
+                                    className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                                      isFaculty
+                                        ? "bg-accent text-accent-text shadow-xs"
+                                        : "text-muted hover:text-text"
+                                    }`}
+                                    title="Faculty view: Displays model answers, quantitative solutions, and facilitation keys"
+                                  >
+                                    <KeyRound className="w-3.5 h-3.5" />
+                                    <span>Faculty (With Answers)</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setPreviewRoleMode("student")}
+                                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                      !isFaculty
+                                        ? "bg-primary-soft text-text border border-border shadow-xs"
+                                        : "text-muted hover:text-text"
+                                    }`}
+                                    title="Student view: Clean classroom prompts without confidential solutions"
+                                  >
+                                    <Users className="w-3.5 h-3.5" />
+                                    <span>Student (Practice View)</span>
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded-lg bg-primary-soft text-muted text-xs font-semibold border border-border">
+                                  Student Classroom Plan
+                                </span>
+                              )}
                             </div>
                             <div className="space-y-3">
                               {generatedCase.content.teaching_note.class_flow.map((flow, i) => {
@@ -3071,7 +3077,7 @@ function CreateCaseContent() {
                                     </div>
 
                                     {/* FACULTY ONLY: Model Answer & Expected Solution */}
-                                    {isFaculty ? (
+                                    {isFaculty && (
                                       <div className="mt-3 pt-3 border-t border-accent/20">
                                         <div className="p-3.5 rounded-xl bg-surface border-2 border-accent/40 space-y-2 shadow-2xs">
                                           <div className="flex items-center justify-between">
@@ -3087,11 +3093,6 @@ function CreateCaseContent() {
                                             {expectedAns}
                                           </div>
                                         </div>
-                                      </div>
-                                    ) : (
-                                      <div className="mt-2.5 pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted">
-                                        <span>Student Phase Objective: Analyze the scenario and prepare your strategic defense.</span>
-                                        <span className="text-accent font-semibold font-mono text-[10px]">Practice Mode</span>
                                       </div>
                                     )}
                                   </div>

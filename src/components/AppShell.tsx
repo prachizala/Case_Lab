@@ -152,6 +152,25 @@ export function AppShell({ children }: AppShellProps) {
     }
   };
 
+  const handleSwitchPersona = async (userId: string) => {
+    try {
+      invalidateAuthCache();
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "switch-role", userId }),
+      });
+      const data = await res.json();
+      if (data.user) {
+        setCurrentUser(data.user);
+        window.dispatchEvent(new CustomEvent("sbs-auth-changed"));
+        setUserDropdownOpen(false);
+      }
+    } catch (err) {
+      console.error("Failed to switch persona:", err);
+    }
+  };
+
   const role: UserRole = currentUser?.role || "faculty";
   const roleLabel = role === "admin" ? "Administrator" : role === "student" ? "Student" : "Faculty";
 
@@ -458,6 +477,35 @@ export function AppShell({ children }: AppShellProps) {
                       </span>
                     </div>
                   </div>
+
+                  {/* Switch Demo Persona (Faculty / Student / Admin) */}
+                  {ENABLE_DEMO_PERSONA_SWITCHER && (
+                    <div className="mt-2 pt-2 border-t border-border/60 space-y-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted px-1 block">
+                        Switch Persona:
+                      </span>
+                      <div className="grid grid-cols-3 gap-1">
+                        {[
+                          { id: "usr-faculty-1", label: "Faculty", role: "faculty" },
+                          { id: "usr-student-1", label: "Student", role: "student" },
+                          { id: "usr-admin-1", label: "Admin", role: "admin" },
+                        ].map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => handleSwitchPersona(p.id)}
+                            className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                              currentUser?.role === p.role
+                                ? "bg-accent text-accent-text font-bold shadow-2xs"
+                                : "bg-primary-soft/60 hover:bg-primary-soft text-text"
+                            }`}
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Sign Out Button */}
                   <div className="mt-2 pt-2 border-t border-border/60">

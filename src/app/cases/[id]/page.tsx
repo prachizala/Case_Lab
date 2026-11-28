@@ -2271,48 +2271,53 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
             </div>
 
             {/* Recommended Class Flow */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-text">
-                Classroom Timing & Discussion Flow
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text">
+                  Classroom Session Flow &amp; Discussion Milestones
+                </h3>
+                <span className="text-[11px] text-muted">
+                  {!isStudent && dossierPerspective === "faculty"
+                    ? "Full pedagogical facilitation plan with step-by-step model answers and stress-testing math."
+                    : "Student classroom preparation flow and discussion milestones (answers hidden for practice)."}
+                </span>
+              </div>
+              <div className="space-y-3">
                 {content.teaching_note.class_flow.map((flow, i) => {
                   const expectedAns = getFlowExpectedResponse(flow);
+                  const isFacultyView = !isStudent && dossierPerspective === "faculty";
                   return (
                     <div
                       key={i}
-                      className="p-3.5 rounded-xl border border-border bg-primary-soft/30 space-y-2"
+                      className="p-4 rounded-xl border border-border bg-primary-soft/40 space-y-2"
                     >
-                      <div className="flex items-center justify-between text-xs font-bold text-text">
-                        <span>{flow.phase}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary text-on-primary font-bold">
-                          {flow.duration_minutes} min
+                      <div className="flex items-start gap-3">
+                        <span className="px-2.5 py-1 rounded bg-accent text-accent-text font-mono font-bold text-xs shrink-0">
+                          {flow.duration_minutes}m
                         </span>
+                        <div className="flex-1">
+                          <p className="font-bold text-text text-sm">{flow.phase}</p>
+                          <p className="text-muted text-xs mt-1 leading-relaxed">{flow.activity}</p>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-muted leading-relaxed">
-                        {flow.activity}
-                      </p>
 
                       {/* FACULTY ONLY: Model Answer & Facilitator Key */}
-                      {!isStudent && dossierPerspective === "faculty" ? (
-                        <div className="p-3 rounded-lg bg-surface border-2 border-accent/40 space-y-1.5 mt-2 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent uppercase tracking-wider">
-                              <KeyRound className="w-3.5 h-3.5 text-accent" />
-                              <span>Faculty Model Solution &amp; Facilitation Key</span>
+                      {isFacultyView && (
+                        <div className="mt-3 pt-3 border-t border-accent/20">
+                          <div className="p-3.5 rounded-xl bg-surface border-2 border-accent/40 space-y-2 shadow-2xs">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 text-accent font-serif font-bold text-xs uppercase tracking-wider">
+                                <KeyRound className="w-3.5 h-3.5 text-accent" />
+                                <span>Faculty Model Solution &amp; Facilitation Key</span>
+                              </div>
+                              <span className="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-accent/15 text-accent border border-accent/30">
+                                CONFIDENTIAL ANSWER KEY
+                              </span>
                             </div>
-                            <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-accent/15 text-accent border border-accent/20">
-                              ANSWER KEY
-                            </span>
+                            <div className="text-xs text-text whitespace-pre-line leading-relaxed font-normal bg-accent/5 p-3 rounded-lg border border-accent/20">
+                              {expectedAns}
+                            </div>
                           </div>
-                          <p className="text-xs text-text whitespace-pre-line leading-relaxed font-normal bg-accent/5 p-2.5 rounded-lg border border-accent/20">
-                            {expectedAns}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted mt-1">
-                          <span>Student Practice Task: Review the dilemma and prepare your opening cold call defense.</span>
-                          <span className="text-accent font-semibold text-[10px]">Student Mode</span>
                         </div>
                       )}
                     </div>
