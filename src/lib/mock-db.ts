@@ -1549,21 +1549,27 @@ class MockStore {
       if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
         const fs = require("fs");
         const path = require("path");
-        const dataDir = process.env.VERCEL ? "/tmp" : path.resolve(process.cwd(), "data");
-        const storeFile = path.join(dataDir, "persisted-cases.json");
-        if (fs.existsSync(storeFile)) {
-          const raw = fs.readFileSync(storeFile, "utf-8");
-          const loaded: CaseStudy[] = JSON.parse(raw);
-          if (Array.isArray(loaded)) {
-            for (const item of loaded) {
-              const existingIdx = this.cases.findIndex((c) => c.id === item.id);
-              if (existingIdx >= 0) {
-                this.cases[existingIdx] = item;
-              } else {
-                this.cases.unshift(item);
+        const candidateFiles = [
+          path.resolve(process.cwd(), "data", "persisted-cases.json"),
+          "/tmp/persisted-cases.json",
+        ];
+        for (const storeFile of candidateFiles) {
+          try {
+            if (fs.existsSync(storeFile)) {
+              const raw = fs.readFileSync(storeFile, "utf-8");
+              const loaded: CaseStudy[] = JSON.parse(raw);
+              if (Array.isArray(loaded)) {
+                for (const item of loaded) {
+                  const existingIdx = this.cases.findIndex((c) => c.id === item.id);
+                  if (existingIdx >= 0) {
+                    this.cases[existingIdx] = item;
+                  } else {
+                    this.cases.unshift(item);
+                  }
+                }
               }
             }
-          }
+          } catch {}
         }
       }
     } catch {
@@ -2633,7 +2639,40 @@ class MockStore {
   }
 
   getCase(id: string): CaseStudy | undefined {
-    return this.cases.find((c) => c.id === id);
+    if (!id || typeof id !== "string") return undefined;
+    const cleanId = decodeURIComponent(id).trim();
+
+    // 1. Exact match in memory
+    let found = this.cases.find((c) => c.id === cleanId);
+    if (found) return found;
+
+    // 2. Case-insensitive match in memory
+    found = this.cases.find((c) => c.id.toLowerCase() === cleanId.toLowerCase());
+    if (found) return found;
+
+    // 3. Match with or without "case-" prefix
+    const bareId = cleanId.replace(/^case-/, "");
+    found = this.cases.find(
+      (c) =>
+        c.id === bareId ||
+        c.id === `case-${bareId}` ||
+        c.id.toLowerCase() === `case-${bareId.toLowerCase()}`
+    );
+    if (found) return found;
+
+    // 4. Fallback search in testFixtureCases
+    const fixture = testFixtureCases.find(
+      (c) =>
+        c.id === cleanId ||
+        c.id.toLowerCase() === cleanId.toLowerCase() ||
+        c.id.replace(/^case-/, "") === bareId
+    );
+    if (fixture) {
+      this.cases.push(fixture);
+      return fixture;
+    }
+
+    return undefined;
   }
 
   saveCase(newCase: CaseStudy): CaseStudy {
@@ -2653,12 +2692,19 @@ class MockStore {
       if (typeof window === "undefined" && process.env.NEXT_RUNTIME !== "edge") {
         const fs = require("fs");
         const path = require("path");
-        const dataDir = process.env.VERCEL ? "/tmp" : path.resolve(process.cwd(), "data");
-        if (!fs.existsSync(dataDir)) {
-          fs.mkdirSync(dataDir, { recursive: true });
+        const targets = [
+          path.resolve(process.cwd(), "data"),
+          "/tmp",
+        ];
+        for (const dataDir of targets) {
+          try {
+            if (!fs.existsSync(dataDir)) {
+              fs.mkdirSync(dataDir, { recursive: true });
+            }
+            const storeFile = path.join(dataDir, "persisted-cases.json");
+            fs.writeFileSync(storeFile, JSON.stringify(this.cases.slice(0, 100), null, 2), "utf-8");
+          } catch {}
         }
-        const storeFile = path.join(dataDir, "persisted-cases.json");
-        fs.writeFileSync(storeFile, JSON.stringify(this.cases.slice(0, 100), null, 2), "utf-8");
       }
     } catch {
       // Safe fallback
@@ -4406,51 +4452,51 @@ class MockStore {
       const actorRole = actor?.role || "faculty";
 
       if (log.action === "case_created") {
-        const caseExists = this.cases.some((c) => c.id === log.target_id);
+        const found = this.getCase(log.target_id);
         activities.push({
           id: log.id,
           type: "case_created",
-          title: log.metadata?.title || "New Case Dossier",
+          title: log.metadata?.title || found?.title || "New Case Dossier",
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: caseExists ? log.target_id : undefined,
-          details: `Created new ${log.metadata?.industry || "teaching"} case study`,
+          case_id: found ? found.id : undefined,
+          details: `Created new ${log.metadata?.industry || found?.industry || "teaching"} case study`,
         });
       } else if (log.action === "case_submitted") {
-        const caseExists = this.cases.some((c) => c.id === log.target_id);
+        const found = this.getCase(log.target_id);
         activities.push({
           id: log.id,
           type: "case_submitted",
-          title: log.metadata?.title || "Curriculum Case",
+          title: log.metadata?.title || found?.title || "Curriculum Case",
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: caseExists ? log.target_id : undefined,
+          case_id: found ? found.id : undefined,
           details: "Submitted case study for institutional peer review",
         });
       } else if (log.action === "case_approval") {
-        const caseExists = this.cases.some((c) => c.id === log.target_id);
+        const found = this.getCase(log.target_id);
         activities.push({
           id: log.id,
           type: "case_approved",
-          title: log.metadata?.title || "Case Study",
+          title: log.metadata?.title || found?.title || "Case Study",
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: caseExists ? log.target_id : undefined,
+          case_id: found ? found.id : undefined,
           details: "Approved case study for classroom simulation",
         });
       } else if (log.action === "case_published") {
-        const caseExists = this.cases.some((c) => c.id === log.target_id);
+        const found = this.getCase(log.target_id);
         activities.push({
           id: log.id,
           type: "case_published",
-          title: log.metadata?.title || "Case Study",
+          title: log.metadata?.title || found?.title || "Case Study",
           actor_name: actorName,
           actor_role: actorRole,
           timestamp: log.created_at,
-          case_id: caseExists ? log.target_id : undefined,
+          case_id: found ? found.id : undefined,
           details: "Officially published case study to Institutional Repository",
         });
       } else if (log.action === "registration_approved") {

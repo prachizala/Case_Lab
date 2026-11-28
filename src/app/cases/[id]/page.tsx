@@ -137,6 +137,9 @@ export default function CaseDetailPage({
   const [diffMode, setDiffMode] = useState(false);
   const [isRestoringVersion, setIsRestoringVersion] = useState(false);
 
+  // Teaching note perspective switcher for faculty
+  const [dossierPerspective, setDossierPerspective] = useState<"faculty" | "student">("faculty");
+
   // Reading View Typography & Controls
   const [fontSize, setFontSize] = useState<"sm" | "base" | "lg" | "xl">("base");
   const [lineSpacing, setLineSpacing] = useState<"normal" | "relaxed" | "loose">("relaxed");
@@ -282,6 +285,27 @@ export default function CaseDetailPage({
         );
       }
       if (!res.ok) {
+        // Fallback: check client localStorage cache for recently curated case
+        try {
+          if (typeof window !== "undefined") {
+            const cachedCaseRaw = localStorage.getItem(`sbs_case_cache_${caseId}`);
+            if (cachedCaseRaw) {
+              const cached = JSON.parse(cachedCaseRaw);
+              if (cached && (cached.id === caseId || cached.id?.toLowerCase() === caseId.toLowerCase())) {
+                setCaseStudy(cached);
+                setEditedTitle(cached.title || "");
+                setEditedContent(cached.content);
+                // Background re-sync to current serverless instance
+                fetch("/api/cases", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(cached),
+                }).catch(() => {});
+                return;
+              }
+            }
+          }
+        } catch {}
         throw new Error(`Failed to load case dossier (HTTP ${res.status}).`);
       }
       const data = await res.json();
@@ -292,6 +316,16 @@ export default function CaseDetailPage({
       setCaseStudy(data.caseStudy);
       setEditedTitle(data.caseStudy.title);
       setEditedContent(data.caseStudy.content);
+
+      // Cache locally for resilient reload across serverless instances
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`sbs_case_cache_${data.caseStudy.id}`, JSON.stringify(data.caseStudy));
+          if (caseId && caseId !== data.caseStudy.id) {
+            localStorage.setItem(`sbs_case_cache_${caseId}`, JSON.stringify(data.caseStudy));
+          }
+        }
+      } catch {}
     } catch (err: unknown) {
       console.error("Fetch case error:", err);
       const msg = err instanceof Error ? err.message : "Failed to load case data.";
@@ -2176,18 +2210,49 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
         {/* 7. TEACHING NOTE & CLASSROOM FLOW */}
         {content.teaching_note && (
           <section id="teaching-note" className="p-6 md:p-8 rounded-2xl border border-border bg-surface shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-border pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
               <div className="flex items-center gap-2">
                 <GraduationCap className="w-6 h-6 text-accent" />
                 <div>
                   <h2 className="font-serif text-xl font-bold text-text">
-                    {isStudent ? "Classroom Session Flow & Analytical Plan" : "Facilitator Teaching Note"}
+                    {isStudent || dossierPerspective === "student" ? "Classroom Session Flow & Analytical Plan" : "Facilitator Teaching Note"}
                   </h2>
-                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isStudent ? "text-muted" : "text-accent"}`}>
-                    {isStudent ? "Student Analytical Practice" : `Confidential • ${COLLEGE_SHORT} Faculty Eyes Only`}
+                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isStudent || dossierPerspective === "student" ? "text-muted" : "text-accent"}`}>
+                    {isStudent || dossierPerspective === "student" ? "Student Analytical Practice • Solutions Hidden" : `Confidential • ${COLLEGE_SHORT} Faculty Eyes Only`}
                   </span>
                 </div>
               </div>
+
+              {!isStudent && (
+                <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setDossierPerspective("faculty")}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                      dossierPerspective === "faculty"
+                        ? "bg-accent text-accent-text shadow-xs"
+                        : "text-muted hover:text-text"
+                    }`}
+                    title="Faculty view: Displays model answers and quantitative solution keys"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>Faculty (With Answers)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDossierPerspective("student")}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      dossierPerspective === "student"
+                        ? "bg-primary-soft text-text border border-border shadow-xs"
+                        : "text-muted hover:text-text"
+                    }`}
+                    title="Student practice view: Clean flow without confidential answers"
+                  >
+                    <Users className="w-3.5 h-3.5" />
+                    <span>Student (Practice View)</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Pedagogical Objectives */}
@@ -2229,15 +2294,25 @@ ${content.teaching_note.frameworks.map((f) => `#### ${f.name}\n- **Application:*
                       </p>
 
                       {/* FACULTY ONLY: Model Answer & Facilitator Key */}
-                      {!isStudent && (
-                        <div className="p-2.5 rounded-lg bg-surface border border-accent/30 space-y-1 mt-2">
-                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent uppercase tracking-wider">
-                            <KeyRound className="w-3 h-3 text-accent" />
-                            <span>Faculty Model Solution &amp; Facilitation Key</span>
+                      {!isStudent && dossierPerspective === "faculty" ? (
+                        <div className="p-3 rounded-lg bg-surface border-2 border-accent/40 space-y-1.5 mt-2 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent uppercase tracking-wider">
+                              <KeyRound className="w-3.5 h-3.5 text-accent" />
+                              <span>Faculty Model Solution &amp; Facilitation Key</span>
+                            </div>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-accent/15 text-accent border border-accent/20">
+                              ANSWER KEY
+                            </span>
                           </div>
-                          <p className="text-[11px] text-text whitespace-pre-line leading-relaxed font-normal">
+                          <p className="text-xs text-text whitespace-pre-line leading-relaxed font-normal bg-accent/5 p-2.5 rounded-lg border border-accent/20">
                             {expectedAns}
                           </p>
+                        </div>
+                      ) : (
+                        <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted mt-1">
+                          <span>Student Practice Task: Review the dilemma and prepare your opening cold call defense.</span>
+                          <span className="text-accent font-semibold text-[10px]">Student Mode</span>
                         </div>
                       )}
                     </div>

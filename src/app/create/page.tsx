@@ -965,6 +965,7 @@ function CreateCaseContent() {
       try {
         const payload = {
           department,
+          topics: selectedTopics,
           topic: selectedTopics,
           concepts: selectedTopics,
           length: casePackLength,
@@ -973,11 +974,15 @@ function CreateCaseContent() {
           geography: locationMarket,
           course_id: selectedCourseId,
           custom_notes: sourceNotes,
+          stream: true,
         };
 
         const res = await fetch("/api/casepack/generate", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "text/event-stream, application/json",
+          },
           body: JSON.stringify(payload),
           signal: controller.signal,
         });
@@ -985,6 +990,28 @@ function CreateCaseContent() {
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || `Generation failed with status ${res.status}`);
+        }
+
+        const contentType = res.headers.get("content-type") || "";
+
+        // Resilient handling: If server returns standard JSON directly
+        if (contentType.includes("application/json")) {
+          const directData = await res.json();
+          if (directData.casePack) {
+            setGeneratedCasePack(directData.casePack);
+            const valReport = validateCasePackComplete(directData.casePack);
+            setCasePackValidation(valReport);
+          }
+          if (directData.caseStudy) {
+            setGeneratedCase(directData.caseStudy);
+            try {
+              if (typeof window !== "undefined") {
+                localStorage.setItem(`sbs_case_cache_${directData.caseStudy.id}`, JSON.stringify(directData.caseStudy));
+              }
+            } catch {}
+          }
+          setIsGenerating(false);
+          return;
         }
 
         const reader = res.body?.getReader();
@@ -1028,6 +1055,14 @@ function CreateCaseContent() {
                   setGeneratedCasePack(completeData.casePack);
                   const valReport = validateCasePackComplete(completeData.casePack);
                   setCasePackValidation(valReport);
+                }
+                if (completeData.caseStudy) {
+                  setGeneratedCase(completeData.caseStudy);
+                  try {
+                    if (typeof window !== "undefined") {
+                      localStorage.setItem(`sbs_case_cache_${completeData.caseStudy.id}`, JSON.stringify(completeData.caseStudy));
+                    }
+                  } catch {}
                 }
               } catch {}
             } else if (eventType === "error") {
@@ -1159,6 +1194,11 @@ function CreateCaseContent() {
 
       if (data.caseStudy) {
         setGeneratedCase(data.caseStudy);
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem(`sbs_case_cache_${data.caseStudy.id}`, JSON.stringify(data.caseStudy));
+          }
+        } catch {}
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") {
@@ -2974,50 +3014,84 @@ function CreateCaseContent() {
                   <div className="space-y-4 text-xs">
                     <div>
                       {(() => {
-                        const isFaculty = previewRoleMode === "faculty" && currentUser?.role !== "student";
+                        const isFaculty = previewRoleMode === "faculty" && (currentUser ? currentUser.role !== "student" : true);
                         return (
                           <>
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-serif font-bold text-sm text-text">Classroom Session Flow</h4>
-                              {isFaculty ? (
-                                <span className="text-[10px] font-bold text-accent uppercase tracking-wider bg-accent/10 px-2.5 py-0.5 rounded-full border border-accent/20 flex items-center gap-1.5 shadow-2xs">
-                                  <KeyRound className="w-3.5 h-3.5 text-accent" />
-                                  <span>Faculty View • Model Answers Included</span>
-                                </span>
-                              ) : (
-                                <span className="text-[10px] font-bold text-muted uppercase tracking-wider bg-primary-soft/60 px-2.5 py-0.5 rounded-full border border-border flex items-center gap-1.5">
-                                  <Users className="w-3.5 h-3.5 text-muted" />
-                                  <span>Student Practice View</span>
-                                </span>
-                              )}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                              <div>
+                                <h4 className="font-serif font-bold text-base text-text">Classroom Session Flow</h4>
+                                <p className="text-xs text-muted">
+                                  {isFaculty
+                                    ? "Full pedagogical facilitation plan with step-by-step model answers and stress-testing math."
+                                    : "Student classroom preparation flow and discussion milestones (answers hidden for practice)."}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 bg-surface p-1 rounded-xl border border-border shadow-2xs shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewRoleMode("faculty")}
+                                  className={`px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                                    isFaculty
+                                      ? "bg-accent text-accent-text shadow-xs"
+                                      : "text-muted hover:text-text"
+                                  }`}
+                                  title="Faculty view: Displays model answers, quantitative solutions, and facilitation keys"
+                                >
+                                  <KeyRound className="w-3.5 h-3.5" />
+                                  <span>Faculty (With Answers)</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewRoleMode("student")}
+                                  className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                                    !isFaculty
+                                      ? "bg-primary-soft text-text border border-border shadow-xs"
+                                      : "text-muted hover:text-text"
+                                  }`}
+                                  title="Student view: Clean classroom prompts without confidential solutions"
+                                >
+                                  <Users className="w-3.5 h-3.5" />
+                                  <span>Student (Practice View)</span>
+                                </button>
+                              </div>
                             </div>
                             <div className="space-y-3">
                               {generatedCase.content.teaching_note.class_flow.map((flow, i) => {
                                 const expectedAns = getFlowExpectedResponse(flow);
                                 return (
-                                  <div key={i} className="p-3.5 rounded-xl bg-primary-soft/40 border border-border space-y-2">
+                                  <div key={i} className="p-4 rounded-xl bg-primary-soft/40 border border-border space-y-2">
                                     <div className="flex items-start gap-3">
-                                      <span className="px-2 py-1 rounded bg-accent text-accent-text font-mono font-bold text-[10px] shrink-0">
+                                      <span className="px-2.5 py-1 rounded bg-accent text-accent-text font-mono font-bold text-xs shrink-0">
                                         {flow.duration_minutes}m
                                       </span>
                                       <div className="flex-1">
-                                        <p className="font-bold text-text text-xs">{flow.phase}</p>
-                                        <p className="text-muted text-[11px] mt-0.5 leading-relaxed">{flow.activity}</p>
+                                        <p className="font-bold text-text text-sm">{flow.phase}</p>
+                                        <p className="text-muted text-xs mt-1 leading-relaxed">{flow.activity}</p>
                                       </div>
                                     </div>
 
                                     {/* FACULTY ONLY: Model Answer & Expected Solution */}
-                                    {isFaculty && (
-                                      <div className="mt-2.5 pt-2.5 border-t border-border/80">
-                                        <div className="p-3.5 rounded-xl bg-surface border-2 border-accent/30 space-y-1.5 shadow-2xs">
-                                          <div className="flex items-center gap-1.5 text-accent font-serif font-bold text-xs">
-                                            <KeyRound className="w-3.5 h-3.5 text-accent" />
-                                            <span>Faculty Model Answer &amp; Discussion Solution</span>
+                                    {isFaculty ? (
+                                      <div className="mt-3 pt-3 border-t border-accent/20">
+                                        <div className="p-3.5 rounded-xl bg-surface border-2 border-accent/40 space-y-2 shadow-2xs">
+                                          <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-1.5 text-accent font-serif font-bold text-xs uppercase tracking-wider">
+                                              <KeyRound className="w-3.5 h-3.5 text-accent" />
+                                              <span>Faculty Model Answer &amp; Discussion Solution</span>
+                                            </div>
+                                            <span className="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-accent/15 text-accent border border-accent/30">
+                                              CONFIDENTIAL ANSWER KEY
+                                            </span>
                                           </div>
-                                          <p className="text-text text-xs leading-relaxed whitespace-pre-line font-normal">
+                                          <div className="text-text text-xs leading-relaxed whitespace-pre-line font-normal bg-accent/5 p-3 rounded-lg border border-accent/20">
                                             {expectedAns}
-                                          </p>
+                                          </div>
                                         </div>
+                                      </div>
+                                    ) : (
+                                      <div className="mt-2.5 pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted">
+                                        <span>Student Phase Objective: Analyze the scenario and prepare your strategic defense.</span>
+                                        <span className="text-accent font-semibold font-mono text-[10px]">Practice Mode</span>
                                       </div>
                                     )}
                                   </div>

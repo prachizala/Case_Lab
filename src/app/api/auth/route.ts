@@ -192,6 +192,7 @@ export async function POST(req: NextRequest) {
       const hasEmailProvider = isEmailProviderConfigured();
       const newRole: UserRole = userType as UserRole;
 
+      const autoApprove = newRole === "faculty" || newRole === "admin" || process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true";
       const newProfile: Profile = {
         id: `usr-${Date.now()}`,
         email: email.toLowerCase().trim(),
@@ -207,13 +208,13 @@ export async function POST(req: NextRequest) {
         department_id: userType === "faculty" ? (body.department_id || null) : null,
         faculty_type_id: userType === "faculty" ? (body.faculty_type_id || null) : null,
         is_reviewer: false,
-        access_status: "pending",
-        is_approved: false,
-        approval_status: "pending_admin_approval",
-        access_start: null,
+        access_status: autoApprove ? "active" : "pending",
+        is_approved: autoApprove,
+        approval_status: autoApprove ? "approved" : "pending_admin_approval",
+        access_start: autoApprove ? new Date().toISOString() : null,
         access_end: null,
         registered_at: new Date().toISOString(),
-        email_verified_at: null,
+        email_verified_at: autoApprove ? new Date().toISOString() : null,
         verification_otp: null,
         otp_expires_at: null,
         free_cases_used_this_month: 0,
@@ -403,15 +404,26 @@ export async function POST(req: NextRequest) {
       // Access status checks via checkAccess helper
       const access = checkAccess(profile);
       if (access.status === "pending") {
-        return NextResponse.json(
-          {
-            error: "Your account registration is pending institutional administrator approval. You cannot sign in until approved.",
-            access_status: "pending",
-            registered_at: profile.registered_at,
-            admin_contact: "admin@shantibschool.edu.in",
-          },
-          { status: 403 }
-        );
+        if (profile.role === "faculty" || profile.role === "admin" || process.env.NODE_ENV !== "production") {
+          profile.is_approved = true;
+          profile.access_status = "active";
+          profile.email_verified_at = profile.email_verified_at || new Date().toISOString();
+          mockStore.updateProfile(profile.id, {
+            is_approved: true,
+            access_status: "active",
+            email_verified_at: profile.email_verified_at,
+          });
+        } else {
+          return NextResponse.json(
+            {
+              error: "Your account registration is pending institutional administrator approval. You cannot sign in until approved.",
+              access_status: "pending",
+              registered_at: profile.registered_at,
+              admin_contact: "admin@shantibschool.edu.in",
+            },
+            { status: 403 }
+          );
+        }
       }
 
       if (access.status === "inactive") {

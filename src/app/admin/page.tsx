@@ -929,6 +929,36 @@ export default function AdminPage() {
     return true;
   });
 
+  const handleJumpToTab = (
+    tab: typeof activeTab,
+    options?: {
+      facultyReviewerOnly?: boolean;
+      subStatus?: string;
+      subOverdue?: boolean;
+      roleFilter?: string;
+    }
+  ) => {
+    setActiveTab(tab);
+    if (options?.facultyReviewerOnly !== undefined) {
+      setFacultyReviewerOnly(options.facultyReviewerOnly);
+    }
+    if (options?.subStatus !== undefined) {
+      setSubStatusFilter(options.subStatus);
+    }
+    if (options?.subOverdue !== undefined) {
+      setSubOverdueOnly(options.subOverdue);
+    }
+    if (options?.roleFilter !== undefined) {
+      setRoleFilter(options.roleFilter);
+    }
+    setTimeout(() => {
+      document.getElementById("admin-content-section")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 60);
+  };
+
   return (
     <AppShell>
       <div className="space-y-6">
@@ -971,10 +1001,10 @@ export default function AdminPage() {
           {/* 1. Students */}
           <button
             type="button"
-            onClick={() => setActiveTab("students")}
+            onClick={() => handleJumpToTab("students")}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
               activeTab === "students"
-                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                ? "border-accent bg-accent/10 ring-2 ring-accent/40 shadow-sm"
                 : "border-border bg-surface hover:border-accent/40"
             }`}
             title="Click to view all student cohorts & active students"
@@ -991,13 +1021,10 @@ export default function AdminPage() {
           {/* 2. Faculty */}
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("faculty");
-              setFacultyReviewerOnly(false);
-            }}
+            onClick={() => handleJumpToTab("faculty", { facultyReviewerOnly: false })}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
               activeTab === "faculty" && !facultyReviewerOnly
-                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                ? "border-accent bg-accent/10 ring-2 ring-accent/40 shadow-sm"
                 : "border-border bg-surface hover:border-accent/40"
             }`}
             title="Click to view faculty directory & allocations"
@@ -1014,13 +1041,10 @@ export default function AdminPage() {
           {/* 3. Reviewers */}
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("faculty");
-              setFacultyReviewerOnly(true);
-            }}
+            onClick={() => handleJumpToTab("faculty", { facultyReviewerOnly: true })}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
               activeTab === "faculty" && facultyReviewerOnly
-                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                ? "border-accent bg-accent/10 ring-2 ring-accent/40 shadow-sm"
                 : "border-border bg-surface hover:border-accent/40"
             }`}
             title="Click to view designated reviewers & workloads"
@@ -1037,14 +1061,10 @@ export default function AdminPage() {
           {/* 4. In Review */}
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("submissions");
-              setSubStatusFilter("in_review");
-              setSubOverdueOnly(false);
-            }}
+            onClick={() => handleJumpToTab("submissions", { subStatus: "in_review", subOverdue: false })}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
               activeTab === "submissions" && subStatusFilter === "in_review" && !subOverdueOnly
-                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                ? "border-accent bg-accent/10 ring-2 ring-accent/40 shadow-sm"
                 : "border-border bg-surface hover:border-accent/40"
             }`}
             title="Click to view cases currently in peer review"
@@ -1061,13 +1081,10 @@ export default function AdminPage() {
           {/* 5. Overdue (>3d) */}
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("submissions");
-              setSubOverdueOnly(true);
-            }}
+            onClick={() => handleJumpToTab("submissions", { subOverdue: true })}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500/40 group ${
               activeTab === "submissions" && subOverdueOnly
-                ? "border-amber-500 bg-amber-500/15 ring-1 ring-amber-500/30 text-amber-600 dark:text-amber-400 shadow-sm"
+                ? "border-amber-500 bg-amber-500/15 ring-2 ring-amber-500/40 text-amber-600 dark:text-amber-400 shadow-sm"
                 : stats.overdueReviewsCount && stats.overdueReviewsCount > 0
                   ? "border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:border-amber-500"
                   : "border-border bg-surface text-text hover:border-accent/40"
@@ -1086,10 +1103,10 @@ export default function AdminPage() {
           {/* 6. Repository */}
           <button
             type="button"
-            onClick={() => setActiveTab("repository")}
+            onClick={() => handleJumpToTab("repository")}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
               activeTab === "repository"
-                ? "border-emerald-500 bg-emerald-500/5 ring-1 ring-emerald-500/30 shadow-sm"
+                ? "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/40 shadow-sm"
                 : "border-border bg-surface hover:border-emerald-500/40"
             }`}
             title="Click to view published repository items & moderation"
@@ -1106,13 +1123,10 @@ export default function AdminPage() {
           {/* 7. Pending Reg. */}
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("users");
-              setRoleFilter("all");
-            }}
+            onClick={() => handleJumpToTab("users", { roleFilter: "all" })}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-warning/40 group ${
               activeTab === "users" && profiles.filter((p) => !p.is_approved).length > 0
-                ? "border-warning bg-warning/10 ring-1 ring-warning/30 shadow-sm"
+                ? "border-warning bg-warning/15 ring-2 ring-warning/40 shadow-sm"
                 : "border-border bg-surface hover:border-warning/40"
             }`}
             title="Click to review and approve pending registrations"
@@ -1129,13 +1143,10 @@ export default function AdminPage() {
           {/* 8. Total Users */}
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("users");
-              setRoleFilter("all");
-            }}
+            onClick={() => handleJumpToTab("users", { roleFilter: "all" })}
             className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-accent/40 group ${
               activeTab === "users" && profiles.filter((p) => !p.is_approved).length === 0
-                ? "border-accent bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                ? "border-accent bg-accent/10 ring-2 ring-accent/40 shadow-sm"
                 : "border-border bg-surface hover:border-accent/40"
             }`}
             title="Click to view all registered users & quota telemetry"
@@ -1151,7 +1162,7 @@ export default function AdminPage() {
         </div>
 
         {/* TABS NAVIGATION */}
-        <div className="flex border-b border-border gap-1 overflow-x-auto no-scrollbar py-1">
+        <div id="admin-content-section" className="scroll-mt-6 flex border-b border-border gap-1 overflow-x-auto no-scrollbar py-1">
           <button
             onClick={() => setActiveTab("overview")}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${

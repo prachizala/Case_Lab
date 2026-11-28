@@ -15,11 +15,21 @@ export async function GET(
     return errorResponse || NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id: caseId } = await context.params;
+  let rawId = "";
+  try {
+    const resolved = await context.params;
+    rawId = resolved?.id || "";
+  } catch {}
+  if (!rawId) {
+    const parts = req.nextUrl.pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1];
+    if (last && last !== "cases") rawId = last;
+  }
 
+  const caseId = decodeURIComponent(rawId).trim();
   const foundCase = mockStore.getCase(caseId);
   if (!foundCase) {
-    return NextResponse.json({ error: "Case study not found" }, { status: 404 });
+    return NextResponse.json({ error: "Case study not found", caseId }, { status: 404 });
   }
 
   // Student permission check: students cannot view draft, in_review, changes_requested, archived, or private cases UNLESS they are the author!
